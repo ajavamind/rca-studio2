@@ -9,7 +9,7 @@ who wrote a RCA COSMAC CDP1802 microcomputer and Studio 2 emulator.
 https://github.com/paulscottrobson/studio2-games 
 
 I converted his well-crafted C code to the Processing language (Java) and I added
-emulation for the Studio III game console color graphics and sound. Robson's emulation
+emulation for the Studio III game console color graphics. Robson's emulation
 is excellent because it simulates the real-time operaton of the Studio 2 quite well, when run
 on modern computers. 
 You will need to download the Processing SDK to run the emulated games. 
