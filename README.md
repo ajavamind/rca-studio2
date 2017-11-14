@@ -49,6 +49,11 @@ Game ROM cartridges and home-made games included here are from Paul Robson's sit
 
 http://www.emma02.hobby-site.com/studio.html
 
+The emulator supports three game file types:
+1. ".st2" Studio II cartridge format, loads at specified locations defined in the file
+2. ".bin" Binary file for Studio II game loads at 0x0400
+3. ".rom" Binary file for Studio II base ROM loads at 0x0000 (to be implemented)
+
 ## Console Design
 Looking back at the games, it is amazing to me how much game function was squeezed into a small 1024 byte ROM cartridge. 
 Resident game ROMs that included a game instruction pseudo code interpreter are 2048 bytes.
@@ -102,6 +107,6 @@ The Studio II system was better suited for puzzles and card games, rather than a
 | Invaders | Paul Robson | |
 | Tv Arcade 2012 | ? | |
 
-This respository is intended for educational and historic research usage to show how the games looked and functioned during play. 
+This respository is intended for educational and historical research usage to show how the games looked and functioned during play. 
 
 by Andrew Modla, RCA Studio II/III game developer, 1976-1977.
