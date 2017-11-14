@@ -15,11 +15,13 @@ https://github.com/paulscottrobson/studio2-games
 Not available in any other emulator, that I am aware, is my Studio 3 emulation, where you can see a color version of Studio III games. 
 The Studio III game console was never built by RCA, but I and others wrote games using Studio III prototype boards in 1977.
 
+Studio III Pinball Game Screenshot
+
 ![Screenshot of Studio III Pinball Game](Studio2/screenshot/pinball.png)
 
-I converted Robson's well-crafted C code to the Processing language (Java) and I added
-emulation for the Studio III game console color graphics. Robson's emulation
-is excellent because it simulates the real-time operaton of the Studio 2 quite well, when run
+I converted Robson's well-crafted C code to the Processing language (Java) and included
+emulation for the Studio III game console color graphics. I was able to add color emulation because I found an archived **Programming Manual for Studio III**, written in September 1977, detailing the color and sound functions. I made some contributions to that document. Paul Robson's emulation code design
+is excellent because it simulates the real-time operaton of the 1802 CPU and Studio 2 quite well, when run
 on modern computers. 
 
 ## Running the Emulator
@@ -46,8 +48,6 @@ You will need to set the "gameSelected" variable array index to change the game 
 Game ROM cartridges and home-made games included here are from Paul Robson's site and the Emma 02 game console emulation site:
 
 http://www.emma02.hobby-site.com/studio.html
-
-I was able to add color emulation because I recently found an archived Programming Manual for Studio III, written in September 1977, detailing the color and sound functions. I made some contributions to that document.
 
 ## Console Design
 Looking back at the games, it is amazing to me how much game function was squeezed into a small 1024 byte ROM cartridge. 
@@ -81,7 +81,7 @@ The Studio II system was better suited for puzzles and card games, rather than a
 | --------- | ------ | ----- |
 | Doodle/Patterns/Bowling/Blackjack | Joseph Weisbecker, Andrew Modla (Blackjack) | Studio III Resident Games |
 | MathFun/Quiz | ? |  |
-| Biorhythm | Gooitzen Van Der Wal |  |
+| Biorhythm | Gooitzen Van Der Wal | Not a game, this is a Biorhythm calculator |
 | Pinball | Andrew Modla |  |
 | Bingo | Andrew Modla | Not a game, this is a Bingo number caller and verification aid |
 | Concentration/Match | Gooitzen Van Der Wal |  |
