@@ -12,8 +12,8 @@ https://github.com/paulscottrobson/studio2-games
 
 ## Studio III Emulator
 
-Not available in any other emulator, that I am aware, is my Studio 3 emulation, where you can see a color version of Studio III games. 
 The Studio III game console was never built by RCA, but I and others wrote games using Studio III prototype boards in 1977.
+My Studio 3 emulation will show color graphics for Studio III games that implement color. 
 
 Studio III Pinball Game Screenshot
 
