@@ -49,6 +49,8 @@ Game ROM cartridges and home-made games included here are from Paul Robson's sit
 
 http://www.emma02.hobby-site.com/studio.html
 
+https://github.com/etxmato/emma_02
+
 The emulator supports three game file types:
 1. ".st2" Studio II cartridge format, loads at specified locations defined in the file
 2. ".bin" Binary file for Studio II game loads at 0x0400
