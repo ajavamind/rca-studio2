@@ -5,6 +5,7 @@
  * from code written by Paul Scott Robson.
  *
  * https://github.com/paulscottrobson/studio2-games
+ *
  * Studio 2 emulation: black and white graphics, single tone sound
  * Studio 3 emulation: color graphics, color background, and
  * programmable sound tone generator
@@ -35,47 +36,51 @@ color[] colorMap = {BLACK, RED, BLUE, VIOLET, GREEN, YELLOW, AQUA, WHITE};
 
 //////////////////////////////////////////////////////////////
 
-int gameSelected = 12;
+int gameSelected = 9; // Studio III resident games
+
 // Game cartridges are in the "data" folder
 String[] gameFileName = {
   // Studio 2 Resident Games
-  "", // Studio 2 internal game ROM with Studio II interpreter
+  /* 0 */ "studio2.rom", // Studio 2 internal game ROM with Studio II interpreter
   // Studio 2 game cartridges
-  "SPACEWAR.BIN", 
-  "fun-with-numbers.st2",
-  "school.st2",
-  "SPEEDWAY.BIN", 
-  "TENNIS.BIN", 
-  "BASEBALL.BIN", 
-  "blackjack.st2",
-  "gunfighter-moonship.bin", 
+  /* 1 */ "SPACEWAR.BIN", 
+  /* 2 */ "fun-with-numbers.st2",
+  /* 3 */ "school.st2",
+  /* 4 */ "SPEEDWAY.BIN", 
+  /* 5 */ "TENNIS.BIN", 
+  /* 6 */ "BASEBALL.BIN", 
+  /* 7 */ "blackjack.st2",
+  /* 8 */ "gunfighter-moonship.bin", 
   ////////////////////////////////
-  "", // Studio 3 internal resident game ROM  (not available)
-  // Studio 3 game cartridges implement with color graphics
-  "mathfun.st2",
-  "biorhythm.st2",
-  "pinball.st2",
-  "bingo.st2",
-  "concentration-match.st2",
-  "star-wars.st2",
+  // Studio 3 game cartridges implement with color graphics.
+  //The Victory MPT-02, a clone of the RCA Studio III is a videogame console made by Soundic released around 1978. 
+  // Unlike the Studio II the Victory came with 2 detachable controllers. 
+  /* 9 */ "victory.rom", // Victory is a Studio 3 internal resident game ROM
+  // Studio 3 game cartridges
+  /* 10 */ "mathfun.st2",
+  /* 11 */ "biorhythm.st2",
+  /* 12 */ "pinball.st2",
+  /* 13 */ "bingo.st2",
+  /* 14 */ "concentration-match.st2",
+  /* 15 */ "star-wars.st2",
   ////////////////////////////////
-  // Other games
-  "computer.st2",
-  "hockey.st2",
-  "combat.st2",
-  "Climber.st2",
-  "scramble.st2",
-  "rocket.st2",
-  "outbreak.st2",
-  "pacman.st2",
-  "kaboom.st2",
-  "asteroids.st2",
-  "berzerk.st2",
-  "invaders.st2",
-  "tv-arcade-2012.st2"
+  // Other games 
+  /* 16 */ "computer.st2",
+  /* 17 */ "hockey.st2",
+  /* 18 */ "combat.st2",
+  /* 19 */ "Climber.st2",
+  /* 20 */ "scramble.st2",
+  /* 21 */ "rocket.st2",
+  /* 22 */ "outbreak.st2",
+  /* 23 */ "pacman.st2",
+  /* 24 */ "kaboom.st2",
+  /* 25 */ "asteroids.st2",
+  /* 26 */ "berzerk.st2",
+  /* 27 */ "invaders.st2",
+  /* 28 */ "tv-arcade-2012.st2"
 };
 String[] gameTitle = {
-  "Doodle/Patterns/Bowling/Freeway/Addition", // Studio 2 resident games
+  "Resident Studio2: Doodle/Patterns/Bowling/Freeway/Addition", // Studio 2 resident games
   "SpaceWar",
   "Fun With Numbers",
   "School House",
@@ -85,7 +90,7 @@ String[] gameTitle = {
   "Blackjack", 
   "Gunfighter/Moonship Battle", 
   /////////////////////////
-  "Doodle/Patterns/Bowling/Blackjack", // Studio 3 resident games
+  "Resident Studio 3: Doodle/Patterns/Bowling/Blackjack1/Blackjack2", // Studio 3 (Victory) resident games
   "MathFun/Quiz",
   "Biorhythm",
   "Pinball",
@@ -120,7 +125,7 @@ void setup()
   // default frame rate is 60 frames per second
   //frameRate(60);  // change frame rate
  
-  // test code runs here when configured
+  // run test code here when configured
   if (test) {
     testDisplayScreen();
     while (true) {
@@ -139,6 +144,8 @@ void draw()
 
   while (true) {
     state = CPU_Execute();  // execute one 1802 CPU instruction until frame state changes
+    //verifyRegisters();
+    //verifyRAMmemory();
     if (state == 1) {
       // update display each frame
       displayScreen(false, CPU_GetScreenMemoryAddress(), CPU_GetScreenScrollOffset());
@@ -157,14 +164,12 @@ void systemReset() {
     backgroundColor = 0;
   background(bgColor[backgroundColor]);
   
-  clearAllKeys();                               // clear key storage isPressed[]
+  clearAllKeys(); // clear key storage isPressed[]
   
-  CPU_Reset();                                  // Initialise 1802 CPU
+  CPU_Reset(); // Initialise 1802 CPU
   // Load Game Cartridge
-  if (gameSelected > 0) {
-    println("Loading " + gameTitle[gameSelected] + " game cartridge");
-    loadGameBinary(gameFileName[gameSelected]);
-  }
+  println("Load " + gameTitle[gameSelected]);
+  loadGameBinary(gameFileName[gameSelected]);
 
 }
 

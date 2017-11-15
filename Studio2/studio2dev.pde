@@ -3,11 +3,12 @@
 //
 //								    	  Derived from Arduino version of Studio 2
 //
-//										 Written by Paul Robson March 2013
+//										 Originally Written by Paul Robson March 2013
 //
 
 /**
- * Written by Andy Modla or converted from code written by Paul Robson
+ * Written by Andy Modla
+ * Converted to Processing from C code written by Paul Robson
  *
  */
  
@@ -27,7 +28,7 @@ class Rect {
   }
 }
 
-int saveCounter = 0;
+int saveCounter = 0; // save screen filename counter
 
 // *****************************************************************************************************************
 //										          Keypad configuration emulation
@@ -255,13 +256,25 @@ void loadGameBinary(String fileName)
         }
       }
     }
-    else { // binary file
-    address = 0x400;
-    for (int i=0; i<data.length; i++) {
-      if (address < 0x800 || address >= 0xA00) {
+    // .BIN binary file
+    else if (fileName.toLowerCase().endsWith(".bin")) { // Studio 2 Cartridge file binary format
+      address = 0x0400;
+      for (int i=0; i<data.length; i++) {
+        if (address < 0x800 || address >= 0xA00) {
           studio2_4k[address] = data[i] & 0xFF;
+        }
+        address++;
       }
-      address++;
     }
+    // .ROM binary file 
+    else { 
+      address = 0x0000;
+      for (int i=0; i<data.length; i++) {
+        if (!((address >= 0x800 && address < 0xA00) || 
+        (address >= 0xB00 && address < 0xB40)) ) {
+          studio2_4k[address] = data[i] & 0xFF;
+        }
+        address++;
+      }
     }
 }
