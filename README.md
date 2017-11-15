@@ -13,7 +13,7 @@ https://github.com/paulscottrobson/studio2-games
 ## Studio III Emulator
 
 The Studio III game console was never built by RCA, but I and others wrote games using Studio III prototype boards in 1977.
-My Studio 3 emulation will show color graphics for Studio III games that implement color. 
+My Studio 3 emulation will show color graphics for Studio III games that use color. 
 
 Studio III Pinball Game Screenshot
 
@@ -51,14 +51,17 @@ http://www.emma02.hobby-site.com/studio.html
 
 https://github.com/etxmato/emma_02
 
-The emulator supports three game file types:
-1. ".st2" Studio II cartridge format, loads at specified locations defined in the file
-2. ".bin" Binary file for Studio II game loads at 0x0400
-3. ".rom" Binary file for Studio II base ROM loads at 0x0000 (to be implemented)
+I thought the Studio III resident game ROM, with the color Blackjack game that I wrote, was lost, but I discovered it was preserved at the EMMA 02 site under the [Victory MPT-02](http://www.emma02.hobby-site.com/victory.html) videogame console made by Soundic.
+
+The emulator reads three game file types:
+1. ".st2" Studio II cartridge format, loads at specific ROM address locations defined in the file
+2. ".bin" Binary file for Studio II game loads at 0x0400, the cartridge staring location
+3. ".rom" Binary file for Studio II/III base ROM loads at 0x0000
 
 ## Console Design
 Looking back at the games, it is amazing to me how much game function was squeezed into a small 1024 byte ROM cartridge. 
-Resident game ROMs that included a game instruction pseudo code interpreter are 2048 bytes.
+Resident game ROMs (2048 bytes) for Studio II included a game instruction pseudo code interpreter.
+Resident game ROMs (3072 bytes) for Studio III included a game instruction pseudo code interpreter.
 
 There was an engineering cost trade-off that favored limits to ROM size and hardware complexity vs faster game speed, screen display size, and color/sound.
 Small game size was achieved using interpreter psuedo code to write games instead of coding directly with 1802 CPU instructions. The hardware design was elegant and relatively simple.
@@ -86,7 +89,7 @@ The Studio II system was better suited for puzzles and card games, rather than a
 
 | Studio III Color Game | Author | Notes |
 | --------- | ------ | ----- |
-| Doodle/Patterns/Bowling/Blackjack | Joseph Weisbecker, Andrew Modla (Blackjack) | Studio III Resident Games |
+| Doodle/Patterns/Bowling/Blackjack | Joseph Weisbecker, Andrew Modla (Blackjack) | Studio III Resident Games: improved Blackjack |
 | MathFun/Quiz | ? |  |
 | Biorhythm | Gooitzen Van Der Wal | Not a game, this is a Biorhythm calculator |
 | Pinball | Andrew Modla |  |
@@ -109,6 +112,14 @@ The Studio II system was better suited for puzzles and card games, rather than a
 | Invaders | Paul Robson | |
 | Tv Arcade 2012 | ? | |
 
-This respository is intended for educational and historical research usage to show how the games looked and functioned during play. 
+## Credits
+Many thanks to Studio 2 enthusiasts, developers and historians, who helped preserve documentation and code, and who wrote
+1802/Studio2 emulators. Your dedicated work and enthusiasm are very appreciated.
+This respository contains a complete list of games originally developed by RCA for the Studio II.
 
-by Andrew Modla, RCA Studio II/III game developer, 1976-1977.
+Special thanks to Joe Weisbecker who started it all.
+
+## Use
+This respository is intended for educational and historical research. Studio II emulation shows how the games looked and functioned during play. 
+
+Written by Andrew Modla, RCA Studio II/III game developer, 1976-1977.
