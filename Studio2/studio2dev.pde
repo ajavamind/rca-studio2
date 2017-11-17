@@ -7,11 +7,68 @@
 //
 
 /**
- * Written by Andy Modla
- * Converted to Processing from C code written by Paul Robson
+ * Written by Andrew Modla
+ * Ported to Processing from C code written by Paul Robson
  *
  */
- 
+
+// http://www.beadsproject.net/ Sound for Java and Processing
+// Add this library to Processing SDK
+// Processing SDK -> sketch -> Import Library -> Beads  (a library for real-time sound for Processing)
+import beads.*;
+
+AudioContext ac;
+WavePlayer[] wp;
+volatile Gain gain;
+volatile int iFreq = 0;
+volatile int prevFreq = 0;
+int freq = BEEP_FREQUENCY;
+float GAIN = 0.1;
+
+static volatile int toneState = 0;                           // Tone currently on/off
+static volatile int toneTimer;                               // No of syncs tone has been on.
+static int BEEP_FREQUENCY  = 625; // Studio 2 default
+
+void initSound() {
+  ac = new AudioContext();
+  wp = new WavePlayer[256];
+  wp[0] = new WavePlayer(ac, BEEP_FREQUENCY, Buffer.SQUARE);
+  for (int i=1; i<255; i++) {
+    wp[i] = new WavePlayer(ac, float(27965/i), Buffer.SQUARE);
+  }
+  gain = new Gain(ac, 1, GAIN);
+  gain.addInput(wp[0]);
+  ac.out.addInput(gain);
+  ac.start();
+}
+
+void setFreq(int val) {
+  prevFreq = iFreq;
+  iFreq = val;
+  if (val != 0) {
+    freq = 27965/val;
+    //print(" F="+freq + " "+val+" ");
+  }
+  //else {
+  //print(" F="+BEEP_FREQUENCY + " 0 ");
+  //}
+}
+
+void tone(boolean state) {
+  if (state) {
+    if (iFreq != prevFreq) {
+      gain.removeAllConnections((UGen)gain.getConnectedInputs().toArray()[0]);
+      gain.addInput(wp[iFreq]);
+    }
+    gain.setGain(GAIN);
+  } else {
+    // tone off
+    gain.setGain(0);
+  }
+  gain.update();
+}
+
+
 class Rect {
   int x;
   int y;
@@ -97,14 +154,7 @@ void checkAllKeys()
 //												Hardware Interface
 // *****************************************************************************************************************
 
-static int toneState = 0;															// Tone currently on/off ?
-static int toneTimer; 															// No of syncs tone has been on.
-static int BEEPFREQUENCY  = 625;
-
-void tone(int val) {
-}
-
-static int selectedKeypad = 1;                          // Currently selected keypad
+static volatile int selectedKeypad = 1;                          // Currently selected keypad
 
 void keyPressed() {
   //println("press key="+key);
@@ -135,10 +185,13 @@ int SYSTEM_Command(int cmd, int param)
     if (param != toneState) 												// Has it changed state ?
     {
       toneState = param;													// If so save new state
-      if (toneState != 0) 
-        tone(BEEPFREQUENCY); 
-      else 
-      tone(0);					// and set the beeper accordingly.
+      if (toneState != 0) {
+        //tone(true); 
+        //print("Q=1");
+      } else {
+        //tone(false);					// and set the beeper accordingly.
+        //print("Q=0");
+      }
       toneTimer = 0;
     } 																		// 2,945 Hz is from CCT Diagram values on
     break;    																// NE555V in RCA Cosmac VIP.
@@ -149,7 +202,7 @@ int SYSTEM_Command(int cmd, int param)
     if (toneState != 0 && toneTimer != 25) 
     {
       toneTimer++;
-      if ((toneTimer & 1) == 0) tone(625-toneTimer*4);
+      //if ((toneTimer & 1) == 0) tone(BEEP_FREQUENCY-toneTimer*4);
     }
     //CheckAllKeys();															// Rescan the keyboard.
     break;    
@@ -224,57 +277,57 @@ void displayScreen(boolean isDebugMode, int screenData, int scrollOffset)
 void loadGameBinary(String fileName)
 {
   int address;
-    byte[] data = loadBytes(fileName);
-    if (fileName.toLowerCase().endsWith(".st2")) { // Studio 2 Cartridge file
-      String header="";
-      try {
+  byte[] data = loadBytes(fileName);
+  if (fileName.toLowerCase().endsWith(".st2")) { // Studio 2 Cartridge file
+    String header="";
+    try {
       header = new String(data, "UTF8");
-      }
-      catch (UnsupportedEncodingException e)
-      {
-        header = "invalid";
-        println("unsupported ASCII encoding");
-      }
-      if (!(header.startsWith("RCA2") && data[5] == 1)) { 
-        println("Invalid Studio 2 Game Cartridge file");
-        return;
-      }
-      int blocks = data[4];
-      //println("blocks="+blocks);
-      println("ROM Size "+(blocks-1)*256 +" bytes");
-      blocks--;
-      for (int i = 0; i< blocks; i++) {
-        int page = data[64+i];
-        if (page != 0) {
-          address = page << 8;
-          println("address="+hex(address));
-          for (int j=0; j<256; j++) {
-            if (address < 0x800 || address >= 0xA00) {
-              studio2_4k[address+j] = data[256*(i+1) + j] & 0xFF;
-             }
-           }
+    }
+    catch (UnsupportedEncodingException e)
+    {
+      header = "invalid";
+      println("unsupported ASCII encoding");
+    }
+    if (!(header.startsWith("RCA2") && data[5] == 1)) { 
+      println("Invalid Studio 2 Game Cartridge file");
+      return;
+    }
+    int blocks = data[4];
+    //println("blocks="+blocks);
+    println("ROM Size "+(blocks-1)*256 +" bytes");
+    blocks--;
+    for (int i = 0; i< blocks; i++) {
+      int page = data[64+i];
+      if (page != 0) {
+        address = page << 8;
+        println("address="+hex(address));
+        for (int j=0; j<256; j++) {
+          if (address < 0x800 || address >= 0xA00) {
+            studio2_4k[address+j] = data[256*(i+1) + j] & 0xFF;
+          }
         }
       }
     }
-    // .BIN binary file
-    else if (fileName.toLowerCase().endsWith(".bin")) { // Studio 2 Cartridge file binary format
-      address = 0x0400;
-      for (int i=0; i<data.length; i++) {
-        if (address < 0x800 || address >= 0xA00) {
-          studio2_4k[address] = data[i] & 0xFF;
-        }
-        address++;
+  }
+  // .BIN binary file
+  else if (fileName.toLowerCase().endsWith(".bin")) { // Studio 2 Cartridge file binary format
+    address = 0x0400;
+    for (int i=0; i<data.length; i++) {
+      if (address < 0x800 || address >= 0xA00) {
+        studio2_4k[address] = data[i] & 0xFF;
       }
+      address++;
     }
-    // .ROM binary file 
-    else { 
-      address = 0x0000;
-      for (int i=0; i<data.length; i++) {
-        if (!((address >= 0x800 && address < 0xA00) || 
+  }
+  // .ROM binary file 
+  else { 
+    address = 0x0000;
+    for (int i=0; i<data.length; i++) {
+      if (!((address >= 0x800 && address < 0xA00) || 
         (address >= 0xB00 && address < 0xB40)) ) {
-          studio2_4k[address] = data[i] & 0xFF;
-        }
-        address++;
+        studio2_4k[address] = data[i] & 0xFF;
       }
+      address++;
     }
+  }
 }
