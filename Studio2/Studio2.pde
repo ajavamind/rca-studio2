@@ -11,10 +11,11 @@
  * programmable sound tone generator
  */
 
-boolean test = false;  // run test components
+private final static boolean test = false;  // run test components
+private final static boolean sound = true; // control sound on/off
 
-private static final int STUDIO2 = 0;  
-private static final int STUDIO3 = 1;  
+private final static int STUDIO2 = 0;  
+private final static int STUDIO3 = 1;  
 static int console = STUDIO3; //STUDIO2;
 
 int backgroundColor = 1;
@@ -35,7 +36,7 @@ color[] colorMap = {BLACK, RED, BLUE, VIOLET, GREEN, YELLOW, AQUA, WHITE};
 
 //////////////////////////////////////////////////////////////
 
-int gameSelected = 9; // Studio III resident games
+volatile int gameSelected = 9; // Studio III resident games
 
 // Game cartridges are in the "data" folder
 String[] gameFileName = {
@@ -79,7 +80,7 @@ String[] gameFileName = {
 /* 28 */  "tv-arcade-2012.st2"
 };
 String[] gameTitle = {
-  "Resident Studio2: Doodle/Patterns/Bowling/Freeway/Addition", // Studio 2 resident games
+  "Studio2 Resident Games", // Studio 2 resident games: Doodle/Patterns/Bowling/Freeway/Addition
   "SpaceWar", 
   "Fun With Numbers", 
   "School House", 
@@ -87,9 +88,9 @@ String[] gameTitle = {
   "Tennis/Squash", 
   "Baseball", 
   "Blackjack", 
-  "Gunfighter/Moonship Battle", 
+  "Gunfighter/Moonship", 
   /////////////////////////
-  "Resident Studio 3: Doodle/Patterns/Bowling/Blackjack1/Blackjack2", // Studio 3 (Victory) resident games
+  "Studio 3 Resident Games", // Studio 3 (Victory) resident games: Doodle/Patterns/Bowling/Blackjack1/Blackjack2
   "MathFun/Quiz", 
   "Biorhythm", 
   "Pinball", 
@@ -118,11 +119,19 @@ String[] gameTitle = {
  * Loads optional game cartridge program from "data" folder.
  * Resets the 1802 CPU emulator.
  */
+
 void setup() 
 {
-  size(1024, 512);
-  // default frame rate is 60 frames per second
-  //frameRate(60);  // change frame rate
+ // portrait mode, recommended size parameters
+  //size(1440, 2160);
+  //size(1080,1440);
+  //size(960, 1280);
+  //size(810, 1080);
+  size(720,1080); // 720 is minimum width for best rendition 
+  // since width affects font size used
+  
+  // default frame rate is 60 frames per second, the Studio 2 update screen speed
+  //frameRate(90);  // change frame rate to speed up game play
 
   // run test code here when configured
   if (test) {
@@ -131,6 +140,7 @@ void setup()
       // loop forever
     }
   }
+  drawConsole();
   initSound();
   systemReset();
 }
@@ -138,6 +148,7 @@ void setup()
 /**
  * Main drawing loop
  */
+
 void draw() 
 {
   int state;
@@ -145,8 +156,8 @@ void draw()
   while (true) {
     state = CPU_Execute();  // execute one 1802 CPU instruction until frame state changes
     if (state == 1) {
-      // update display each frame
-      displayScreen(false, CPU_GetScreenMemoryAddress(), CPU_GetScreenScrollOffset());
+      updateGUI();
+      displayScreen(false, width, 3*height/8, CPU_GetScreenMemoryAddress(), CPU_GetScreenScrollOffset());
       break; // leave draw() until the next frame
     }
   }
@@ -160,7 +171,7 @@ void systemReset() {
     backgroundColor = 1;
   else
     backgroundColor = 0;
-  background(bgColor[backgroundColor]);
+  //background(bgColor[backgroundColor]);
 
   clearAllKeys(); // clear key storage isPressed[]
 
@@ -179,5 +190,5 @@ void testDisplayScreen() {
   for (int i=0; i<256; i++) {
     studio2_4k[i+0x900] = pattern;
   }
-  displayScreen(true, 0x900, CPU_GetScreenScrollOffset());
+  displayScreen(true, width, height/2, 0x900, CPU_GetScreenScrollOffset());
 }

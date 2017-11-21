@@ -12,62 +12,9 @@
  *
  */
 
-// http://www.beadsproject.net/ Sound for Java and Processing
-// Add this library to Processing SDK
-// Processing SDK -> sketch -> Import Library -> Beads  (a library for real-time sound for Processing)
-import beads.*;
-
-AudioContext ac;
-WavePlayer[] wp;
-volatile Gain gain;
-volatile int iFreq = 0;
-volatile int prevFreq = 0;
-int freq = BEEP_FREQUENCY;
-float GAIN = 0.1;
-
 static volatile int toneState = 0;                           // Tone currently on/off
 static volatile int toneTimer;                               // No of syncs tone has been on.
 static int BEEP_FREQUENCY  = 625; // Studio 2 default
-
-void initSound() {
-  ac = new AudioContext();
-  wp = new WavePlayer[256];
-  wp[0] = new WavePlayer(ac, BEEP_FREQUENCY, Buffer.SQUARE);
-  for (int i=1; i<255; i++) {
-    wp[i] = new WavePlayer(ac, float(27965/i), Buffer.SQUARE);
-  }
-  gain = new Gain(ac, 1, GAIN);
-  gain.addInput(wp[0]);
-  ac.out.addInput(gain);
-  ac.start();
-}
-
-void setFreq(int val) {
-  prevFreq = iFreq;
-  iFreq = val;
-  if (val != 0) {
-    freq = 27965/val;
-    //print(" F="+freq + " "+val+" ");
-  }
-  //else {
-  //print(" F="+BEEP_FREQUENCY + " 0 ");
-  //}
-}
-
-void tone(boolean state) {
-  if (state) {
-    if (iFreq != prevFreq) {
-      gain.removeAllConnections((UGen)gain.getConnectedInputs().toArray()[0]);
-      gain.addInput(wp[iFreq]);
-    }
-    gain.setGain(GAIN);
-  } else {
-    // tone off
-    gain.setGain(0);
-  }
-  gain.update();
-}
-
 
 class Rect {
   int x;
@@ -218,18 +165,26 @@ int SYSTEM_Command(int cmd, int param)
  * Display the pixel screen 64x32
  * Implements color for Studio III emulation
  */
-void displayScreen(boolean isDebugMode, int screenData, int scrollOffset)
+void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int screenData, int scrollOffset)
 {
   int xc, yc, xs, ys, x, y, pixByte;
+  int drawWidth;
+  int drawHeight;
+  int hOffset;
+  drawWidth = screenWidth - screenWidth/16;
+  drawHeight = screenHeight - screenHeight/8;
   Rect rc = new Rect();
-  xc = 0;
-  yc = 0;
-  xs = width / 64;  // program screen size() width
-  ys = height / 32;  // program screen size() height
+  xs = drawWidth / 66;  // pixel width
+  ys = xs;  // pixel height
+  hOffset = (screenWidth - 64*xs)/2;
+  xc = xs; //0;
+  yc = ys; //0;
   rc.x = xc;
   rc.y = yc;
   // Erase screen display
-  background(bgColor[backgroundColor]);
+  //background(bgColor[backgroundColor]);
+  fill(bgColor[backgroundColor]);
+  rect(0, 0, screenWidth, screenHeight - 2*ys);
   if (screenData == -1) {
     //println("screen OFF");
     return; // Screen off, exit.
@@ -261,7 +216,7 @@ void displayScreen(boolean isDebugMode, int screenData, int scrollOffset)
       {
         // if bit 7 set draw pixel
         if ((pixByte & 0x80) != 0) {
-          rect(rc.x, rc.y, rc.w, rc.h);
+          rect(hOffset+rc.x, rc.y, rc.w, rc.h);
         }
         pixByte = (pixByte << 1) & 0xFF;                                        // shift to left, lose overflow.
         rc.x = rc.x + xs;                                                       // next coordinate across.
@@ -286,7 +241,7 @@ void loadGameBinary(String fileName)
     catch (UnsupportedEncodingException e)
     {
       header = "invalid";
-      println("unsupported ASCII encoding");
+      println("Unsupported ASCII encoding");
     }
     if (!(header.startsWith("RCA2") && data[5] == 1)) { 
       println("Invalid Studio 2 Game Cartridge file");
@@ -294,13 +249,13 @@ void loadGameBinary(String fileName)
     }
     int blocks = data[4];
     //println("blocks="+blocks);
-    println("ROM Size "+(blocks-1)*256 +" bytes");
+    //println("ROM Size "+(blocks-1)*256 +" bytes");
     blocks--;
     for (int i = 0; i< blocks; i++) {
       int page = data[64+i];
       if (page != 0) {
         address = page << 8;
-        println("address="+hex(address));
+        //println("address="+hex(address));
         for (int j=0; j<256; j++) {
           if (address < 0x800 || address >= 0xA00) {
             studio2_4k[address+j] = data[256*(i+1) + j] & 0xFF;
