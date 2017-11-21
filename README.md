@@ -35,6 +35,14 @@ I chose Processing/Java so that the code can be ported or generated for Windows,
 I used the Beads sound library for sound generation with the Processing SDK.
 In the Processing SDK menu add this library: Sketch -> Import Library -> Beads  (a library for real-time sound for Processing)
 
+Screenshot Android app generated from Processing running on a Samsung S8 phone, sound not yet implemented for Android.
+
+![Screenshot of Studio III Pinball Game](Studio2/screenshot/pinballSamsungS8.png)
+
+Windows 10 Screenshot
+
+![Screenshot of Studio III Pinball Game](Studio2/screenshot/colorblackjackWindows10.png)
+
 ## Using the Emulator
 
 As currently implemented the emulator uses the number keys 0-9 for the A keypad on the Studio II console, and the numeric keys (num lock) for keys 0-9 on the B keypad.
