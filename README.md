@@ -1,37 +1,39 @@
 # RCA Studio II and Studio III Home TV Programmer
 ![](Studio2logo.jpg)
 
-The system is also known as the RCA Studio 2 and Studio 3 game console.
+The system is also known as the RCA Studio 2 and Studio 3 video game console.
 
 ## Studio II Emulator
 
 The emulator code in this repository is based on work by Paul Robson, 
-who wrote a RCA COSMAC CDP1802 microcomputer and Studio 2 console emulator.
+who wrote a RCA COSMAC CDP1802 microcomputer and Studio 2 video game console emulator.
+Paul Robson's emulation code design
+is excellent because it simulates the real-time operaton of the CDP1802 CPU and Studio 2 quite well, when run
+on modern computers. 
 
 https://github.com/paulscottrobson/studio2-games 
 
 ## Studio III Emulator
 
 The Studio III game console was never built by RCA, but I and others wrote games using Studio III prototype boards in 1977.
-My Studio 3 emulation will show color graphics for Studio III games that use color. 
+My Studio 3 emulation will support color graphics and sound for Studio III games that use color and programmable sound generation. 
 
 Studio III Pinball Game Screenshot
 
 ![Screenshot of Studio III Pinball Game](Studio2/screenshot/pinball.png)
 
-I converted Robson's well-crafted C code to the Processing language (Java) and included
-emulation for the Studio III game console color graphics. I was able to add color emulation because I found an archived **Programming Manual for Studio III**, written in September 1977, detailing the color and sound functions. I made some contributions to that document. Paul Robson's emulation code design
-is excellent because it simulates the real-time operaton of the 1802 CPU and Studio 2 quite well, when run
-on modern computers. 
+I ported Paul Robson's well-crafted C code to the Processing language (Java) and included
+emulation for the Studio III game console color graphics and programmable sound. I was able to add color and sound emulation because I found an archived **Programming Manual for Studio III**, written in September 1977, detailing the color and sound functions. I made some contributions to that document when it was written. 
 
 ## Running the Emulator
 
-You will need to download the Processing SDK to run the emulated games. 
-I chose Processing/Java so that the code can be ported or generated for Windows, Apple IOS, Linux, Android, and Web JavaScript.
-
-Please donate to the Processing Foundation.
+You will need to download the Processing SDK to run the emulated games. Please donate to the Processing Foundation.
 
 https://processing.org/
+
+I chose Processing/Java so that the code can be ported or generated for Windows, Apple IOS, Linux, Android, and Web JavaScript.
+I used the Beads sound library for sound generation with the Processing SDK.
+In the Processing SDK menu add this library: Sketch -> Import Library -> Beads  (a library for real-time sound for Processing)
 
 ## Using the Emulator
 
@@ -42,10 +44,10 @@ For debug the following keys may be used:
 - 'S' key saves a screen shot in the folder "screenshot"
 - 'F' show the frame rate in the Processing SDK console terminal output area
 
-You will need to set the "gameSelected" variable array index to change the game run.
+You will need to set the "gameSelected" variable array index to change the game run. It is set to the Studio 3 ROM.
 
 ## Games
-Game ROM cartridges and home-made games included here are from Paul Robson's site and the Emma 02 game console emulation site:
+Game ROM cartridges and home-made games included here are from Paul Robson's Github site (above) and the Emma 02 game console emulation sites:
 
 http://www.emma02.hobby-site.com/studio.html
 
@@ -63,15 +65,15 @@ Looking back at the games, it is amazing to me how much game function was squeez
 Resident game ROMs (2048 bytes) for Studio II included a game instruction pseudo code interpreter.
 Resident game ROMs (3072 bytes) for Studio III included a game instruction pseudo code interpreter.
 
-There was an engineering cost trade-off that favored limits to ROM size and hardware complexity vs faster game speed, screen display size, and color/sound.
+There was an engineering cost trade-off that favored limits to ROM size and hardware complexity vs faster game speed, screen display size, and color/sound features.
 Small game size was achieved using interpreter psuedo code to write games instead of coding directly with 1802 CPU instructions. The hardware design was elegant and relatively simple.
 
 Games were slow for three reasons: 
 1. Interpreter pseudo code overhead
-2. Drawing graphics with software instructions without hardware assistance 
+2. Drawing graphics with software instructions without hardware assistance (for example, no hardware sprite graphics)
 3. No game instruction execution during screen update cycles. 
 
-The Studio II system was better suited for puzzles and card games, rather than action games. 
+Due to its operating speed and keyboard input, the Studio II system was better suited for puzzles and card games, rather than action games. 
 
 
 ## Game Developers
@@ -90,7 +92,7 @@ The Studio II system was better suited for puzzles and card games, rather than a
 | Studio III Color Game | Author | Notes |
 | --------- | ------ | ----- |
 | Doodle/Patterns/Bowling/Blackjack | Joseph Weisbecker, Andrew Modla (Blackjack) | Studio III Resident Games: improved Blackjack |
-| MathFun/Quiz | ? |  |
+| MathFun/Quiz | Philip Baltzer? |  |
 | Biorhythm | Gooitzen Van Der Wal | Not a game, this is a Biorhythm calculator |
 | Pinball | Andrew Modla |  |
 | Bingo | Andrew Modla | Not a game, this is a Bingo number caller and verification aid |
@@ -113,11 +115,10 @@ The Studio II system was better suited for puzzles and card games, rather than a
 | Tv Arcade 2012 | ? | |
 
 ## Credits
-Many thanks to Studio 2 enthusiasts, developers and historians, who helped preserve documentation and code, and who wrote
-1802/Studio2 emulators. Your dedicated work and enthusiasm are very appreciated.
-This respository contains a complete list of games originally developed by RCA for the Studio II.
+Many thanks to Studio 2 enthusiasts, game programmers and historians, who helped preserve and archive documentation and code, and who wrote 1802/Studio2 emulators. Your dedicated work and enthusiasm are very appreciated.
+This respository contains a complete list of games originally developed by RCA for the Studio II and III.
 
-Special thanks to Joe Weisbecker who started it all.
+Special dedication to Joe Weisbecker who started it all.
 
 ## Use
 This respository is intended for educational and historical research. Studio II emulation shows how the games looked and functioned during play. 
