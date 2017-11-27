@@ -13,10 +13,10 @@
 
 private final static boolean test = false;  // run test components
 private final static boolean sound = true; // control sound on/off
-
+private static boolean android = false;
 private final static int STUDIO2 = 0;  
 private final static int STUDIO3 = 1;  
-static int console = STUDIO3; //STUDIO2;
+private static int console = STUDIO3; //STUDIO2;
 
 int backgroundColor = 1;
 color BLACK_BACKGROUND = color(0);
@@ -119,19 +119,36 @@ String[] gameTitle = {
  * Loads optional game cartridge program from "data" folder.
  * Resets the 1802 CPU emulator.
  */
+void settings() {
+  android = isAndroid();
+  if (android) {
+    fullScreen();
+  }
+  else {
+    //println("displayWidth="+displayWidth + " displayHeight="+displayHeight);
+    if (displayWidth > displayHeight) {
+      size(2*displayHeight/3, displayHeight);
+    }
+    //size(1440, 2160);
+    // portrait mode, recommended size parameters
+    //size(1440, 2160);
+    //size(1080,1440);
+    //size(960, 1280);
+    //size(810, 1080);
+    //size(720,1080); // 720 is minimum width for best rendition 
+    // since width affects font size used
+  }
+
+}
 
 void setup() 
 {
- // portrait mode, recommended size parameters
-  //size(1440, 2160);
-  //size(1080,1440);
-  //size(960, 1280);
-  //size(810, 1080);
-  size(720,1080); // 720 is minimum width for best rendition 
-  // since width affects font size used
+  if (android) {
+    orientation(PORTRAIT); 
+  }
   
   // default frame rate is 60 frames per second, the Studio 2 update screen speed
-  //frameRate(90);  // change frame rate to speed up game play
+  //frameRate(90);  // uncomment to change frame rate to speed up game play
 
   // run test code here when configured
   if (test) {
@@ -140,6 +157,7 @@ void setup()
       // loop forever
     }
   }
+  
   drawConsole();
   initSound();
   systemReset();
@@ -171,7 +189,6 @@ void systemReset() {
     backgroundColor = 1;
   else
     backgroundColor = 0;
-  //background(bgColor[backgroundColor]);
 
   clearAllKeys(); // clear key storage isPressed[]
 
@@ -179,6 +196,15 @@ void systemReset() {
   // Load Game Cartridge
   println("Load " + gameTitle[gameSelected]);
   loadGameBinary(gameFileName[gameSelected]);
+}
+
+public boolean isAndroid() {
+  String name = System.getProperty("java.runtime.name");
+  println(name);
+  if (name.toLowerCase().contains("android"))
+    return true;
+  else
+    return false;
 }
 
 //////////////////////////////////////////////////////////////
