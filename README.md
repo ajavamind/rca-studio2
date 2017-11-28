@@ -31,11 +31,11 @@ You will need to download the Processing SDK to run the emulated games. Please d
 
 https://processing.org/
 
-I chose Processing/Java so that the code can be ported or generated for Windows, Apple IOS, Linux, Android, and Web JavaScript.
+I chose Processing/Java so that the code can be ported or generated for Windows, Apple iOS, Linux, Android, and Web JavaScript.
 I used the Beads sound library for sound generation with the Processing SDK.
 In the Processing SDK menu add this library: Sketch -> Import Library -> Beads  (a library for real-time sound for Processing)
 
-Screenshot Android app generated from Processing running on a Samsung S8 phone, sound not yet implemented for Android.
+Screenshot Android app generated from Processing running on a Samsung S8 phone. Sound for Android ues a different library.
 
 ![Screenshot of Studio III Pinball Game](Studio2/screenshot/pinballSamsungS8.png)
 
@@ -66,15 +66,27 @@ I thought the Studio III resident game ROM, with the color Blackjack game that I
 The emulator reads three game file types:
 1. ".st2" Studio II cartridge format, loads at specific ROM address locations defined in the file
 2. ".bin" Binary file for Studio II game loads at 0x0400, the cartridge staring location
-3. ".rom" Binary file for Studio II/III base ROM loads at 0x0000
+3. ".rom" Binary file for Studio II/III base ROM, loads at 0x0000
+4. ".ch8" Binary file for VIP board RAM, loads at 0x200
 
 ## Console Design
-Looking back at the games, it is amazing to me how much game function was squeezed into a small 1024 byte ROM cartridge. 
-Resident game ROMs (2048 bytes) for Studio II included a game instruction pseudo code interpreter.
-Resident game ROMs (3072 bytes) for Studio III included a game instruction pseudo code interpreter.
+Looking back at the games, it is amazing to me how much game function was squeezed into a small 1024 byte ROM cartridge.
+ 
+Resident game ROMs (2048 bytes) for Studio II included a game instruction pseudo code interpreter (starting at memory location 0) and resident games (starting at 
+memory location 0x0400).
 
-There was an engineering cost trade-off that favored limits to ROM size and hardware complexity vs faster game speed, screen display size, and color/sound features.
-Small game size was achieved using interpreter psuedo code to write games instead of coding directly with 1802 CPU instructions. The hardware design was elegant and relatively simple.
+Resident game ROMs (3072 bytes) for Studio III included a game instruction pseudo code interpreter (starting at location 0) and resident games Doodle, Pattern, Bowling 
+(starting at 0x0400), and Blackjack (starting at location 0x0C00). 
+
+The only difference between the Studio II and Studio III interpreters is that the Studio III interpreter replaced a 3 byte branch instruction with 2 byte instructions.
+This was needed for correct video display timing. Note that in the Studio III programming manual, there is a caution note to avoid 3 byte instructions in 1802 machine 
+language subroutines. Color and sound features used in games were programmed in the game cartridge.
+
+There was an engineering cost trade-off that favored limits to ROM size and hardware complexity versis faster game speed, screen display size, and color/sound features.
+By using interpreter psuedo code to write games instead of coding directly with 1802 CPU instructions, small game ROM size was made possible, with shared functions in
+the interpreter. 
+
+The hardware design was elegant and relatively simple.
 
 Games were slow for three reasons: 
 1. Interpreter pseudo code overhead
@@ -104,8 +116,8 @@ Due to its operating speed and keyboard input, the Studio II system was better s
 | Biorhythm | Gooitzen Van Der Wal | Not a game, this is a Biorhythm calculator |
 | Pinball | Andrew Modla |  |
 | Bingo | Andrew Modla | Not a game, this is a Bingo number caller and verification aid |
-| Concentration/Match | Gooitzen Van Der Wal |  |
-| Star Wars | Gooitzen Van Der Wal |  |
+| Concentration/Match | Gooitzen van der Wal |  |
+| Star Wars | Gooitzen van der Wal |  |
 
 | Other Studio II Games | Author | Notes |
 | --------- | ------ | ----- |
@@ -113,20 +125,20 @@ Due to its operating speed and keyboard input, the Studio II system was better s
 | Hockey | Paul Robson | |
 | Combat | Paul Robson | |
 | Scramble | Paul Robson | |
-| Rocket | ? | |
-| Outbreak | ? | |
+| Rocket | Lee Romanow | original Joseph Weisbecker, converted by Romanow
+| Outbreak | Lee Romanow | |
 | Pacman | Paul Robson | |
 | Kaboom | Paul Robson | |
 | Asteroids | Paul Robson | |
 | Berzerk | Paul Robson | |
 | Invaders | Paul Robson | |
-| Tv Arcade 2012 | ? | |
+| Tv Arcade 2012 | Lee Romanow | |
 
 ## Credits
 Many thanks to Studio 2 enthusiasts, game programmers and historians, who helped preserve and archive documentation and code, and who wrote 1802/Studio2 emulators. Your dedicated work and enthusiasm are very appreciated.
 This respository contains a complete list of games originally developed by RCA for the Studio II and III.
 
-Special dedication to Joe Weisbecker who started it all.
+Special dedication to Joe Weisbecker who started it all. One of his goals for the Studio II was computer and programming education.
 
 ## Use
 This respository is intended for educational and historical research. Studio II emulation shows how the games looked and functioned during play. 

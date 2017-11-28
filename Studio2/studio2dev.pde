@@ -206,10 +206,10 @@ void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int s
     xc = 0;
     for (x = 0; x < 8; x++)                                                           // 8 bytes per line.
     {
-      pixByte = studio2_4k[screenData+offset++] & 0xFF;                            // Get next pixel.
+      pixByte = studio2_memory[screenData+offset++] & 0xFF;                            // Get next pixel.
       rc.x = xc + x * xs * 8;                                                     // Calculate horizontal coordinate
       if (console == STUDIO3) {
-        int colorIndex = studio2_4k[COLOR_MAP + x + 8*(y/4)] & 0x0007;
+        int colorIndex = studio2_memory[COLOR_MAP + x + 8*(y/4)] & 0x0007;
         fill(colorMap[colorIndex]);
       }
       while (pixByte != 0)                                                        // if something to render.
@@ -231,6 +231,7 @@ void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int s
  */
 void loadGameBinary(String fileName)
 {
+  println("Filename: "+fileName);
   int address;
   byte[] data = loadBytes(fileName);
   if (fileName.toLowerCase().endsWith(".st2")) { // Studio 2 Cartridge file
@@ -257,8 +258,8 @@ void loadGameBinary(String fileName)
         address = page << 8;
         //println("address="+hex(address));
         for (int j=0; j<256; j++) {
-          if (address < 0x800 || address >= 0xA00) {
-            studio2_4k[address+j] = data[256*(i+1) + j] & 0xFF;
+          if (address < RAM || address >= (RAM+RAM_SIZE)) {
+            studio2_memory[address+j] = data[256*(i+1) + j] & 0xFF;
           }
         }
       }
@@ -266,10 +267,21 @@ void loadGameBinary(String fileName)
   }
   // .BIN binary file
   else if (fileName.toLowerCase().endsWith(".bin")) { // Studio 2 Cartridge file binary format
-    address = 0x0400;
+    address = 0x0400; // Interpreter code game starting location
     for (int i=0; i<data.length; i++) {
-      if (address < 0x800 || address >= 0xA00) {
-        studio2_4k[address] = data[i] & 0xFF;
+      if (address < RAM || address >= (RAM+RAM_SIZE)) {
+        studio2_memory[address] = data[i] & 0xFF;
+      }
+      address++;
+    }
+  }
+  // .CH8 binary file
+  else if (fileName.toLowerCase().endsWith(".ch8")) { // Chip8 file binary format
+    address = 0x0200; // Interpreter code starting location
+    for (int i=0; i<data.length; i++) {
+      if (address < RAM || address >= (RAM+RAM_SIZE)) {
+        studio2_memory[address] = data[i] & 0xFF;
+        //println(" " + hex(address) + " " + hex(int(data[i])));
       }
       address++;
     }
@@ -278,11 +290,32 @@ void loadGameBinary(String fileName)
   else { 
     address = 0x0000;
     for (int i=0; i<data.length; i++) {
-      if (!((address >= 0x800 && address < 0xA00) || 
-        (address >= 0xB00 && address < 0xB40)) ) {
-        studio2_4k[address] = data[i] & 0xFF;
+      if (console == CUSTOM) {
+        studio2_memory[address] = data[i] & 0xFF;
+      } else {
+        if (!((address >= RAM && address < (RAM+RAM_SIZE)) || 
+          (address >= COLOR_MAP && address < (COLOR_MAP+COLOR_MAP_SIZE))) ) {
+          studio2_memory[address] = data[i] & 0xFF;
+        }
       }
       address++;
     }
+  }
+}
+
+/**
+ * Load Binary Memory Image
+ * param fileName String for files located in "data" folder
+ * param address Location in RAM
+ */
+void loadBinary(String fileName, int address)
+{
+  println("Filename: "+fileName + " at "+ hex(address));
+  byte[] data = loadBytes(fileName);
+  // binary file
+  for (int i=0; i<data.length; i++) {
+    studio2_memory[address] = data[i] & 0xFF;
+    println(" " + hex(address) + " " + hex(int(data[i])));
+    address++;
   }
 }

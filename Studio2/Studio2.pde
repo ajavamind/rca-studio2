@@ -16,9 +16,12 @@ private final static boolean sound = true; // control sound on/off
 private static boolean android = false;
 private final static int STUDIO2 = 0;  
 private final static int STUDIO3 = 1;  
-private static int console = STUDIO3; //STUDIO2;
+private final static int VIP = 2;
+private final static int CUSTOM = 3;
 
-int backgroundColor = 1;
+private static int console =  STUDIO3; //VIP; //STUDIO3; //STUDIO2; CUSTOM;
+
+int backgroundColor = 1; // index for bgColor array selection
 color BLACK_BACKGROUND = color(0);
 color BLUE_BACKGROUND = color(0, 0, 128);
 color GREEN_BACKGROUND = color(0, 128, 0);
@@ -33,6 +36,13 @@ color YELLOW = color(255, 255, 0);
 color AQUA = color(0, 255, 255);
 color WHITE = color(255, 255, 255);
 color[] colorMap = {BLACK, RED, BLUE, VIOLET, GREEN, YELLOW, AQUA, WHITE};
+
+private final static int COLOR_MAP = 0x0B00;
+private final static int COLOR_MAP_SIZE = 0x40;
+static int RAM = 0x800; // Studio 2 and 3
+private final static int RAM_SIZE = 0x200; // Working and Video display RAM
+static int VIDEO_RAM = 0x900;  // starting location
+// Video RAM is 64 x 32 pixels stored in 256 bytes
 
 //////////////////////////////////////////////////////////////
 
@@ -77,7 +87,8 @@ String[] gameFileName = {
 /* 25 */  "asteroids.st2", 
 /* 26 */  "berzerk.st2", 
 /* 27 */  "invaders.st2", 
-/* 28 */  "tv-arcade-2012.st2"
+/* 28 */  "tv-arcade-2012.st2",
+/* 29 */  "Bowling [Gooitzen van der Wal].ch8"   // Chip8 version of J. Weisbecker bowling
 };
 String[] gameTitle = {
   "Studio2 Resident Games", // Studio 2 resident games: Doodle/Patterns/Bowling/Freeway/Addition
@@ -110,7 +121,8 @@ String[] gameTitle = {
   "Asteroids", 
   "Berzerk", 
   "Invaders", 
-  "Tv Arcade 2012"
+  "Tv Arcade 2012",
+  "Custom"
 };
 
 /**
@@ -157,7 +169,12 @@ void setup()
       // loop forever
     }
   }
-  
+  if (console == VIP) {
+    studio2_memory = new int[0x8200];
+  }
+  else {
+    studio2_memory = new int[4096];
+  }
   drawConsole();
   initSound();
   systemReset();
@@ -190,9 +207,22 @@ void systemReset() {
   else
     backgroundColor = 0;
 
+  if (console == VIP) {
+    // these areas are CHIP8 interpreter working space in VIP, so loaders should not write here
+    // assumes 4K RAM VIP board
+    RAM = 0x0E00;
+    VIDEO_RAM = 0x0F00;
+  }
+  else if (console == CUSTOM) {
+    // experimental for alternate versions of Joe Weisbeckers dev boards
+    RAM = 0x0800;
+    VIDEO_RAM = 0x0900;    
+  }
+  
   clearAllKeys(); // clear key storage isPressed[]
 
   CPU_Reset(); // Initialise 1802 CPU
+  
   // Load Game Cartridge
   println("Load " + gameTitle[gameSelected]);
   loadGameBinary(gameFileName[gameSelected]);
@@ -214,7 +244,7 @@ public boolean isAndroid() {
 void testDisplayScreen() {
   int pattern = 0xAA;
   for (int i=0; i<256; i++) {
-    studio2_4k[i+0x900] = pattern;
+    studio2_memory[i+VIDEO_RAM] = pattern;
   }
-  displayScreen(true, width, height/2, 0x900, CPU_GetScreenScrollOffset());
+  displayScreen(true, width, height/2, VIDEO_RAM, CPU_GetScreenScrollOffset());
 }
