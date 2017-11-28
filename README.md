@@ -63,7 +63,7 @@ https://github.com/etxmato/emma_02
 
 I thought the Studio III resident game ROM, with the color Blackjack game that I wrote, was lost, but I discovered it was preserved at the EMMA 02 site under the [Victory MPT-02](http://www.emma02.hobby-site.com/victory.html) videogame console made by Soundic.
 
-The emulator reads three game file types:
+The emulator can read the following game file types:
 1. ".st2" Studio II cartridge format, loads at specific ROM address locations defined in the file
 2. ".bin" Binary file for Studio II game loads at 0x0400, the cartridge staring location
 3. ".rom" Binary file for Studio II/III base ROM, loads at 0x0000
