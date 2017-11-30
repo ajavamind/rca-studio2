@@ -118,6 +118,8 @@ Due to its operating speed and keyboard input, the Studio II system was better s
 | Blackjack | Andrew Modla | |
 | Gunfighter/Moonship Battle | Andrew Modla  | |
 
+Note: Joyce Weisbecker http://www.vintagecomputing.com/index.php/archives/2018/historys-first-female-video-game-designer
+
 | Studio III Color Game | Author | Notes |
 | --------- | ------ | ----- |
 | Doodle/Patterns/Bowling/Blackjack | Joseph Weisbecker, Andrew Modla (Blackjack) | Studio III Resident Games: improved Blackjack |
