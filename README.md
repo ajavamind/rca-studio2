@@ -54,6 +54,13 @@ For debug the following keys may be used:
 
 You will need to set the "gameSelected" variable array index to change the game run. It is set to the Studio 3 ROM.
 
+## Emulator Performance
+
+I have run the emulator on Windows 10 with an Intel i7 processor and AMD Radeon 560 graphics card 
+and was able to achieve a frame rate of 120 frames per second without any problems. On Samsung S8 smart phone using Android, 
+again no issues. However, when running the Android app on a Samsung Chromebook Plus, the processor could not keep up and 
+showed a significant delay.
+
 ## Games
 Game ROM cartridges and home-made games included here are from Paul Robson's Github site (above) and the Emma 02 game console emulation sites:
 
@@ -61,15 +68,17 @@ http://www.emma02.hobby-site.com/studio.html
 
 https://github.com/etxmato/emma_02
 
+Many thanks to Marcel van Tongeren for his contributions on the Emma 02 site.
+
 I thought the Studio III resident game ROM, with the color Blackjack game that I wrote, was lost, but I discovered it was preserved at the EMMA 02 site under the [Victory MPT-02](http://www.emma02.hobby-site.com/victory.html) videogame console made by Soundic.
 
 The emulator can read the following game file types:
 1. ".st2" Studio II cartridge format, loads at specific ROM address locations defined in the file
-2. ".bin" Binary file for Studio II game loads at 0x0400, the cartridge staring location
+2. ".bin" Binary file for Studio II game, loads at 0x0400, the plug-in cartridge starting location
 3. ".rom" Binary file for Studio II/III base ROM, loads at 0x0000
-4. ".ch8" Binary file for VIP board RAM, loads at 0x200
+4. ".ch8" Binary file for COSMAC VIP board RAM, loads at 0x0200
 
-## Console Design
+## Game Console Design
 Looking back at the games, it is amazing to me how much game function was squeezed into a small 1024 byte ROM cartridge.
  
 Resident game ROMs (2048 bytes) for Studio II included a game instruction pseudo code interpreter (starting at memory location 0) and resident games (starting at 
@@ -113,7 +122,7 @@ Due to its operating speed and keyboard input, the Studio II system was better s
 | --------- | ------ | ----- |
 | Doodle/Patterns/Bowling/Blackjack | Joseph Weisbecker, Andrew Modla (Blackjack) | Studio III Resident Games: improved Blackjack |
 | MathFun/Quiz | Philip Baltzer? |  |
-| Biorhythm | Gooitzen Van Der Wal | Not a game, this is a Biorhythm calculator |
+| Biorhythm | Gooitzen van der Wal | Not a game, this is a Biorhythm calculator |
 | Pinball | Andrew Modla |  |
 | Bingo | Andrew Modla | Not a game, this is a Bingo number caller and verification aid |
 | Concentration/Match | Gooitzen van der Wal |  |
@@ -125,7 +134,7 @@ Due to its operating speed and keyboard input, the Studio II system was better s
 | Hockey | Paul Robson | |
 | Combat | Paul Robson | |
 | Scramble | Paul Robson | |
-| Rocket | Lee Romanow | original Joseph Weisbecker, converted by Romanow
+| Rocket | Lee Romanow | original by Joseph Weisbecker, converted by Romanow
 | Outbreak | Lee Romanow | |
 | Pacman | Paul Robson | |
 | Kaboom | Paul Robson | |
@@ -138,7 +147,8 @@ Due to its operating speed and keyboard input, the Studio II system was better s
 Many thanks to Studio 2 enthusiasts, game programmers and historians, who helped preserve and archive documentation and code, and who wrote 1802/Studio2 emulators. Your dedicated work and enthusiasm are very appreciated.
 This respository contains a complete list of games originally developed by RCA for the Studio II and III.
 
-Special dedication to Joe Weisbecker who started it all. One of his goals for the Studio II was computer and programming education.
+Special dedication to Joe Weisbecker who started it all. One of his goals for the Studio II was computer and programming education. 
+My intent here is to continue to extend this goal.
 
 ## Use
 This respository is intended for educational and historical research. Studio II emulation shows how the games looked and functioned during play. 
