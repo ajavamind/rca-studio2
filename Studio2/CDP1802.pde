@@ -17,21 +17,21 @@
 
 import java.io.*;
 
-static int HWC_READKEYBOARD   =     0;
-static int HWC_UPDATEQ        =     1;
-static int HWC_FRAMESYNC      =     2;
-static int HWC_SETKEYPAD      =     3;
+private static final int HWC_READKEYBOARD   =     0;
+private static final int HWC_UPDATEQ        =     1;
+private static final int HWC_FRAMESYNC      =     2;
+private static final int HWC_SETKEYPAD      =     3;
 
-static int CLOCK_SPEED =            (3521280/2);                                        // Clock Frequency (1,760,640Hz)
-static int CYCLES_PER_SECOND   =    (CLOCK_SPEED/8);                                     // There are 8 clocks in each cycle (220,080 Cycles/Second)
-static int FRAMES_PER_SECOND  =     (60);                                                // NTSC Frames Per Second
-static int LINES_PER_FRAME    =     (262);                                               // Lines Per NTSC Frame
-static int CYCLES_PER_FRAME   =     (CYCLES_PER_SECOND/FRAMES_PER_SECOND);               // Cycles per Frame, Complete (3668)
-static int CYCLES_PER_LINE    =     (CYCLES_PER_FRAME/LINES_PER_FRAME);                  // Cycles per Display Line (14)
+private static final int CLOCK_SPEED =            (3521280/2);                                        // Clock Frequency (1,760,640Hz)
+private static final int CYCLES_PER_SECOND   =    (CLOCK_SPEED/8);                                     // There are 8 clocks in each cycle (220,080 Cycles/Second)
+private static final int FRAMES_PER_SECOND  =     (60);                                                // NTSC Frames Per Second
+private static final int LINES_PER_FRAME    =     (262);                                               // Lines Per NTSC Frame
+private static final int CYCLES_PER_FRAME   =     (CYCLES_PER_SECOND/FRAMES_PER_SECOND);               // Cycles per Frame, Complete (3668)
+private static final int CYCLES_PER_LINE    =     (CYCLES_PER_FRAME/LINES_PER_FRAME);                  // Cycles per Display Line (14)
 
-static int VISIBLE_LINES     =      (128);                                               // 128 visible lines per frame
-static int NON_DISPLAY_LINES  =     (LINES_PER_FRAME-VISIBLE_LINES);                     // Number of non-display lines per frame. (134)
-static int EXEC_CYCLES_PER_FRAME =  (NON_DISPLAY_LINES*CYCLES_PER_LINE);                 // Cycles where 1802 not generating video per frame (1876)
+private static final int VISIBLE_LINES     =      (128);                                               // 128 visible lines per frame
+private static final int NON_DISPLAY_LINES  =     (LINES_PER_FRAME-VISIBLE_LINES);                     // Number of non-display lines per frame. (134)
+private static final int EXEC_CYCLES_PER_FRAME =  (NON_DISPLAY_LINES*CYCLES_PER_LINE);                 // Cycles where 1802 not generating video per frame (1876)
 
 // Note: this means that there are 1876*60/2 approximately instructions per second, about 56,280. With an instruction rate of
 // approx 8m per second, this means each instruction is limited to 8,000,000 / 56,280 * (128/312.5) about 58 AVR instructions for each
@@ -40,8 +40,8 @@ static int EXEC_CYCLES_PER_FRAME =  (NON_DISPLAY_LINES*CYCLES_PER_LINE);        
 // State 1 : 1876 cycles till interrupt N1 = 0
 // State 2 : 29 cycles with N1 = 1
 
-static int STATE_1_CYCLES     =     (EXEC_CYCLES_PER_FRAME);
-static int STATE_2_CYCLES     =     (29);
+private static final int STATE_1_CYCLES     =     (EXEC_CYCLES_PER_FRAME);
+private static final int STATE_2_CYCLES     =     (29);
 
 static int D, X, P, T;                                                               // 1802 8 bit registers
 static int DF, IE, Q;                                                               // 1802 1 bit registers
@@ -65,73 +65,106 @@ class CPU1802STATE
   int Cycles, State;
 }
 
+// COSMAC CDP1802 instruction set mnemonics
 static String[] mnemonics = { "idl", "ldn r1", "ldn r2", "ldn r3", "ldn r4", "ldn r5", "ldn r6", "ldn r7", "ldn r8", "ldn r9", "ldn ra", "ldn rb", "ldn rc", "ldn rd", "ldn re", "ldn rf", "inc r0", "inc r1", "inc r2", "inc r3", "inc r4", "inc r5", "inc r6", "inc r7", "inc r8", "inc r9", "inc ra", "inc rb", "inc rc", "inc rd", "inc re", "inc rf", "dec r0", "dec r1", "dec r2", "dec r3", "dec r4", "dec r5", "dec r6", "dec r7", "dec r8", "dec r9", "dec ra", "dec rb", "dec rc", "dec rd", "dec re", "dec rf", "br .1", "bq .1", "bz .1", "bdf .1", "b1 .1", "b2 .1", "b3 .1", "b4 .1", "skp", "bnq .1", "bnz .1", "bnf .1", "bn1 .1", "bn2 .1", "bn3 .1", "bn4 .1", "lda r0", "lda r1", "lda r2", "lda r3", "lda r4", "lda r5", "lda r6", "lda r7", "lda r8", "lda r9", "lda ra", "lda rb", "lda rc", "lda rd", "lda re", "lda rf", "str r0", "str r1", "str r2", "str r3", "str r4", "str r5", "str r6", "str r7", "str r8", "str r9", "str ra", "str rb", "str rc", "str rd", "str re", "str rf", "irx", "out 1", "out 2", "out 3", "out 4", "out 5", "out 6", "out 7", "nop68", "inp 1", "inp 2", "inp 3", "inp 4", "inp 5", "inp 6", "inp 7", "ret", "dis", "ldxa", "stxd", "adc", "sdb", "rshr", "smb", "sav", "mark", "req", "seq", "adci .1", "sdbi .1", "rshl", "smbi .1", "glo r0", "glo r1", "glo r2", "glo r3", "glo r4", "glo r5", "glo r6", "glo r7", "glo r8", "glo r9", "glo ra", "glo rb", "glo rc", "glo rd", "glo re", "glo rf", "ghi r0", "ghi r1", "ghi r2", "ghi r3", "ghi r4", "ghi r5", "ghi r6", "ghi r7", "ghi r8", "ghi r9", "ghi ra", "ghi rb", "ghi rc", "ghi rd", "ghi re", "ghi rf", "plo r0", "plo r1", "plo r2", "plo r3", "plo r4", "plo r5", "plo r6", "plo r7", "plo r8", "plo r9", "plo ra", "plo rb", "plo rc", "plo rd", "plo re", "plo rf", "phi r0", "phi r1", "phi r2", "phi r3", "phi r4", "phi r5", "phi r6", "phi r7", "phi r8", "phi r9", "phi ra", "phi rb", "phi rc", "phi rd", "phi re", "phi rf", "lbr .2", "lbq .2", "lbz .2", "lbdf .2", "nop", "lsnq", "lsnz", "lsnf", "lskp", "lbnq .2", "lbnz .2", "lbnf .2", "lsie", "lsq", "lsz", "lsdf", "sep r0", "sep r1", "sep r2", "sep r3", "sep r4", "sep r5", "sep r6", "sep r7", "sep r8", "sep r9", "sep ra", "sep rb", "sep rc", "sep rd", "sep re", "sep rf", "sex r0", "sex r1", "sex r2", "sex r3", "sex r4", "sex r5", "sex r6", "sex r7", "sex r8", "sex r9", "sex ra", "sex rb", "sex rc", "sex rd", "sex re", "sex rf", "ldx", "or", "and", "xor", "add", "sd", "shr", "sm", "ldi .1", "ori .1", "ani .1", "xri .1", "adi .1", "sdi .1", "shl", "smi .1"};
 
 //*******************************************************************************************************
-//                                 Macros to Read/Write memory
+//                                        Read a byte in memory
 //*******************************************************************************************************
 
-static int READ(int a) {
-  return   CPU_ReadMemory(a);
+private final static int READ(int address)
+{
+  if (address >= studio2_memory.length) {
+    return 0xFF;
+  }
+  return studio2_memory[address] & 0xFF;
 }
-static void WRITE(int a, int d) { 
-  CPU_WriteMemory(a, d);
+
+//*******************************************************************************************************
+//                                          Write a byte to memory
+//*******************************************************************************************************
+
+private final static void WRITE(int address, int data)
+{
+  //if (address >=0x1000) {
+  //  println("write "+hex(address) + " value "+ hex(data));
+  //  return;
+  //}
+  if ((address >= RAM) && (address < (RAM+RAM_SIZE))) // only RAM space is writeable
+  {
+    studio2_memory[address] = data & 0xFF;
+  } else if ((console == STUDIO3) && (address >= COLOR_MAP) && (address < (COLOR_MAP+COLOR_MAP_SIZE))) {
+    studio2_memory[address] = data & 0xFF;
+    //println("write color map memory "+ hex(address) + " value="+(data&0xFF));
+  } else if (console == VIP || console == CUSTOM) {
+    studio2_memory[address] = data & 0xFF;
+  } else {
+    println("Attempt to write ROM memory "+hex(address));
+  }
+  // debug
+  //if (address >= 0x900 && address < 0xA00) {
+  //  println("write "+hex(address) + " value "+ hex(data));
+  //}
+  //if (address >= 0x800 && address < 0x1000) {
+  //  println("write "+hex(address) + " value "+ hex(data));
+  //}
 }
+
 
 //*******************************************************************************************************
 //   Macros for fetching 1 + 2 BYTE8 operands, Note 2 BYTE8 fetch stores in _temp, 1 BYTE8 returns value
 //*******************************************************************************************************
 
-static int FETCH2() {
-  int val = CPU_ReadMemory(R[P]++);
+private final static int FETCH2() {
+  int val = READ(R[P]++);
   R[P] &= 0xFFFF;
   return (val);
 }
 
-static void FETCH3() {   
-  _temp = CPU_ReadMemory(R[P]++);
+private final static void FETCH3() {   
+  _temp = READ(R[P]++);
   R[P] &= 0xFFFF;
-  _temp = (_temp << 8) | CPU_ReadMemory(R[P]++);
+  _temp = (_temp << 8) | READ(R[P]++);
   R[P] &= 0xFFFF;
   _temp = _temp & 0xFFFF;
 }
 
-static void ADD(int n1, int n2, int n3) {
+private final static void ADD(int n1, int n2, int n3) {
   _temp = (n1)+(n2)+(n3);
   DF = (_temp >> 8) & 01;
   D = _temp & 0xFF;
 }
 
-static void SUB(int n1, int n2, int n3) {
+private final static void SUB(int n1, int n2, int n3) {
   _temp = (n1)+((n2) ^ 0xFF)+(n3);
   DF = (_temp >> 8) & 0x01;
   D = _temp & 0xFF;
 }
 
-static void INC(int i) {
+private final static void INC(int i) {
   R[i]++;
   R[i] &= 0xFFFF;
 }
 
-static void DEC(int i) {
+private final static void DEC(int i) {
   R[i]--;
   R[i] &= 0xFFFF;
 }
 
-static void SHORT(int b) {  
+private final static void SHORT(int b) {  
   R[P] = (R[P] & 0xFF00) | (b & 0xFF);
 }
 
-static void LONG(int a) { 
+private final static void LONG(int a) { 
   R[P] = a & 0xFFFF;
 }
 
-static void LONGSKIP() {  
+private final static void LONGSKIP() {  
   R[P] += 2; 
   R[P] = R[P] & 0xFFFF;
 }
 
-static void INTERRUPT() { 
+private final static void INTERRUPT() { 
   if (IE != 0) { 
     T = (((X << 4) &0xFF) | P);
     P = 1; 
@@ -140,7 +173,7 @@ static void INTERRUPT() {
   }
 }
 
-static void RETURN() { 
+private final static void RETURN() { 
   _temp = READ(R[X]);
   R[X]++;
   R[X] &= 0xFFFF;
@@ -152,7 +185,7 @@ static void RETURN() {
 //                      Macros translating Hardware I/O to hardwareHandler calls
 //*******************************************************************************************************
 
-int READEFLAG(int flag) {    
+private final static int READEFLAG(int flag) {    
   int retVal = 0;
   switch (flag)
   {
@@ -171,7 +204,7 @@ int READEFLAG(int flag) {
   return retVal;
 }
 
-void UPDATEIO(int portID, int data) { 
+private final static void UPDATEIO(int portID, int data) { 
   switch (portID)
   {
     //  set Q
@@ -203,7 +236,7 @@ void UPDATEIO(int portID, int data) {
   }
 }
 
-int INPUTIO(int portID) {
+private final static int INPUTIO(int portID) {
   int retVal = 0xFF;  // data bus has pull up resistors for logic 1 value
   switch (portID)
   {
@@ -238,17 +271,20 @@ void CPU_Reset()
   State = 1;                                                                      // State 1
   Cycles = STATE_1_CYCLES;                                                        // Run this many cycles.
   screenEnabled = false;
-  
+
   // PC Version copy ROM code into 4k space.
   if (console == STUDIO2 || console == STUDIO3) {
     for (int i = 0; i < 2048; i++) studio2_memory[i] = studio2[i];
-  }
-  else if (console == VIP) {
+  } else if (console == VIP) {
     loadBinary("vip.rom", 0x8000);
-    loadBinary("chip8.ram", 0x0000);
+    if (interpreter == CHIP8)
+      loadBinary("chip8.ram", 0x0000);
+    else
+      loadBinary("chip8x.ram", 0x0000);
     R[1] = VIDEO_RAM | 0x00FF;
     println("R[1] "+hex(R[1]));
   }
+
   // set color map
   if (console == STUDIO3) {
     for (int i = 0; i<COLOR_MAP_SIZE; i++) {
@@ -257,51 +293,8 @@ void CPU_Reset()
   }
 }
 
-
 //*******************************************************************************************************
-//                                        Read a byte in memory
-//*******************************************************************************************************
-
-static int CPU_ReadMemory(int address)
-{
-  if (address >= studio2_memory.length) {
-    return 0xFF;
-  }
-  return studio2_memory[address] & 0xFF;
-}
-
-//*******************************************************************************************************
-//                                          Write a byte in memory
-//*******************************************************************************************************
-
-static void CPU_WriteMemory(int address, int data)
-{
-  if (address >=0x1000) {
-    println("write "+hex(address) + " value "+ hex(data));
-    return;
-  }
-  if ((address >= RAM) && (address < (RAM+RAM_SIZE))) // only RAM space is writeable
-  {
-    studio2_memory[address] = data & 0xFF;
-  } else if ((console == STUDIO3) && (address >= COLOR_MAP) && (address < (COLOR_MAP+COLOR_MAP_SIZE))) {
-    studio2_memory[address] = data & 0xFF;
-    //println("write color map memory "+ hex(address) + " value="+(data&0xFF));
-  } else if (console == VIP || console == CUSTOM) {
-    studio2_memory[address] = data & 0xFF;
-  } else {
-    println("Attempt to write ROM memory "+hex(address));
-  }
-  // debug
-  //if (address >= 0x900 && address < 0xA00) {
-  //  println("write "+hex(address) + " value "+ hex(data));
-  //}
-  //if (address >= 0x800 && address < 0x1000) {
-  //  println("write "+hex(address) + " value "+ hex(data));
-  //}
-}
-
-//*******************************************************************************************************
-//                                         Execute one instruction
+// Execute one CDP1802 microcomputer instruction
 //*******************************************************************************************************
 
 int CPU_Execute()
@@ -309,7 +302,7 @@ int CPU_Execute()
   int rState = 0;
   int addr = R[P]++;
   R[P] &= 0xFFFF;
-  int opCode = CPU_ReadMemory(addr) & 0xFF;
+  int opCode = READ(addr) & 0xFF;
   //println("P= "+hex(R[P]-1)+" opCode="+hex(opCode));
   Cycles -= 2;                                                                    // 2 x 8 clock Cycles - Fetch and Execute.
   switch(opCode)                                                                  // Execute dependent on the Operation Code
@@ -1277,7 +1270,7 @@ int CPU_Execute()
       Cycles = STATE_2_CYCLES;                                                // The 29 cycles between INT and DMAOUT.
       if (screenEnabled)                                                      // If screen is on
       {
-        if (CPU_ReadMemory(R[P]) == 0) {
+        if (READ(R[P]) == 0) {
           R[P]++;        
           R[P] &= 0xFFFF;
         }
@@ -1310,7 +1303,6 @@ int CPU_Execute()
 
 CPU1802STATE CPU_ReadState(CPU1802STATE s)
 {
-  int i;
   s.D = D;
   s.DF = DF;
   s.X = X;
@@ -1320,7 +1312,7 @@ CPU1802STATE CPU_ReadState(CPU1802STATE s)
   s.Q = Q;
   s.Cycles = Cycles;
   s.State = State;
-  for (i = 0; i < 16; i++) s.R[i] = R[i];
+  for (int i : s.R) s.R[i] = R[i];
   return s;
 }
 
@@ -1328,7 +1320,7 @@ CPU1802STATE CPU_ReadState(CPU1802STATE s)
 //                         Get Current Screen Memory Base Address (ignoring scrolling)
 //*******************************************************************************************************
 
-int CPU_GetScreenMemoryAddress()
+static int CPU_GetScreenMemoryAddress()
 {
   if (scrollOffset != 0)
   {
@@ -1341,7 +1333,7 @@ int CPU_GetScreenMemoryAddress()
 //                               Get Current Screen Memory Scrolling Offset
 //*******************************************************************************************************
 
-int CPU_GetScreenScrollOffset()
+static int CPU_GetScreenScrollOffset()
 {
   return scrollOffset;
 }
@@ -1352,7 +1344,7 @@ int CPU_GetScreenScrollOffset()
  * Processing uses 32 bits for int data type
  * Check for register size data overflow
  */
-void verifyRegisters() {
+static void verifyRegisters() {
   // 16 bit registers
   for (int i=0; i<16; i++) {
     if ((R[i] & 0xFFFF0000) != 0) {
@@ -1384,7 +1376,7 @@ void verifyRegisters() {
   }
 }
 
-void verifyRAMmemory() {
+static void verifyRAMmemory() {
   for (int i=0x800; i<0xA00; i++) {
     if ((studio2_memory[i] & 0xFFFFFF00) != 0) {
       println("RAM location hex(i) overflow "+ hex(studio2_memory[i]) + " at 0x" + hex(R[P]));

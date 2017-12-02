@@ -4,7 +4,7 @@
 
 // remove comments for Android
 /*
-import android.media.*;
+ import android.media.*;
  import android.content.res.*;
  */
 public class PlaySound {

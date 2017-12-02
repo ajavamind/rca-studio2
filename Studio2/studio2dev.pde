@@ -8,7 +8,7 @@
 
 /**
  * Written by Andrew Modla
- * Ported to Processing from C code written by Paul Robson
+ * Sections ported to Processing from C code written by Paul Robson
  *
  */
 
@@ -39,8 +39,8 @@ int saveCounter = 0; // save screen filename counter
 // A keypad (left)
 // B keypad (right)
 // *****************************************************************************************************************
-volatile int isPressedA[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };              // Flags for each key pressed.
-volatile int isPressedB[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };              // Flags for each key pressed.
+volatile static int isPressedA[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };              // Flags for each key pressed.
+volatile static int isPressedB[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };              // Flags for each key pressed.
 
 /**
  *
@@ -114,7 +114,7 @@ void keyReleased() {
   clearAllKeys();
 }
 
-int SYSTEM_Command(int cmd, int param)
+static int SYSTEM_Command(int cmd, int param)
 {
   int retVal = 0;
   switch(cmd)
@@ -190,7 +190,7 @@ void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int s
     return; // Screen off, exit.
   }
   //println("screen ON");
-  color fgr = WHITE;       // Painting colour.
+  color fgr = WHITE;       // Painting color.
   if (isDebugMode)
     stroke(color(255, 0, 0));  // debug outline
   else 
@@ -208,7 +208,7 @@ void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int s
     {
       pixByte = studio2_memory[screenData+offset++] & 0xFF;                            // Get next pixel.
       rc.x = xc + x * xs * 8;                                                     // Calculate horizontal coordinate
-      if (console == STUDIO3) {
+      if (console == STUDIO3 || (console == VIP && interpreter == CHIP8X)) {
         int colorIndex = studio2_memory[COLOR_MAP + x + 8*(y/4)] & 0x0007;
         fill(colorMap[colorIndex]);
       }
@@ -277,7 +277,18 @@ void loadGameBinary(String fileName)
   }
   // .CH8 binary file
   else if (fileName.toLowerCase().endsWith(".ch8")) { // Chip8 file binary format
-    address = 0x0200; // Interpreter code starting location
+    address = 0x0200; // Program code starting location
+    for (int i=0; i<data.length; i++) {
+      if (address < RAM || address >= (RAM+RAM_SIZE)) {
+        studio2_memory[address] = data[i] & 0xFF;
+        //println(" " + hex(address) + " " + hex(int(data[i])));
+      }
+      address++;
+    }
+  }
+  // .C8X binary file
+  else if (fileName.toLowerCase().endsWith(".c8x")) { // Chip8X file binary format
+    address = 0x0300; // Program code starting location
     for (int i=0; i<data.length; i++) {
       if (address < RAM || address >= (RAM+RAM_SIZE)) {
         studio2_memory[address] = data[i] & 0xFF;
@@ -315,7 +326,7 @@ void loadBinary(String fileName, int address)
   // binary file
   for (int i=0; i<data.length; i++) {
     studio2_memory[address] = data[i] & 0xFF;
-    println(" " + hex(address) + " " + hex(int(data[i])));
+    //println(" " + hex(address) + " " + hex(int(data[i])));
     address++;
   }
 }

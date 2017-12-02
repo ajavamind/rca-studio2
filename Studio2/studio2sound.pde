@@ -1,3 +1,5 @@
+// Written by Andy Modla Nov 2017
+//
 // http://www.beadsproject.net/ Sound for Java and Processing
 // Add this library to Processing SDK
 // Processing SDK -> sketch -> Import Library -> Beads  (a library for real-time sound for Processing)
@@ -12,13 +14,13 @@ import beads.*;
 AudioContext ac;
 WavePlayer[] wp;
 volatile Gain gain;
-volatile int iFreq = 0;
-volatile int prevFreq = 0;
-int freq = BEEP_FREQUENCY;
-float GAIN = 0.1;
+volatile static int iFreq = 0;
+volatile static int prevFreq = 0;
+static int freq = BEEP_FREQUENCY;
+static float GAIN = 0.1;
 /////////////////////////////////
 
-PlaySound player;
+static PlaySound player;
 
 /////////////////////////////////
 
@@ -31,7 +33,7 @@ void initSound() {
       ac = new AudioContext();
       wp = new WavePlayer[256];
       wp[0] = new WavePlayer(ac, BEEP_FREQUENCY, Buffer.SQUARE);
-      for (int i=1; i<255; i++) {
+      for (int i=1; i<256; i++) {
         wp[i] = new WavePlayer(ac, float(27965/i), Buffer.SQUARE);
       }
       gain = new Gain(ac, 1, GAIN);
@@ -66,7 +68,7 @@ void tone(boolean state) {
   }
 }
 
-void setFreq(int val) {
+static void setFreq(int val) {
   prevFreq = iFreq;
   iFreq = val;
   if (val != 0) {

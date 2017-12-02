@@ -2,7 +2,7 @@
  * RCA Studio II and Studio III Video Game Console Emulator
  *
  * Ported to Java/Processing by Andrew Modla
- * from code C written by Paul Scott Robson.
+ * from code written in C by Paul Scott Robson.
  *
  * https://github.com/paulscottrobson/studio2-games
  *
@@ -14,19 +14,29 @@
 private final static boolean test = false;  // run test components
 private final static boolean sound = true; // control sound on/off
 private static boolean android = false;
+
+// Console or Development Board types
 private final static int STUDIO2 = 0;  
 private final static int STUDIO3 = 1;  
 private final static int VIP = 2;
 private final static int CUSTOM = 3;
+private final static int INITIAL_CONSOLE = STUDIO3;  //STUDIO3; //STUDIO2; CUSTOM;
+private static int console = INITIAL_CONSOLE;
 
-private static int console =  STUDIO3; //VIP; //STUDIO3; //STUDIO2; CUSTOM;
+// CHIP8 Interpreter types
+private final static int CHIP8 = 1;
+private final static int CHIP8X = 2;
+private static int interpreter = CHIP8;
 
-int backgroundColor = 1; // index for bgColor array selection
-color BLACK_BACKGROUND = color(0);
-color BLUE_BACKGROUND = color(0, 0, 128);
-color GREEN_BACKGROUND = color(0, 128, 0);
-color RED_BACKGROUND = color(128, 0, 0);
-color[] bgColor = {BLUE_BACKGROUND, BLACK_BACKGROUND, GREEN_BACKGROUND, RED_BACKGROUND};
+// Background colors
+static int backgroundColor = 1; // index for bgColor array selection
+static color BLACK_BACKGROUND = 0xFF000000; // color(0);
+static color BLUE_BACKGROUND = 0xFF000080;  // color(0, 0, 128);
+static color GREEN_BACKGROUND = 0xFF008000; // color(0, 128, 0);
+static color RED_BACKGROUND = 0xFF800000;  //color(128, 0, 0);
+static color[] bgColor = {BLUE_BACKGROUND, BLACK_BACKGROUND, GREEN_BACKGROUND, RED_BACKGROUND};
+
+// Pixel colors
 color BLACK = color(0);
 color RED = color (255, 0, 0);
 color BLUE = color(0, 0, 255);
@@ -34,14 +44,17 @@ color VIOLET = color (255, 0, 255);
 color GREEN = color(0, 255, 0);
 color YELLOW = color(255, 255, 0);
 color AQUA = color(0, 255, 255);
-color WHITE = color(255, 255, 255);
+static color WHITE = 0xFFFFFFFF;  // color(255, 255, 255);
 color[] colorMap = {BLACK, RED, BLUE, VIOLET, GREEN, YELLOW, AQUA, WHITE};
 
-private final static int COLOR_MAP = 0x0B00;
+private final static int INITIAL_COLOR_MAP = 0x0B00;
+private static int COLOR_MAP = INITIAL_COLOR_MAP;
 private final static int COLOR_MAP_SIZE = 0x40;
-static int RAM = 0x800; // Studio 2 and 3
+private static int INITIAL_RAM = 0x800; // Studio 2 and 3
+private static int RAM = INITIAL_RAM; // Studio 2 and 3
 private final static int RAM_SIZE = 0x200; // Working and Video display RAM
-static int VIDEO_RAM = 0x900;  // starting location
+private static int INITIAL_VIDEO_RAM = 0x900;  // Studio 2 and 3 starting location
+private static int VIDEO_RAM = INITIAL_VIDEO_RAM;  // Studio 2 and 3 starting location
 // Video RAM is 64 x 32 pixels stored in 256 bytes
 
 //////////////////////////////////////////////////////////////
@@ -74,7 +87,7 @@ String[] gameFileName = {
 /* 14 */  "concentration-match.st2", 
 /* 15 */  "star-wars.st2", 
   ////////////////////////////////
-  // Other games 
+  // Other Studio2 Games 
 /* 16 */  "computer.st2", 
 /* 17 */  "hockey.st2", 
 /* 18 */  "combat.st2", 
@@ -87,8 +100,19 @@ String[] gameFileName = {
 /* 25 */  "asteroids.st2", 
 /* 26 */  "berzerk.st2", 
 /* 27 */  "invaders.st2", 
-/* 28 */  "tv-arcade-2012.st2",
-/* 29 */  "Bowling [Gooitzen van der Wal].ch8"   // Chip8 version of J. Weisbecker bowling
+/* 28 */  "tv-arcade-2012.st2", 
+  ////////////////////////////////
+  // CHIP8 games 
+/* 29 */  "Bowling [Gooitzen van der Wal].ch8", // Chip8 version of J. Weisbecker bowling
+/* 30 */  "Blockout [Steve Houk].c8x",   // Chip8x 
+/* 31 */  "ColourTest.c8x",
+/* 32 */  "Color Kaleidoscope [Steve Houk, 1978].c8x",
+
+// work in progress
+///*  */  "swords_audio.ch8",   // swordfighter
+///*  */  "AUD_2464_09_B41_ID01_01_01.ch8",
+///*  */  "SoundTest.c8x"
+
 };
 String[] gameTitle = {
   "Studio2 Resident Games", // Studio 2 resident games: Doodle/Patterns/Bowling/Freeway/Addition
@@ -101,7 +125,7 @@ String[] gameTitle = {
   "Blackjack", 
   "Gunfighter/Moonship", 
   /////////////////////////
-  "Studio 3 Resident Games", // Studio 3 (Victory) resident games: Doodle/Patterns/Bowling/Blackjack1/Blackjack2
+  "Studio 3 Resident Games", // Studio 3 resident games: Doodle/Patterns/Bowling/Blackjack1/Blackjack2
   "MathFun/Quiz", 
   "Biorhythm", 
   "Pinball", 
@@ -121,8 +145,17 @@ String[] gameTitle = {
   "Asteroids", 
   "Berzerk", 
   "Invaders", 
-  "Tv Arcade 2012",
-  "Custom"
+  "Tv Arcade 2012", 
+  ////////////////////////
+  "Bowling CHIP8",
+  "Blockout CHIP8X",
+  "Color Test CHIP8X",
+  "Color Kaleidoscope CHIP8X"
+  
+// Work in progress
+//  "Sword Fighter CHIP8",
+//  "AUD_2464_09_B41_ID01_01_01.rom",
+//  "Sound Test CHIP8X"
 };
 
 /**
@@ -135,8 +168,7 @@ void settings() {
   android = isAndroid();
   if (android) {
     fullScreen();
-  }
-  else {
+  } else {
     //println("displayWidth="+displayWidth + " displayHeight="+displayHeight);
     if (displayWidth > displayHeight) {
       size(2*displayHeight/3, displayHeight);
@@ -150,15 +182,14 @@ void settings() {
     //size(720,1080); // 720 is minimum width for best rendition 
     // since width affects font size used
   }
-
 }
 
 void setup() 
 {
   if (android) {
-    orientation(PORTRAIT); 
+    orientation(PORTRAIT);
   }
-  
+
   // default frame rate is 60 frames per second, the Studio 2 update screen speed
   //frameRate(90);  // uncomment to change frame rate to speed up game play
 
@@ -169,15 +200,10 @@ void setup()
       // loop forever
     }
   }
-  if (console == VIP) {
-    studio2_memory = new int[0x8200];
-  }
-  else {
-    studio2_memory = new int[4096];
-  }
-  drawConsole();
+  studio2_memory = new int[0x10000];
   initSound();
   systemReset();
+  drawConsole();
 }
 
 /**
@@ -202,27 +228,44 @@ void draw()
  * System reset
  */
 void systemReset() {
-  if (console == STUDIO2)
+  tone(false);
+  if (gameFileName[gameSelected].toLowerCase().endsWith(".ch8")) {
+    console = VIP;
+    interpreter = CHIP8;
+  } else if (gameFileName[gameSelected].toLowerCase().endsWith(".c8x")) {
+    console = VIP;
+    interpreter = CHIP8X;
+  } else {
+    console = INITIAL_CONSOLE;
+  }
+  COLOR_MAP = INITIAL_COLOR_MAP;
+  if (console == STUDIO2 )
     backgroundColor = 1;
   else
     backgroundColor = 0;
 
-  if (console == VIP) {
+  if (console == STUDIO2 || console == STUDIO3) {
+    RAM = INITIAL_RAM;
+    VIDEO_RAM = INITIAL_VIDEO_RAM;
+  }
+  else if (console == VIP) {
     // these areas are CHIP8 interpreter working space in VIP, so loaders should not write here
     // assumes 4K RAM VIP board
     RAM = 0x0E00;
     VIDEO_RAM = 0x0F00;
-  }
-  else if (console == CUSTOM) {
-    // experimental for alternate versions of Joe Weisbeckers dev boards
+    if (interpreter == CHIP8X) {
+      COLOR_MAP = 0xC000;
+    }
+  } else if (console == CUSTOM) {
+    // experimental for alternate versions of Joe Weisbecker development boards
     RAM = 0x0800;
-    VIDEO_RAM = 0x0900;    
+    VIDEO_RAM = 0x0900;
   }
-  
+
   clearAllKeys(); // clear key storage isPressed[]
 
   CPU_Reset(); // Initialise 1802 CPU
-  
+
   // Load Game Cartridge
   println("Load " + gameTitle[gameSelected]);
   loadGameBinary(gameFileName[gameSelected]);

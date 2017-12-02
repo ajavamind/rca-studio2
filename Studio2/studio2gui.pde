@@ -1,4 +1,4 @@
-// Written by Andy Modla
+// Written by Andy Modla November 2017
 
 int black = color(0);   // black
 int gray = color(128);
@@ -21,6 +21,7 @@ int KEY_HSPACING;
 int KEY_VSPACING;
 
 boolean displayUpdate = false;
+boolean resetUpdate = false;
 
 class Key {
   int x, y, w, h;
@@ -92,10 +93,11 @@ class Cartridge extends Key {
   }
 }
 
+
 class Keyboard {
-  Key[] list = new Key[10];
+  Key[] list;
   int fontSize;
-  String[] cap = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+  String[] cap = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"};
   String label;
   int x, y;
   int keyw, keyh, vSpacing, hSpacing;
@@ -103,7 +105,8 @@ class Keyboard {
   public Keyboard() {
   }
 
-  public Keyboard(String label, int x, int y, int keyw, int keyh, int hSpacing, int vSpacing ) {
+  public Keyboard(int numKeys, String label, int x, int y, int keyw, int keyh, int hSpacing, int vSpacing ) {
+    list = new Key[numKeys];
     this.x = x;
     this.y = y;
     this.label = label;
@@ -116,6 +119,14 @@ class Keyboard {
       list[i] = new Key(cap[i], fontSize, x+((i-1)%3)*(hSpacing+keyw), y+((i-1)/3)*(vSpacing+keyh), keyw, keyh);
     }
     list[0] = new Key(cap[0], fontSize, x+keyw+hSpacing, y+3*(keyh+vSpacing), keyw, keyh);
+    if (numKeys == 16) {
+      list[10] = new Key(cap[10], fontSize, x, y+3*(keyh+vSpacing), keyw, keyh);
+      list[11] = new Key(cap[11], fontSize, x+2*(keyw+hSpacing), y+3*(keyh+vSpacing), keyw, keyh);
+      list[12] = new Key(cap[12], fontSize, x+3*(keyw+hSpacing), y, keyw, keyh);
+      list[13] = new Key(cap[13], fontSize, x+3*(keyw+hSpacing), y+1*(keyh+vSpacing), keyw, keyh);
+      list[14] = new Key(cap[14], fontSize, x+3*(keyw+hSpacing), y+2*(keyh+vSpacing), keyw, keyh);
+      list[15] = new Key(cap[15], fontSize, x+3*(keyw+hSpacing), y+3*(keyh+vSpacing), keyw, keyh);
+    }
   }
 
   public void draw() {
@@ -123,15 +134,20 @@ class Keyboard {
     fill(silver);
     stroke(brown);
     strokeWeight(4);
-    rect(x - hSpacing/2, y - vSpacing/2, 3*(keyw+hSpacing), 4*(keyh+vSpacing), 3*(keyw+hSpacing)/8);
+    if (list.length == 10) {
+      rect(x - hSpacing/2, y - vSpacing/2, 3*(keyw+hSpacing), 4*(keyh+vSpacing), 3*(keyw+hSpacing)/8);
+    } else {
+      rect(x - hSpacing/2, y - vSpacing/2, 4*(keyw+hSpacing), 4*(keyh+vSpacing), 4*(keyw+hSpacing)/8);
+    }
     // keyboard label
-    //noStroke();
-    //fill(bague);
-    //rect(x + keyw + hSpacing, y-3*vSpacing, keyw, keyh);
     noStroke();
     fill(white);
     textAlign(CENTER, CENTER);
-    text(label, x + keyw + hSpacing, y-6*vSpacing, keyw, keyh);
+    if (list.length == 10) {
+      text(label, x + keyw + hSpacing, y-6*vSpacing, keyw, keyh);
+    } else {
+      text(label, x + 2*keyw -hSpacing, y-6*vSpacing, keyw, keyh);
+    }
     // keyboard
     for (int i=0; i< list.length; i++) {
       list[i].draw();
@@ -168,19 +184,27 @@ private void drawSetup() {
     FONT_SIZE = BASE_FONT_SIZE;
   else
     FONT_SIZE = BASE_FONT_SIZE * (width / 720);
-    
-  int vertOffset = height/3  +2*KEY_VSPACING;
-  aKeyboard = new Keyboard("A", 3*KEY_HSPACING, vertOffset + KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING);
-  bKeyboard = new Keyboard("B", width/2+KEY_HSPACING, vertOffset+ KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING);
 
+  int vertOffset = height/3  +2*KEY_VSPACING;
+  if (console == STUDIO2 || console == STUDIO3) {
+    aKeyboard = new Keyboard(10, "A", 3*KEY_HSPACING, vertOffset + KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING);
+    bKeyboard = new Keyboard(10, "B", width/2+KEY_HSPACING, vertOffset+ KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING);
+  } else {
+    aKeyboard = new Keyboard(16, "VIP", 11*KEY_HSPACING, vertOffset + KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING);
+    bKeyboard = null;
+  }
   resetKey = new Key("CLEAR", FONT_SIZE, width/2 - width/6, vertOffset + 6*(KEY_HEIGHT)+KEY_VSPACING, 2*KEY_WIDTH + KEY_WIDTH/2, 2*KEY_HEIGHT/3);
   cartridge = new Cartridge(gameTitle[gameSelected], FONT_SIZE, width-8*KEY_WIDTH, vertOffset, 8*KEY_WIDTH, 5*KEY_HEIGHT/6);
 }
 
 public void drawKeyboards() {
   setTextSize(FONT_SIZE);
-  aKeyboard.draw();
-  bKeyboard.draw();
+  if (aKeyboard != null) {
+    aKeyboard.draw();
+  }
+  if (bKeyboard != null) {
+    bKeyboard.draw();
+  }
   resetKey.draw();
   cartridge.draw();
 }
@@ -210,23 +234,25 @@ public void mouseReleased() {
 
 public void mousePressed() {
   int key = -1;
-  String side = "A";
-  key = aKeyboard.getPressed(mouseX, mouseY);
-  if (key >= 0) {
-    isPressedA[key] = 1;
-    //println("Keyboard "+side + "="+key);
-    return;
+  if (aKeyboard != null) {
+    key = aKeyboard.getPressed(mouseX, mouseY);
+    if (key >= 0) {
+      isPressedA[key] = 1;
+      //println("Keyboard "+side + "="+key);
+      return;
+    }
   }
-  side = "B";
-  key = bKeyboard.getPressed(mouseX, mouseY);
-  if (key >= 0) {
-    isPressedB[key] = 1;
-    //println("Keyboard "+side + "="+key);
-    return;
+  if (bKeyboard != null) {
+    key = bKeyboard.getPressed(mouseX, mouseY);
+    if (key >= 0) {
+      isPressedB[key] = 1;
+      //println("Keyboard "+side + "="+key);
+      return;
+    }
   }
-
   // common areas 
   if (resetKey.isPressed(mouseX, mouseY)) {
+    resetUpdate = true;
     systemReset();
     //println("reset");
     return;
@@ -251,6 +277,10 @@ public void mousePressed() {
 
 void updateGUI() {
   // update display each frame
+  if (resetUpdate) {
+    drawConsole();
+    resetUpdate = false;
+  }
   if (displayUpdate) {
     cartridge.draw();
     displayUpdate = false;
