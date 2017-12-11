@@ -9,21 +9,24 @@ The emulator code in this repository is based on work by Paul Robson,
 who wrote a RCA COSMAC CDP1802 microcomputer and Studio 2 video game console emulator.
 Paul Robson's emulation code design
 is excellent because it simulates the real-time operaton of the CDP1802 CPU and Studio 2 quite well, when run
-on modern computers. 
+on modern computers. I ported Paul Robson's well-crafted C code to the Processing language (Java).
 
 https://github.com/paulscottrobson/studio2-games 
 
 ## Studio III Emulator
 
-The Studio III game console was never built by RCA, but I and others wrote games using Studio III prototype boards in 1977.
-My Studio 3 emulation supports color graphics and sound for Studio III games that use color and programmable sound generation. 
+The Studio III game console was never built by RCA, but was sold by manufacturers outside the USA. The game programmers wrote Studio III games using the COSMAC VIP boards for software development and prototyping in 1977.
+An add-on graphics card supplied the color support and a programmable sound card was used for Studio III enhanced sound.
+
+My Studio 3 emulation supports color graphics and programmable sound for Studio III games that use color and programmable sound generation. I was able to add color and sound emulation because I found an archived **Programming Manual for Studio III**, written in September 1977, detailing the color and sound functions. I made some contributions to that document when it was written. 
 
 Studio III Pinball Game Screenshot
 
 ![Screenshot of Studio III Pinball Game](Studio2/screenshot/pinball.png)
 
-I ported Paul Robson's well-crafted C code to the Processing language (Java) and I added
-emulation for the Studio III game console color graphics and programmable sound. I was able to add color and sound emulation because I found an archived **Programming Manual for Studio III**, written in September 1977, detailing the color and sound functions. I made some contributions to that document when it was written. 
+## Studio IV
+
+The Studio IV game console was in the planning stages, in 1977, but was never built. 
 
 ## COSMAC VIP Emulator
 
@@ -88,8 +91,9 @@ The emulator can read the following game file types:
 1. ".st2" Studio II cartridge format, loads at specific ROM address locations defined in the file
 2. ".bin" Binary program file for Studio II game, loads at address 0x0400, the plug-in cartridge starting location
 3. ".rom" Binary program file for Studio II/III base ROM, loads at address 0x0000
-4. ".ch8" Binary program file for COSMAC VIP board RAM, loads at address 0x0200
-5. ".c8x" Binary program file for COSMAC VIP board RAM, loads at address 0x0300
+4. ".ch8" Binary program file for COSMAC VIP board RAM, loads at address 0x0200. Assumes VIP ROM at 0x8000
+5. ".c8x" Binary program file for COSMAC VIP board RAM, loads at address 0x0300. Assumes VIP ROM at 0x8000, Color RAM at 0xC000
+6. ".vip" Binary program file for COSMAC VIP board RAM, loads at address 0x0000. Assumes VIP ROM at 0x8000
 
 ## Studio II/III Game Console Design
 
@@ -102,7 +106,7 @@ Resident game ROMs (3072 bytes) for Studio III included a game instruction pseud
 (starting at 0x0400), and Blackjack (starting at location 0x0C00). 
 
 The only difference between the Studio II and Studio III interpreters is that the Studio III interpreter replaced a 3 byte branch instruction with 2 byte instructions.
-This was needed for correct video display timing. Note that in the Studio III programming manual, there is a caution note to avoid 3 byte instructions in 1802 machine 
+This was needed for correct video display timing. Note that in the Studio III programming manual, there is a caution note to not use 3 byte instructions in 1802 machine 
 language subroutines. Color and sound features used in games were programmed in the game cartridge.
 
 There was an engineering cost trade-off that favored limits to ROM size and hardware complexity versis faster game speed, screen display size, and color/sound features.
@@ -112,11 +116,11 @@ the interpreter.
 The hardware design was elegant and relatively simple.
 
 Games were slow for three reasons: 
-1. Interpreter pseudo code overhead
-2. Drawing graphics with software instructions without hardware assistance (for example, no hardware sprite graphics)
-3. No game instruction execution during screen update cycles. 
+1. No game instruction execution occurs during screen update cycles. The screen draw update uses 50% of the CDP1802 processor time.
+2. Decoding interpreter pseudo code.
+3. Drawing graphics with software instructions without hardware assistance (for example, no hardware sprite graphics).
 
-Due to its operating speed and keyboard input, the Studio II system was better suited for puzzles and card games, rather than action games. 
+Due to its operating speed and keyboard input, in my opinion, the Studio II system was better suited for puzzles and card games, rather than action games. 
 
 ## Documents
 
@@ -136,20 +140,28 @@ In the Documents folder you will find documents for Studio II/III and VIP games.
 | Fun With Numbers | Philip Baltzer |   |
 | School House | Joyce Weisbecker | Daughter of Joseph Weisbecker |
 | Speedway/Tag | Joyce Weisbecker | Note 1 |
-| Tennis/Squash | Andrew Modla | Second Studio II game I wrote |
+| Tennis/Squash | Andrew Modla | 512 bytes, This is the second Studio II game I wrote |
 | Baseball | Andrew Modla |  Third Studio II game I wrote|
 | Blackjack | Andrew Modla | Note 2 |
 | Gunfighter/Moonship Battle | Andrew Modla  | This is the first Studio II game I wrote |
+| Studio II Point-of-Purchase Demo | Andrew Modla  | 1024 bytes, code lost |
 
 | Studio III Color Game | Author | Notes |
 | --------- | ------ | ----- |
-| Doodle/Patterns/Bowling/Blackjack | Joseph Weisbecker, Andrew Modla (Blackjack) | Studio III Resident Games Note 3 |
-| MathFun/Quiz | Philip Baltzer? |  |
+| Doodle/Patterns/Bowling/Blackjack | Joseph Weisbecker, Andrew Modla (Blackjack) | 2048 bytes, Studio III Resident Games Note 3 |
+| MathFun/Quiz | Andrew Modla | 1024 bytes |
 | Biorhythm | Gooitzen van der Wal | Not a game, this is a Biorhythm calculator |
-| Pinball | Andrew Modla | Note 4 |
-| Bingo | Andrew Modla | Not a game, this is a Bingo number caller and verification helper Note 5 |
+| Pinball | Andrew Modla | 1024 bytes, Note 4 |
+| Bingo | Andrew Modla | Not a game, 512 bytes, this is a Bingo number caller and verification helper Note 5 |
 | Concentration/Match | Gooitzen van der Wal |  |
 | Star Wars | Gooitzen van der Wal |  |
+| TV Typewriter/Ticker Tape | Andrew Modla | 1024 bytes, originally for Studio III, CHIP8 version exists |
+| Studio III Point-of-Purchase Demo | Andrew Modla | 1024 bytes, code lost |
+
+| Studio IV Color Game | Author | Notes |
+| --------- | ------ | ----- |
+| Match Game | Andrew Modla | Planned enhanced version, not implemented |
+| Helicopter Gunship | Andrew Modla | Planned, not implemented |
 
 | Other Studio II Games | Author | Notes |
 | --------- | ------ | ----- |
@@ -166,6 +178,11 @@ In the Documents folder you will find documents for Studio II/III and VIP games.
 | Invaders | Paul Robson | |
 | Tv Arcade 2012 | Lee Romanow | |
 
+| COSMAC VIP Games | Author | Notes |
+| --------- | ------ | ----- |
+| Sword Fighter | Joseph Weisbecker | VIP game (not CHIP8)  |
+| Bowling | Gooitzen van der Wal | original by Joseph Weisbecker, converted to CHIP8 by van der Wal |
+
 Additional Notes:
 1. Joyce Weisbecker http://www.vintagecomputing.com/index.php/archives/2018/historys-first-female-video-game-designer
 2. Blackjack is the 4th Studio II game I wrote. As a Studio II game cartridge this version of Blackjack used single digit bet amounts.
@@ -181,14 +198,16 @@ This respository contains a complete list of games originally developed by RCA f
 
 Some document are from https://archive.org
 
-Special dedication to Joe Weisbecker who started it all. One of his goals for the Studio II was computer and programming education. 
-My intent here is to continue to extend this goal.
+Special dedication to Joe Weisbecker who started it all. One of his goals for the COSMAC and Studio II was computer and programming education. 
 
 ## Usage
 This respository is intended for educational and historical research. Studio II emulation shows how the games looked and functioned during play. 
 
+## References
+
+
 ## Postscript
-My intent for this repository is a tribute to Joe Weisbecker's work on personal and educational computers. 
+My intent for this repository is a tribute to Joe Weisbecker's work on personal and educational computers and continue to extend with the goal of education. 
 Writing this is like creating a programmer's memoir. I am able to reconstruct the environment to run code written in the past without the hardware it ran on. 
 Many programmer's work is lost over time with a project's termination or expiration, as the technology advances, so being able to
 see and preserve what was done in the distant past is heartening and personally rewarding.
