@@ -149,10 +149,10 @@ In the Documents folder you will find documents for Studio II/III and VIP games.
 | Studio III Color Game | Author | Notes |
 | --------- | ------ | ----- |
 | Doodle/Patterns/Bowling/Blackjack | Joseph Weisbecker, Andrew Modla (Blackjack) | 2048 bytes, Studio III Resident Games Note 3 |
-| MathFun/Quiz | Andrew Modla | 1024 bytes |
+| MathFun/Quiz | Andrew Modla | 1024 bytes, Note 4 |
 | Biorhythm | Gooitzen van der Wal | Not a game, this is a Biorhythm calculator |
-| Pinball | Andrew Modla | 1024 bytes, Note 4 |
-| Bingo | Andrew Modla | Not a game, 512 bytes, this is a Bingo number caller and verification helper Note 5 |
+| Pinball | Andrew Modla | 1024 bytes, Note 5 |
+| Bingo | Andrew Modla | Not a game, 512 bytes, this is a Bingo number caller and verification helper Note 6 |
 | Concentration/Match | Gooitzen van der Wal |  |
 | Star Wars | Gooitzen van der Wal |  |
 | TV Typewriter/Ticker Tape | Andrew Modla | 1024 bytes, originally for Studio III, CHIP8 version exists |
@@ -169,7 +169,7 @@ In the Documents folder you will find documents for Studio II/III and VIP games.
 | Hockey | Paul Robson | |
 | Combat | Paul Robson | |
 | Scramble | Paul Robson | |
-| Rocket | Lee Romanow | original by Joseph Weisbecker, converted by Romanow
+| Rocket | Lee Romanow | original by Joseph Weisbecker for ELF, converted by Romanow
 | Outbreak | Lee Romanow | |
 | Pacman | Paul Robson | |
 | Kaboom | Paul Robson | |
@@ -180,7 +180,7 @@ In the Documents folder you will find documents for Studio II/III and VIP games.
 
 | COSMAC VIP Games | Author | Notes |
 | --------- | ------ | ----- |
-| Sword Fighter | Joseph Weisbecker | VIP game (not CHIP8)  |
+| Sword Fighter | Joseph Weisbecker | VIP game (not CHIP8) The original game was an RCA Coin arcade game Joe wrote |
 | Bowling | Gooitzen van der Wal | original by Joseph Weisbecker, converted to CHIP8 by van der Wal |
 
 Additional Notes:
@@ -188,9 +188,10 @@ Additional Notes:
 2. Blackjack is the 4th Studio II game I wrote. As a Studio II game cartridge this version of Blackjack used single digit bet amounts.
 3. The Blackjack game conversion to Studio III resident game added color and two digit bet amounts.
 There is also a VIP CHIP8 version of Blackjack in color.
-4. Pinball is the 5th Studio game I wrote in Spring 1977. This may be the first software game program that simulated pinball game machine operations.
+4. I was not sure I did MathFun until I discovered an old memo page (from 1977) in my resume folder. It lists all the games I wrote for Studio II and III. I forgot I did this one, confusing it with Fun With Numbers, that Phil Baltzer did.
+5. Pinball is the 5th Studio game I wrote in Spring 1977. This may be the first software game program that simulated pinball game machine operations.
 There is also a VIP CHIP8 version of Pinball.
-5. There is also a COSMAC VIP CHIP8 version of Bingo.
+6. There is also a COSMAC VIP CHIP8 version of Bingo.
 
 ## Credits
 Many thanks to Studio 2 enthusiasts, game programmers and historians, who helped preserve and archive documentation and code, and who wrote 1802/Studio2 emulators. Your dedicated work and enthusiasm are very appreciated.
