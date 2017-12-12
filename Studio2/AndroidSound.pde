@@ -12,7 +12,7 @@ public class PlaySound {
   private final int numSamples = sampleRate;
   private final double samples[] = new double[numSamples];
   private final byte generatedSnd[] = new byte[2*(numSamples)];
-  /*
+  /* uncomment for Android
   final AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 
    sampleRate, AudioFormat.CHANNEL_CONFIGURATION_MONO, 
    AudioFormat.ENCODING_PCM_16BIT, numSamples, 
@@ -45,7 +45,7 @@ public class PlaySound {
      if (audioTrack.getPlayState() != AudioTrack.PLAYSTATE_PLAYING ) {
      audioTrack.play();
      }
-     */
+//     */
   }
 
   void playSound(boolean on) {

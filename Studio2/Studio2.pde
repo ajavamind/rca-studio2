@@ -19,11 +19,14 @@ private static boolean android = false;
 private final static int STUDIO2 = 0;  
 private final static int STUDIO3 = 1;  
 private final static int VIP = 2;
-private final static int CUSTOM = 3;
-private final static int INITIAL_CONSOLE = STUDIO3;  //STUDIO3; //STUDIO2; CUSTOM;
+private final static int ELF = 3;
+private final static int ARCADE = 4;
+private final static int CUSTOM = 5;
+private final static int INITIAL_CONSOLE = STUDIO3;  //STUDIO3; //STUDIO2; CUSTOM; ARCADE; 
 private static int console = INITIAL_CONSOLE;
 
 // CHIP8 Interpreter types
+private final static int ROM_ONLY = 0;  // assumes VIP ROM at 0x8000 but not interpreter
 private final static int CHIP8 = 1;
 private final static int CHIP8X = 2;
 private static int interpreter = CHIP8;
@@ -56,6 +59,9 @@ private final static int RAM_SIZE = 0x200; // Working and Video display RAM
 private static int INITIAL_VIDEO_RAM = 0x900;  // Studio 2 and 3 starting location
 private static int VIDEO_RAM = INITIAL_VIDEO_RAM;  // Studio 2 and 3 starting location
 // Video RAM is 64 x 32 pixels stored in 256 bytes
+
+private static int COIN_ARCADE_AD_ROM = 0x0A00;  // splash barker screen
+private static int COIN_ARCADE_PARAMETER_SWITCH = 0x00;  // setting
 
 //////////////////////////////////////////////////////////////
 
@@ -102,16 +108,15 @@ String[] gameFileName = {
 /* 27 */  "invaders.st2", 
 /* 28 */  "tv-arcade-2012.st2", 
   ////////////////////////////////
-  // CHIP8 games 
+  // VIP CHIP8 games 
 /* 29 */  "Bowling [Gooitzen van der Wal].ch8", // Chip8 version of J. Weisbecker bowling
 /* 30 */  "Blockout [Steve Houk].c8x",   // Chip8x 
 /* 31 */  "ColourTest.c8x",
 /* 32 */  "Color Kaleidoscope [Steve Houk, 1978].c8x",
-
-// work in progress
-///*  */  "swords_audio.ch8",   // swordfighter
-///*  */  "AUD_2464_09_B41_ID01_01_01.ch8",
+/* 33 */  "swordfighter[Joe Weisbecker].vip",   // swordfighter does not use CHIP8
+///*  */  "invad.bin", // * SPACE INVADERS FOR THE RCA COSMAC ELF CREATED BY CHARLIE BRINT IN 1980
 ///*  */  "SoundTest.c8x"
+///* 34 */ "AUD_2464_09_B41_ID01_01_01.arc" // coin arcade game bowling
 
 };
 String[] gameTitle = {
@@ -150,12 +155,12 @@ String[] gameTitle = {
   "Bowling CHIP8",
   "Blockout CHIP8X",
   "Color Test CHIP8X",
-  "Color Kaleidoscope CHIP8X"
-  
+  "Color Kaleidoscope CHIP8X",
+  "VIP Swordfighter"
+//  "Space Invaders",
 // Work in progress
-//  "Sword Fighter CHIP8",
-//  "AUD_2464_09_B41_ID01_01_01.rom",
 //  "Sound Test CHIP8X"
+//  "AUD_2464_09_B41_ID01_01_01"
 };
 
 /**
@@ -201,6 +206,9 @@ void setup()
     }
   }
   studio2_memory = new int[0x10000];
+  for (int i=0; i<0x10000; i++) {
+    studio2_memory[i] = 0xFF;
+  }
   initSound();
   systemReset();
   drawConsole();
@@ -235,11 +243,16 @@ void systemReset() {
   } else if (gameFileName[gameSelected].toLowerCase().endsWith(".c8x")) {
     console = VIP;
     interpreter = CHIP8X;
+  } else if (gameFileName[gameSelected].toLowerCase().endsWith(".vip")) {
+    console = VIP;
+    interpreter = ROM_ONLY;
+  } else if (gameFileName[gameSelected].toLowerCase().endsWith(".arc")) {
+    console = ARCADE;
   } else {
     console = INITIAL_CONSOLE;
   }
   COLOR_MAP = INITIAL_COLOR_MAP;
-  if (console == STUDIO2 )
+  if (console == STUDIO2 || console == ARCADE)
     backgroundColor = 1;
   else
     backgroundColor = 0;
@@ -249,13 +262,15 @@ void systemReset() {
     VIDEO_RAM = INITIAL_VIDEO_RAM;
   }
   else if (console == VIP) {
-    // these areas are CHIP8 interpreter working space in VIP, so loaders should not write here
-    // assumes 4K RAM VIP board
-    RAM = 0x0E00;
-    VIDEO_RAM = 0x0F00;
+    RAM = 0x7E00;
+    VIDEO_RAM = 0x7F00;  // assumes 32K byte RAM 
     if (interpreter == CHIP8X) {
       COLOR_MAP = 0xC000;
     }
+  } else if (console == ARCADE) {
+    // experimental for alternate versions of Joe Weisbecker development boards
+    RAM = 0x0800;
+    VIDEO_RAM = 0x0900;
   } else if (console == CUSTOM) {
     // experimental for alternate versions of Joe Weisbecker development boards
     RAM = 0x0800;

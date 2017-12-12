@@ -16,22 +16,6 @@ static volatile int toneState = 0;                           // Tone currently o
 static volatile int toneTimer;                               // No of syncs tone has been on.
 static int BEEP_FREQUENCY  = 625; // Studio 2 default
 
-class Rect {
-  int x;
-  int y;
-  int w;
-  int h;
-
-  public Rect() {
-  }
-  public Rect(int x, int y, int w, int h) {
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h = h;
-  }
-}
-
 int saveCounter = 0; // save screen filename counter
 
 // *****************************************************************************************************************
@@ -90,6 +74,12 @@ void checkAllKeys()
           save("screenshot/screen"+saveCounter+".png");
           println("Save Screenshot "+"screen+"+saveCounter+".png");
           saveCounter++;
+        } else if (key == 'c' || key == 'C') {
+          // Coin Arcade Game
+          println("Coin");
+          coin = true;
+        } else if (key == ' ') {  // debug not implemented
+          step = true;
         }
       }
     }
@@ -162,27 +152,28 @@ static int SYSTEM_Command(int cmd, int param)
 }
 
 /**
- * Display the pixel screen 64x32
+ * Display the video display screen 64x32 pixels
  * Implements color for Studio III emulation
  */
+private static final int VIDEO_SCREEN_WIDTH = 64;  // pixels
+private static final int VIDEO_SCREEN_HEIGHT = 32; // pixels
 void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int screenData, int scrollOffset)
 {
   int xc, yc, xs, ys, x, y, pixByte;
+  int rx, ry, rw, rh;   // defines drawing rectangle coorinates
   int drawWidth;
   int drawHeight;
   int hOffset;
   drawWidth = screenWidth - screenWidth/16;
   drawHeight = screenHeight - screenHeight/8;
-  Rect rc = new Rect();
-  xs = drawWidth / 66;  // pixel width
+  xs = drawWidth / (VIDEO_SCREEN_WIDTH + 2);  // pixel width
   ys = xs;  // pixel height
   hOffset = (screenWidth - 64*xs)/2;
   xc = xs; //0;
   yc = ys; //0;
-  rc.x = xc;
-  rc.y = yc;
+  rx = xc;
+  ry = yc;
   // Erase screen display
-  //background(bgColor[backgroundColor]);
   fill(bgColor[backgroundColor]);
   rect(0, 0, screenWidth, screenHeight - 2*ys);
   if (screenData == -1) {
@@ -197,17 +188,17 @@ void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int s
   noStroke();
 
   fill(fgr);
-  rc.w = xs;
-  rc.h = ys;                                                                // Set cell width and height
-  for (y = 0; y < 32; y++)                                                              // One line at a time.
+  rw = xs;
+  rh = ys;                                                                // Set cell width and height
+  for (y = 0; y < VIDEO_SCREEN_HEIGHT; y++)                               // One line at a time.
   {
     int offset = ((y * 8 + scrollOffset) & 0xFF);                   // Work out where data comes from.
-    rc.y = yc + ys * y;                                                             // Calculate vertical coordinate
+    ry = yc + ys * y;                                                             // Calculate vertical coordinate
     xc = 0;
-    for (x = 0; x < 8; x++)                                                           // 8 bytes per line.
+    for (x = 0; x < (VIDEO_SCREEN_WIDTH/8); x++)                    // 8 bytes per line.
     {
       pixByte = studio2_memory[screenData+offset++] & 0xFF;                            // Get next pixel.
-      rc.x = xc + x * xs * 8;                                                     // Calculate horizontal coordinate
+      rx = xc + x * xs * 8;                                                     // Calculate horizontal coordinate
       if (console == STUDIO3 || (console == VIP && interpreter == CHIP8X)) {
         int colorIndex = studio2_memory[COLOR_MAP + x + 8*(y/4)] & 0x0007;
         fill(colorMap[colorIndex]);
@@ -216,10 +207,10 @@ void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int s
       {
         // if bit 7 set draw pixel
         if ((pixByte & 0x80) != 0) {
-          rect(hOffset+rc.x, rc.y, rc.w, rc.h);
+          rect(hOffset+rx, ry, rw, rh);
         }
         pixByte = (pixByte << 1) & 0xFF;                                        // shift to left, lose overflow.
-        rc.x = rc.x + xs;                                                       // next coordinate across.
+        rx = rx + xs;                                                       // next coordinate across.
       }
     }
   }
@@ -297,7 +288,28 @@ void loadGameBinary(String fileName)
       address++;
     }
   }
-  // .ROM binary file 
+  // .CH8 binary file
+  else if (fileName.toLowerCase().endsWith(".vip")) { // VIP file binary format
+    address = 0x0000; // Program code starting location
+    for (int i=0; i<data.length; i++) {
+      if (address < RAM || address >= (RAM+RAM_SIZE)) {
+        studio2_memory[address] = data[i] & 0xFF;
+        //println(" " + hex(address) + " " + hex(int(data[i])));
+      }
+      address++;
+    }
+  }
+  // .ARC binary file for Arcade Game consoles
+  else if (fileName.toLowerCase().endsWith(".arc")) { 
+    address = 0x0000;
+    for (int i=0; i<data.length; i++) {
+      if (!((address >= RAM && address < (RAM+RAM_SIZE)))) {
+        studio2_memory[address] = data[i] & 0xFF;
+      }
+      address++;
+    }
+  }
+  // .ROM binary file for Studio consoles
   else { 
     address = 0x0000;
     for (int i=0; i<data.length; i++) {

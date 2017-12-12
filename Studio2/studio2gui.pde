@@ -186,7 +186,7 @@ private void drawSetup() {
     FONT_SIZE = BASE_FONT_SIZE * (width / 720);
 
   int vertOffset = height/3  +2*KEY_VSPACING;
-  if (console == STUDIO2 || console == STUDIO3) {
+  if (console == STUDIO2 || console == STUDIO3 || console == ARCADE) {
     aKeyboard = new Keyboard(10, "A", 3*KEY_HSPACING, vertOffset + KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING);
     bKeyboard = new Keyboard(10, "B", width/2+KEY_HSPACING, vertOffset+ KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING);
   } else {

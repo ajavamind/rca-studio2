@@ -12,7 +12,7 @@
 /**
  * Converted to Processing/Java programming environment by Andrew Modla
  * November 2017
- *
+ * Processing uses signed integers (byte and int) requiring register size masking in code below
  */
 
 import java.io.*;
@@ -23,7 +23,7 @@ private static final int HWC_FRAMESYNC      =     2;
 private static final int HWC_SETKEYPAD      =     3;
 
 private static final int CLOCK_SPEED =            (3521280/2);                                        // Clock Frequency (1,760,640Hz)
-private static final int CYCLES_PER_SECOND   =    (CLOCK_SPEED/8);                                     // There are 8 clocks in each cycle (220,080 Cycles/Second)
+private static final int CYCLES_PER_SECOND   =    (CLOCK_SPEED/8);                                     // There are 8 clocks in each cycle (220,080 cycles/Second)
 private static final int FRAMES_PER_SECOND  =     (60);                                                // NTSC Frames Per Second
 private static final int LINES_PER_FRAME    =     (262);                                               // Lines Per NTSC Frame
 private static final int CYCLES_PER_FRAME   =     (CYCLES_PER_SECOND/FRAMES_PER_SECOND);               // Cycles per Frame, Complete (3668)
@@ -47,14 +47,18 @@ static int D, X, P, T;                                                          
 static int DF, IE, Q;                                                               // 1802 1 bit registers
 static int[] R = new int[16];                                                     // 1802 16 bit registers
 static int _temp;                                                                // Temporary register
-static int Cycles;                                                                // Cycles till state switch
-static int State;                                                                 // Frame position state (NOT 1802 internal state)
+static int cycles;                                                                // Cycles till state switch
+static int state;                                                                 // Frame position state (NOT 1802 internal state)
 static int screenMemory = -1;                                                  // Current Screen Pointer (-1 = off)
 static int scrollOffset;                                                          // Vertical scroll offset e.g. R0 = $nnXX at 29 cycles
 static boolean screenEnabled;                                                         // Screen on (IN 1 on, OUT 1 off)
 static int displayPointer;
+static volatile boolean coin = false;  // Arcade Game coin entered when true
 static int keyboardLatch;                                                         // Value stored in Keyboard Select Latch (Studio 2)
 static int[] studio2_memory;                                          // RAM development space for emulation
+
+static boolean step = false;  // for debug
+static int previous = 0;  // for debug
 
 /**
  * 1802 CPU State (used for debug machine state saves)
@@ -62,7 +66,7 @@ static int[] studio2_memory;                                          // RAM dev
 class CPU1802STATE
 {
   int D, DF, X, P, T, IE, Q, R[];
-  int Cycles, State;
+  int cycles, state;
 }
 
 // COSMAC CDP1802 instruction set mnemonics
@@ -99,7 +103,7 @@ private final static void WRITE(int address, int data)
   } else if (console == VIP || console == CUSTOM) {
     studio2_memory[address] = data & 0xFF;
   } else {
-    println("Attempt to write ROM memory "+hex(address));
+    println("Attempt at "+ hex(R[P]-1) + " to write ROM memory "+hex(address) + " "+ hex(data));
   }
   // debug
   //if (address >= 0x900 && address < 0xA00) {
@@ -189,16 +193,41 @@ private final static int READEFLAG(int flag) {
   int retVal = 0;
   switch (flag)
   {
-  case 1:                                                                     // EF1 detects not in display
-    retVal = 1;                                                             // Permanently set to '1' so BN1 in interrupts always fails
+  case 1:
+    if (console == ARCADE) {
+      // center A switch pressed
+      retVal = isPressedA[5];
+      if (retVal == 1) println("EF1");
+    }
+    else {
+      // EF1 detects not in display
+      retVal = 1;               // Permanently set to '1' so BN1 in interrupts always fails
+    }
     break;
-  case 3:                                                                     // EF3 detects keypressed on VIP and Elf but differently.
-    SYSTEM_Command(HWC_SETKEYPAD, 1);
-    retVal = SYSTEM_Command(HWC_READKEYBOARD, keyboardLatch);
+  case 3: 
+    if (console == ARCADE) {
+      // center B switch pressed
+      retVal = isPressedB[5];
+      if (retVal == 1) println("EF3");
+    }
+    else {
+      // EF3 detects keypressed on VIP and ELF but differently.
+      SYSTEM_Command(HWC_SETKEYPAD, 1);
+      retVal = SYSTEM_Command(HWC_READKEYBOARD, keyboardLatch);
+    }
     break;
-  case 4:                                                                     // EF4 is !IN Button
-    SYSTEM_Command(HWC_SETKEYPAD, 2);
-    retVal = SYSTEM_Command(HWC_READKEYBOARD, keyboardLatch);
+  case 4:
+    if (console == ARCADE) {
+      if (coin) {
+        retVal = 1;
+        if (retVal == 1) println("Coin reset");
+      }
+    }
+    else {
+      // EF4 key press
+      SYSTEM_Command(HWC_SETKEYPAD, 2);
+      retVal = SYSTEM_Command(HWC_READKEYBOARD, keyboardLatch);
+    }
     break;
   }
   return retVal;
@@ -214,20 +243,36 @@ private final static void UPDATEIO(int portID, int data) {
     break;
   case 1:
     // OUT 1 turns the display off on a Studio 2, changed for Studio 3
-    if (console == STUDIO2) // || console == VIP)
+    if (console == STUDIO2) { // || console == VIP)
       screenEnabled = false;
+    }
+    else if (console == ARCADE) {
+      // TV selected
+      //println("TV selected "+ hex(data));
+    }
     break;
   case 2:
-    // OUT 2 sets the keyboard latch (both S2 & VIP)
-    keyboardLatch = (data & 0x0F);  // Lower 4 bits only :)
+    if (console == ARCADE) {
+      //println("start Arcade Display "+ hex(data));
+      screenEnabled = true;
+    }
+    else {
+      // OUT 2 sets the keyboard latch (both S2 & VIP)
+      keyboardLatch = (data & 0x0F);  // Lower 4 bits only
+    }
     break;
   case 3:
     break;
   case 4:
-    // Studio III programmable sound generator
-    setFreq(data);
+    if (console != ARCADE) {
+      // Studio III programmable sound generator
+      setFreq(data);
+    }
     break;
   case 5:
+    if (console == ARCADE) {
+      setFreq(data);
+    }
     break;
   case 6:
     break;
@@ -240,8 +285,24 @@ private final static int INPUTIO(int portID) {
   int retVal = 0xFF;  // data bus has pull up resistors for logic 1 value
   switch (portID)
   {
-  case 1:                                                                     // IN 1 turns the display on.
-    screenEnabled = true;
+  case 1:
+    if (console != ARCADE) {
+      // IN 1 turns the display on.
+      screenEnabled = true;
+    }
+    break;
+  case 5:  // 4 Bit Parameter switch code
+    if (console == ARCADE) {
+      retVal = COIN_ARCADE_PARAMETER_SWITCH;
+      println("Parameter switch read "+ retVal);
+    }
+    break;
+  case 6: // Switches bit 0-7 
+    if (console == ARCADE) {
+      //retVal = 0;  // to do
+      coin = false;
+      println("switches "+ hex(retVal));
+    }
     break;
   }
   return retVal;
@@ -265,11 +326,11 @@ void CPU_Reset()
   P = 0;
   Q = 0;
   R[0] = 0;                                                           // Reset 1802 - Clear X,P,Q,R0
-  IE = 1;                                                                         // Set IE to 1
-  DF = DF & 1;                                                                    // Make DF a valid value as it is 1-bit.
+  IE = 1;                                                             // Set IE to 1
+  DF = DF & 1;                                                        // Make DF a valid value as it is 1-bit.
 
-  State = 1;                                                                      // State 1
-  Cycles = STATE_1_CYCLES;                                                        // Run this many cycles.
+  state = 1;                                                          // State 1
+  cycles = STATE_1_CYCLES;                                            // Run this many cycles.
   screenEnabled = false;
 
   // PC Version copy ROM code into 4k space.
@@ -279,7 +340,7 @@ void CPU_Reset()
     loadBinary("vip.rom", 0x8000);
     if (interpreter == CHIP8)
       loadBinary("chip8.ram", 0x0000);
-    else
+    else if (interpreter == CHIP8X)
       loadBinary("chip8x.ram", 0x0000);
     R[1] = VIDEO_RAM | 0x00FF;
     println("R[1] "+hex(R[1]));
@@ -291,24 +352,59 @@ void CPU_Reset()
       studio2_memory[COLOR_MAP+i] = WHITE;
     }
   }
+  
+  if (console == ARCADE) {
+    R[0] = 1;  // skip over idl instruction
+  }
+
+}
+
+String hexAddr(int addr) {
+  String val = hex(addr).substring(4);
+  return val;
+}
+
+String hexData(int data) {
+  String val = hex(data).substring(6);
+  return val;
 }
 
 //*******************************************************************************************************
 // Execute one CDP1802 microcomputer instruction
 //*******************************************************************************************************
-
 int CPU_Execute()
 {
   int rState = 0;
   int addr = R[P]++;
+  
+  // debug 
+  //if (addr < 0x1FF) {
+  //  println("R[0] "+hexAddr(addr)+ " "+hexData(READ(addr))+ " prev "+ hexAddr(previous));
+  //}
+  
+  // breakpoints for debug
+  //if (addr == 0x00A2) {
+  //  println("R5="+hexAddr(R[5]));
+  //}
+  //if (addr == 0x002A) {
+  //  println("R5="+hexAddr(R[5]));
+  //}
+  //if (addr == 0x0038) {
+  //  println("0MMM RC="+hexAddr(R[12]));
+  //}
+  //if (addr == 0x0024) {
+  //  println("R5="+hexAddr(R[5]));
+  //}
+  ///////////////////////
+  
+  previous = addr;
   R[P] &= 0xFFFF;
-  int opCode = READ(addr) & 0xFF;
+  int opCode = READ(addr);
   //println("P= "+hex(R[P]-1)+" opCode="+hex(opCode));
-  Cycles -= 2;                                                                    // 2 x 8 clock Cycles - Fetch and Execute.
-  switch(opCode)                                                                  // Execute dependent on the Operation Code
+  cycles -= 2;                                              // 2 x 8 clock Cycles - Fetch and Execute.
+  
+  switch(opCode)                                            // Execute dependent on the Operation Code
   {
-    /* GENERATED */
-
   case 0x00: /* "idl" */
     R[P]--;
     R[P] &= 0xFFFF;
@@ -722,7 +818,7 @@ int CPU_Execute()
     R[X] &= 0xFFFF;
     break;
   case 0x68: /* "nop68" */
-    Cycles--;
+    cycles--;
     break;
   case 0x69: /* "inp 1" */
     D = INPUTIO(1);
@@ -1042,73 +1138,73 @@ int CPU_Execute()
     R[15] &= 0xFFFF;
     break;
   case 0xc0: /* "lbr .2" */
-    Cycles--;
+    cycles--;
     FETCH3();
     LONG(_temp);
     break;
   case 0xc1: /* "lbq .2" */
-    Cycles--;
+    cycles--;
     FETCH3();
     if ((Q != 0)) LONG(_temp);
     break;
   case 0xc2: /* "lbz .2" */
-    Cycles--;
+    cycles--;
     FETCH3();
     if ((D == 0)) LONG(_temp);
     break;
   case 0xc3: /* "lbdf .2" */
-    Cycles--;
+    cycles--;
     FETCH3();
     if ((DF != 0)) LONG(_temp);
     break;
   case 0xc4: /* "nop" */
-    Cycles--;
+    cycles--;
     break;
   case 0xc5: /* "lsnq" */
-    Cycles--;
+    cycles--;
     if (!(Q != 0)) LONGSKIP();
     break;
   case 0xc6: /* "lsnz" */
-    Cycles--;
+    cycles--;
     if (!(D == 0)) LONGSKIP();
     break;
   case 0xc7: /* "lsnf" */
-    Cycles--;
+    cycles--;
     if (!(DF != 0)) LONGSKIP();
     break;
   case 0xc8: /* "lskp" */
-    Cycles--;
+    cycles--;
     FETCH3();
     break;
   case 0xc9: /* "lbnq .2" */
-    Cycles--;
+    cycles--;
     FETCH3();
     if (!((Q != 0))) LONG(_temp);
     break;
   case 0xca: /* "lbnz .2" */
-    Cycles--;
+    cycles--;
     FETCH3();
     if (!((D == 0))) LONG(_temp);
     break;
   case 0xcb: /* "lbnf .2" */
-    Cycles--;
+    cycles--;
     FETCH3();
     if (!((DF != 0))) LONG(_temp);
     break;
   case 0xcc: /* "lsie" */
-    Cycles--;
+    cycles--;
     if (IE != 0) LONGSKIP();
     break;
   case 0xcd: /* "lsq" */
-    Cycles--;
+    cycles--;
     if (((Q != 0))) LONGSKIP();
     break;
   case 0xce: /* "lsz" */
-    Cycles--;
+    cycles--;
     if (((D == 0))) LONGSKIP();
     break;
   case 0xcf: /* "lsdf" */
-    Cycles--;
+    cycles--;
     if (((DF != 0))) LONGSKIP();
     break;
   case 0xd0: /* "sep r0" */
@@ -1261,13 +1357,13 @@ int CPU_Execute()
     break;
   } // switch
 
-  if (Cycles < 0)                                                                 // Time for a state switch.
+  if (cycles < 0)                                                                 // Time for a state switch.
   {
-    switch(State)
+    switch(state)
     {
     case 1:                                                                     // Main Frame State Ends
-      State = 2;                                                              // Switch to Interrupt Preliminary state
-      Cycles = STATE_2_CYCLES;                                                // The 29 cycles between INT and DMAOUT.
+      state = 2;                                                              // Switch to Interrupt Preliminary state
+      cycles = STATE_2_CYCLES;                                                // The 29 cycles between INT and DMAOUT.
       if (screenEnabled)                                                      // If screen is on
       {
         if (READ(R[P]) == 0) {
@@ -1279,8 +1375,8 @@ int CPU_Execute()
       }
       break;
     case 2:                                                                     // Interrupt preliminary ends.
-      State = 1;                                                              // Switch to Main Frame State
-      Cycles = STATE_1_CYCLES;
+      state = 1;                                                              // Switch to Main Frame State
+      cycles = STATE_1_CYCLES;
       screenMemory = (R[0] & 0xFF00) ;                               // space for PC version
       scrollOffset = R[0] & 0xFF;                                             // Get the scrolling offset (for things like the car game)
       SYSTEM_Command(HWC_FRAMESYNC, 0);                                        // Synchronise.
@@ -1291,8 +1387,8 @@ int CPU_Execute()
       }
       break;
     } // switch
-    rState = State;                                                      // Return state as state has switched
-    Cycles--;                                                                   // Time out when cycles goes -ve so deduct 1.
+    rState = state;                                                      // Return state as state has switched
+    cycles--;                                                                   // Time out when cycles goes -ve so deduct 1.
   }
   return rState;
 }
@@ -1310,8 +1406,8 @@ CPU1802STATE CPU_ReadState(CPU1802STATE s)
   s.T = T;
   s.IE = IE;
   s.Q = Q;
-  s.Cycles = Cycles;
-  s.State = State;
+  s.cycles = cycles;
+  s.state = state;
   for (int i : s.R) s.R[i] = R[i];
   return s;
 }
