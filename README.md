@@ -37,6 +37,32 @@ Later he expanded the interpreter, naming it CHIP8X to handle adapter cards (sou
 Since the emulator implements the RCA CDP1802 microcomputer instruction set directly, it will run all the interpreters written for Studio II/III or VIP boards.
 The VIP has many major design similarities to the Studio III.
 
+## RCA Video Arcade Game Console Emulator
+
+The RCA Video Arcade console games preceded the Studio 2 and were built in 1975. 
+The consoles were placed in a shopping mall to evaluate the marketability of the game systems.
+Based on information from the Hagley Museum and Library, Wilmington, Delaware,
+I was able to emulate the circuit board for these games. 
+The console game board used the 1801 (two integrated circuits) as the microprocessor.
+The RCA Arcade consoles had a screen resolution of 32x64 pixels that was the same as the Studio 2.
+
+![Screenshot of RCA Arcade Swords Game](Studio2/screenshot/screen5.png)
+
+This video is a screen capture of the RCA Video Arcade Game "Swords" emulation running on a Windows 10 notebook computer. 
+The game was written by Joseph Weisbecker in 1975. 
+
+https://youtu.be/xbSNnIyc1K4
+
+The "Swords" game was stored on a cassette tape and converted into a WAV file provided by the Hagley Museum and Library.  
+I wrote a program in Processing to extract the game code instruction bytes encoded in the WAV file audio to use with the Arcade game emulator.
+
+-Hagley Museum and Library: Sarnoff/RCA Collection
+-Joseph A. Weisbecker's archived manuscripts and materials
+-Accession 2464 
+-Box Number AVD B41
+-Cassette Tape AUD_2464_09_B41_ID01_02 Swords.wav
+-The source of WAV files purchased from the Hagley Library and other related materials is from Atariage member "ubersaurus".
+
 ## Running the Emulator
 
 You will need to download the Processing SDK to run the emulated games. Please donate to the Processing Foundation. 
@@ -59,14 +85,22 @@ Windows 10 Screenshot
 
 ## Using the Emulator
 
+You can change the game run by clicking on the cartridge name under the screen area. 
+Clicking on the right side of the cartridge selects the next game, and on the left side selects the previous game in a list of games.
+Then click the "Clear" button to reset and run the game.
+
 As currently implemented the emulator uses the number keys 0-9 for the A keypad on the Studio II console, and the numeric keys (num lock) for keys 0-9 on the B keypad.
 
-For debug the following keys may be used:
+For debug the following keys may be used (upper or lower case):
 - 'R' key performs a system reset
 - 'S' key saves a screen shot in the folder "screenshot"
-- 'F' show the frame rate in the Processing SDK console terminal output area
+- 'F' shows the frame rate in the Processing SDK console terminal output area
+- 'D' outputs debug information in the Processing SDK console terminal output area
+- 'C' Arcade Game toggles coin insertion flip-flop emulation
+- 'P' Arcade Game toggles circuit board parameter switch emulation
 
-You will need to set the "gameSelected" variable array index to change the game run. It is set to the Studio 3 ROM.
+The "gameSelected" variable is an array index used to select the game to run. It is set by default to the Studio 3 ROM.
+
 
 ## Emulator Performance
 
@@ -87,13 +121,14 @@ Many thanks to Marcel van Tongeren for his contributions on the Emma 02 site.
 
 I thought the Studio III resident game ROM, with the color Blackjack game that I wrote, was lost, but I discovered it was preserved at the EMMA 02 site under the [Victory MPT-02](http://www.emma02.hobby-site.com/victory.html) videogame console made by Soundic.
 
-The emulator can read the following game file types:
+The emulator reads the following game file types:
 1. ".st2" Studio II cartridge format, loads at specific ROM address locations defined in the file
 2. ".bin" Binary program file for Studio II game, loads at address 0x0400, the plug-in cartridge starting location
 3. ".rom" Binary program file for Studio II/III base ROM, loads at address 0x0000
 4. ".ch8" Binary program file for COSMAC VIP board RAM, loads at address 0x0200. Assumes VIP ROM at 0x8000
 5. ".c8x" Binary program file for COSMAC VIP board RAM, loads at address 0x0300. Assumes VIP ROM at 0x8000, Color RAM at 0xC000
 6. ".vip" Binary program file for COSMAC VIP board RAM, loads at address 0x0000. Assumes VIP ROM at 0x8000
+7. ".arc" Binary program file for RCA Video Arcade game board RAM, loads at address 0x0000. 
 
 ## Studio II/III Game Console Design
 
@@ -180,7 +215,7 @@ In the Documents folder you will find documents for Studio II/III and VIP games.
 
 | COSMAC VIP Games | Author | Notes |
 | --------- | ------ | ----- |
-| Sword Fighter | Joseph Weisbecker | VIP game (not CHIP8) The original game was an RCA Coin arcade game Joe wrote |
+| Sword Fighter | Joseph Weisbecker | VIP game  Ref 1 (not CHIP8) The original game was RCA Coin arcade game |
 | Bowling | Gooitzen van der Wal | original by Joseph Weisbecker, converted to CHIP8 by van der Wal |
 
 Additional Notes:
@@ -205,7 +240,10 @@ Special dedication to Joe Weisbecker who started it all. One of his goals for th
 This respository is intended for educational and historical research. Studio II emulation shows how the games looked and functioned during play. 
 
 ## References
-
+1. RCA COSMAC Game Manual II (VP-720), 8-1980, RCA Microcomputer Products, New Holland Avenue, Lancaster, PA 127604. (Andrew Modla collection)
+2. Game Instruction manual for Studio II and Studio II, 1977, RCA Corporation, David Sarnoff Research Center, Princeton, NJ (Andrew Modla collection)
+3. Internal Memo RE: Studio II & III PROGRAMS, 12/15/1977, Andrew Modla, David Sarnoff Research Center, Princeton, NJ (Andrew Modla collection)
+4. Programming Manual for Studio III, September 1977, RCA Corporation, David Sarnoff Research Center, Princeton, NJ (https://www.archive.org)
 
 ## Postscript
 My intent for this repository is a tribute to Joe Weisbecker's work on personal and educational computers and continue to extend with the goal of education. 

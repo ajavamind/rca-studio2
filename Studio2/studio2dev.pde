@@ -1,14 +1,35 @@
-// *****************************************************************************************************************
-// *****************************************************************************************************************
-//
-//								    	  Derived from Arduino version of Studio 2
-//
-//										 Originally Written by Paul Robson March 2013
-//
+/*
+Note: this license does not apply to  the Studio 2 ROM or game images, nor the RCA Databooks and Datasheets. 
+The License applies to the new work only.
+
+MIT License
+
+Copyright (c) 2017-2018 Andrew Modla
+portions Copyright (c) 2016 paulscottrobson
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 /**
  * Written by Andrew Modla
- * Sections ported to Processing from C code written by Paul Robson
+ * Derived from Arduino version of Studio 2 from C code written by Paul Robson March 2013
+ * Sections ported to Processing 
  *
  */
 
@@ -39,8 +60,8 @@ void clearAllKeys() {
 
 /**
  * Check for key presses.
- * Decode keys
- * Debug keys for displaying frame rate, system reset, and screen save
+ * Decode keys for console play
+ * Debug keys for displaying frame rate, system reset, and screen save, etc.
  */
 void checkAllKeys() 
 {
@@ -59,7 +80,7 @@ void checkAllKeys()
         //println(keyCode);
       } 
       // Keys for Debug
-      else { 
+      else {
         // Show frame rate
         if (key == 'f' || key == 'F') {
           println("frameRate="+frameRate);
@@ -71,21 +92,43 @@ void checkAllKeys()
         }
         // save screen shot
         else if (key == 's' || key == 'S') {
-          save("screenshot/screen"+saveCounter+".png");
-          println("Save Screenshot "+"screen+"+saveCounter+".png");
-          saveCounter++;
+          screenSave = true;
         } else if (key == 'c' || key == 'C') {
-          // Coin Arcade Game
+          // Insert Coin for Arcade Game
           println("Coin");
           coin = true;
-        } else if (key == ' ') {  // debug not implemented
-          step = true;
+        } else if (key == ' ') { 
+          step = true;  // not implemented
+        //} else if (key == 't' || key == 'T') {  // test interrupt
+        //  if (READ(R[P]) == 0) {
+        //    R[P]++;        
+        //    R[P] &= 0xFFFF;
+        //  }
+        //  // Come out of IDL for Interrupt.
+        //  INTERRUPT();  // if IE != 0 generate an interrupt.
+        } else if (key == 'd' || key == 'D') {
+          debugInfo();
+        } else if(key == 'p' || key == 'P') { // parameter on/off
+          if (COIN_ARCADE_PARAMETER_SWITCH == 0)
+            COIN_ARCADE_PARAMETER_SWITCH = 8;
+          else
+            COIN_ARCADE_PARAMETER_SWITCH = 0;
+          println("COIN_ARCADE_PARAMETER_SWITCH="+COIN_ARCADE_PARAMETER_SWITCH);
         }
       }
     }
   }
 }
 
+void debugInfo() {
+  println("screenEnabled="+screenEnabled);
+  println("P="+ hexData(P) +" X="+ hexData(X) + " R[X]="+hex(R[X]) + " IE=" +IE +" state="+state + " cycles="+cycles + " coin="+coin);
+  println(" R[0]="+hex(R[0])+" R[1]="+hex(R[1]) +" R[2]="+hex(R[2]) +" R[3]="+hex(R[3]));
+  println(" R[4]="+hex(R[4])+" R[5]="+hex(R[5]) +" R[6]="+hex(R[6]) +" R[7]="+hex(R[7]));
+  println(" R[8]="+hex(R[8])+" R[9]="+hex(R[9]) +" R[10]="+hex(R[10]) +" R[11]="+hex(R[11]));
+  println(" R[12]="+hex(R[12])+" R[13]="+hex(R[13]) +" R[14]="+hex(R[14]) +" R[15]="+hex(R[15]));
+  //println(" screenMemory="+hex(screenMemory) );
+}
 
 // *****************************************************************************************************************
 //												Hardware Interface
@@ -217,6 +260,61 @@ void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int s
 }
 
 /**
+ * Display the information text
+ */
+void displayInfo(int screenWidth, int screenHeight, String[] text, int offset)
+{
+  int xc, yc, xs, ys, x, y, pixByte;
+  int rx, ry, rw, rh;   // defines drawing rectangle coorinates
+  int drawWidth;
+  int drawHeight;
+  int hOffset;
+  drawWidth = screenWidth - screenWidth/16;
+  drawHeight = screenHeight - screenHeight/8;
+  xs = drawWidth / (VIDEO_SCREEN_WIDTH + 2);  // pixel width
+  ys = xs;  // pixel height
+  hOffset = (screenWidth - 64*xs)/2;
+  xc = xs; //0;
+  yc = ys; //0;
+  rx = xc;
+  ry = yc;
+  // Erase screen display
+  fill(bgColor[backgroundColor]);
+  rect(0, 0, screenWidth, screenHeight - 2*ys);
+  //println("screen ON");
+  color fgr = WHITE;       // Painting color.
+  noStroke();
+
+  fill(fgr);
+  //rw = xs;
+  //rh = ys;                                                                // Set cell width and height
+  //for (y = 0; y < VIDEO_SCREEN_HEIGHT; y++)                               // One line at a time.
+  //{
+  //  int offset = ((y * 8 + scrollOffset) & 0xFF);                   // Work out where data comes from.
+  //  ry = yc + ys * y;                                                             // Calculate vertical coordinate
+  //  xc = 0;
+  //  for (x = 0; x < (VIDEO_SCREEN_WIDTH/8); x++)                    // 8 bytes per line.
+  //  {
+  //    pixByte = studio2_memory[screenData+offset++] & 0xFF;                            // Get next pixel.
+  //    rx = xc + x * xs * 8;                                                     // Calculate horizontal coordinate
+  //    if (console == STUDIO3 || (console == VIP && interpreter == CHIP8X)) {
+  //      int colorIndex = studio2_memory[COLOR_MAP + x + 8*(y/4)] & 0x0007;
+  //      fill(colorMap[colorIndex]);
+  //    }
+  //    while (pixByte != 0)                                                        // if something to render.
+  //    {
+  //      // if bit 7 set draw pixel
+  //      if ((pixByte & 0x80) != 0) {
+  //        rect(hOffset+rx, ry, rw, rh);
+  //      }
+  //      pixByte = (pixByte << 1) & 0xFF;                                        // shift to left, lose overflow.
+  //      rx = rx + xs;                                                       // next coordinate across.
+  //    }
+  //  }
+  //}
+}
+
+/**
  * Load Game Cartridge Binary
  * param fileName String for files located in "data" folder
  */
@@ -288,7 +386,7 @@ void loadGameBinary(String fileName)
       address++;
     }
   }
-  // .CH8 binary file
+  // .VIP binary file
   else if (fileName.toLowerCase().endsWith(".vip")) { // VIP file binary format
     address = 0x0000; // Program code starting location
     for (int i=0; i<data.length; i++) {
@@ -301,6 +399,16 @@ void loadGameBinary(String fileName)
   }
   // .ARC binary file for Arcade Game consoles
   else if (fileName.toLowerCase().endsWith(".arc")) { 
+    address = 0x0000;
+    for (int i=0; i<data.length; i++) {
+      if (!((address >= RAM && address < (RAM+RAM_SIZE)))) {
+        studio2_memory[address] = data[i] & 0xFF;
+      }
+      address++;
+    }
+  }
+  // .CUS binary file for Arcade Game consoles
+  else if (fileName.toLowerCase().endsWith(".cus")) { 
     address = 0x0000;
     for (int i=0; i<data.length; i++) {
       if (!((address >= RAM && address < (RAM+RAM_SIZE)))) {
@@ -333,7 +441,7 @@ void loadGameBinary(String fileName)
  */
 void loadBinary(String fileName, int address)
 {
-  println("Filename: "+fileName + " at "+ hex(address));
+  println("Binary Filename: "+fileName + " at "+ hex(address));
   byte[] data = loadBytes(fileName);
   // binary file
   for (int i=0; i<data.length; i++) {
@@ -341,4 +449,14 @@ void loadBinary(String fileName, int address)
     //println(" " + hex(address) + " " + hex(int(data[i])));
     address++;
   }
+}
+
+/**
+ * Load Game Info Text String
+ * param fileName String for files located in "data" folder
+ */
+void loadGameInfo(String fileName)
+{
+  println("Info Filename: "+fileName);
+  textInfo = loadStrings(fileName);
 }

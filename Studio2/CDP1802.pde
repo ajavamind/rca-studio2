@@ -1,17 +1,36 @@
-//******************************************************************************************************* //<>// //<>//
-//*******************************************************************************************************
-//
-//      Name:       Cpu.C
-//      Purpose:    1802 Processor Emulation
-//      Author:     Paul Robson
-//      Date:       24th February 2013
-//
-//*******************************************************************************************************
-//*******************************************************************************************************
+/* //<>//
+Note: this license does not apply to  the Studio 2 ROM or game images, nor the RCA Databooks and Datasheets. 
+The License applies to the new work only.
+
+MIT License
+
+Copyright (c) 2017-2018 Andrew Modla
+portions Copyright (c) 2016 paulscottrobson
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 /**
  * Converted to Processing/Java programming environment by Andrew Modla
+ * from Cpu.C  Processor Emulation code by Paul Robson, 24th February 2013
  * November 2017
+ *
  * Processing uses signed integers (byte and int) requiring register size masking in code below
  */
 
@@ -22,7 +41,8 @@ private static final int HWC_UPDATEQ        =     1;
 private static final int HWC_FRAMESYNC      =     2;
 private static final int HWC_SETKEYPAD      =     3;
 
-private static final int CLOCK_SPEED =            (3521280/2);                                        // Clock Frequency (1,760,640Hz)
+//private static final int CLOCK_SPEED =            (4000000/2);                                        // Clock Frequency (2,000,000 Hz)
+private static final int CLOCK_SPEED =            (3521280/2);                                         // Clock Frequency (1,760,640 Hz)
 private static final int CYCLES_PER_SECOND   =    (CLOCK_SPEED/8);                                     // There are 8 clocks in each cycle (220,080 cycles/Second)
 private static final int FRAMES_PER_SECOND  =     (60);                                                // NTSC Frames Per Second
 private static final int LINES_PER_FRAME    =     (262);                                               // Lines Per NTSC Frame
@@ -49,6 +69,7 @@ static int[] R = new int[16];                                                   
 static int _temp;                                                                // Temporary register
 static int cycles;                                                                // Cycles till state switch
 static int state;                                                                 // Frame position state (NOT 1802 internal state)
+static int prevState;
 static int screenMemory = -1;                                                  // Current Screen Pointer (-1 = off)
 static int scrollOffset;                                                          // Vertical scroll offset e.g. R0 = $nnXX at 29 cycles
 static boolean screenEnabled;                                                         // Screen on (IN 1 on, OUT 1 off)
@@ -59,6 +80,7 @@ static int[] studio2_memory;                                          // RAM dev
 
 static boolean step = false;  // for debug
 static int previous = 0;  // for debug
+static int opCode = 0;
 
 /**
  * 1802 CPU State (used for debug machine state saves)
@@ -100,7 +122,7 @@ private final static void WRITE(int address, int data)
   } else if ((console == STUDIO3) && (address >= COLOR_MAP) && (address < (COLOR_MAP+COLOR_MAP_SIZE))) {
     studio2_memory[address] = data & 0xFF;
     //println("write color map memory "+ hex(address) + " value="+(data&0xFF));
-  } else if (console == VIP || console == CUSTOM) {
+  } else if (console == VIP || console == CUSTOM || console == ARCADE) {
     studio2_memory[address] = data & 0xFF;
   } else {
     println("Attempt at "+ hex(R[P]-1) + " to write ROM memory "+hex(address) + " "+ hex(data));
@@ -193,22 +215,32 @@ private final static int READEFLAG(int flag) {
   int retVal = 0;
   switch (flag)
   {
-  case 1:
+  case 1:  // EF1
+    //println("EF1");
     if (console == ARCADE) {
       // center A switch pressed
       retVal = isPressedA[5];
-      if (retVal == 1) println("EF1");
+      //isPressedA[5] = 0;
+      //if (retVal == 1) println("EF1");
     }
     else {
       // EF1 detects not in display
       retVal = 1;               // Permanently set to '1' so BN1 in interrupts always fails
     }
     break;
-  case 3: 
+  case 2: // EF2
+    if (console == ARCADE) {
+      //println("EF2");
+      //retVal = 1;
+    }
+    break;
+  case 3: // EF3
+    //println("EF3");
     if (console == ARCADE) {
       // center B switch pressed
       retVal = isPressedB[5];
-      if (retVal == 1) println("EF3");
+      //isPressedB[5] = 0;
+      //if (retVal == 1) println("EF3");
     }
     else {
       // EF3 detects keypressed on VIP and ELF but differently.
@@ -216,11 +248,12 @@ private final static int READEFLAG(int flag) {
       retVal = SYSTEM_Command(HWC_READKEYBOARD, keyboardLatch);
     }
     break;
-  case 4:
+  case 4: // EF4
+    //println("EF4");
     if (console == ARCADE) {
       if (coin) {
         retVal = 1;
-        if (retVal == 1) println("Coin reset");
+        //if (retVal == 1) println("Coin reset");
       }
     }
     else {
@@ -275,6 +308,14 @@ private final static void UPDATEIO(int portID, int data) {
     }
     break;
   case 6:
+    if (console == ARCADE) {
+      if (data != 0) {
+        toneState = 1;
+      }
+      else {
+        toneState = 0;
+      }
+    }
     break;
   case 7:
     break;
@@ -294,14 +335,53 @@ private final static int INPUTIO(int portID) {
   case 5:  // 4 Bit Parameter switch code
     if (console == ARCADE) {
       retVal = COIN_ARCADE_PARAMETER_SWITCH;
-      println("Parameter switch read "+ retVal);
+      //println("Parameter switch read "+ retVal);
     }
     break;
   case 6: // Switches bit 0-7 
     if (console == ARCADE) {
-      //retVal = 0;  // to do
+      retVal = 0;  
       coin = false;
-      println("switches "+ hex(retVal));
+      if (isPressedA[4] == 1) {
+        retVal |= 0x01;
+       }
+      else {
+        retVal &= 0xFE;
+      }
+      if (isPressedA[2] == 1) {
+        retVal |= 0x02;
+      }
+      else {
+        retVal &= 0xFD;
+      }
+      if (isPressedA[6] == 1)
+        retVal |= 0x04;
+      else
+        retVal &= 0xFB;
+      if (isPressedA[8] == 1)
+        retVal |= 0x08;
+      else
+        retVal &= 0xF7;
+      //////////////////////
+      if (isPressedB[4] == 1)
+        retVal |= 0x10;
+      else
+        retVal &= 0xEF;
+      if (isPressedB[2] == 1)
+        retVal |= 0x20;
+      else
+        retVal &= 0xDF;
+      if (isPressedB[6] == 1)
+        retVal |= 0x40;
+      else
+        retVal &= 0xBF;
+      if (isPressedB[8] == 1)
+        retVal |= 0x80;
+      else
+        retVal &= 0x7F;
+      //if (retVal != 0) {
+      //  println("switches "+ hex(retVal));
+      //}
     }
     break;
   }
@@ -344,6 +424,8 @@ void CPU_Reset()
       loadBinary("chip8x.ram", 0x0000);
     R[1] = VIDEO_RAM | 0x00FF;
     println("R[1] "+hex(R[1]));
+  } else if (console == ARCADE) {
+    //
   }
 
   // set color map
@@ -353,8 +435,8 @@ void CPU_Reset()
     }
   }
   
-  if (console == ARCADE) {
-    R[0] = 1;  // skip over idl instruction
+  if (READ(0) == 0) {
+    R[0] = 1;  // skip over idl or sep 0 instruction
   }
 
 }
@@ -375,7 +457,7 @@ String hexData(int data) {
 int CPU_Execute()
 {
   int rState = 0;
-  int addr = R[P]++;
+  int addr = R[P];
   
   // debug 
   //if (addr < 0x1FF) {
@@ -398,11 +480,12 @@ int CPU_Execute()
   ///////////////////////
   
   previous = addr;
-  R[P] &= 0xFFFF;
-  int opCode = READ(addr);
-  //println("P= "+hex(R[P]-1)+" opCode="+hex(opCode));
-  cycles -= 2;                                              // 2 x 8 clock Cycles - Fetch and Execute.
+  opCode = READ(addr);
   
+  R[P]++;
+  R[P] &= 0xFFFF;
+  cycles -= 2;                                              // 2 x 8 clock Cycles - Fetch and Execute.
+
   switch(opCode)                                            // Execute dependent on the Operation Code
   {
   case 0x00: /* "idl" */
@@ -1362,7 +1445,7 @@ int CPU_Execute()
     switch(state)
     {
     case 1:                                                                     // Main Frame State Ends
-      state = 2;                                                              // Switch to Interrupt Preliminary state
+      state = 2;                                                               // Switch to Interrupt Preliminary state
       cycles = STATE_2_CYCLES;                                                // The 29 cycles between INT and DMAOUT.
       if (screenEnabled)                                                      // If screen is on
       {
@@ -1377,8 +1460,8 @@ int CPU_Execute()
     case 2:                                                                     // Interrupt preliminary ends.
       state = 1;                                                              // Switch to Main Frame State
       cycles = STATE_1_CYCLES;
-      screenMemory = (R[0] & 0xFF00) ;                               // space for PC version
-      scrollOffset = R[0] & 0xFF;                                             // Get the scrolling offset (for things like the car game)
+      screenMemory = (R[0] & 0xFF00) ;     // display location
+      scrollOffset = R[0] & 0xFF;          // Get the scrolling offset (for things like the car game)
       SYSTEM_Command(HWC_FRAMESYNC, 0);                                        // Synchronise.
       if (toneState != 0) {
         tone(true);

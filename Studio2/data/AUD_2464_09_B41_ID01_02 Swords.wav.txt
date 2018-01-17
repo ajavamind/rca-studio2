@@ -1,0 +1,8 @@
+RCA Swords Arcade Game (1975) by Joe Weisbecker
+
+After coin insert:
+press A center button for 1 player
+press B center button for 2 players
+
+Center button moves sword
+Arrow keys move sword fighter up, down, left, right
