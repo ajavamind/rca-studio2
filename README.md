@@ -3,7 +3,7 @@
 
 The system is also known as the RCA Studio 2 and Studio 3 video game console.
 
-## Studio II Emulator
+## COSMAC Game Emulation
 
 The emulator code in this repository is based on work by Paul Robson, 
 who wrote a RCA COSMAC CDP1802 microcomputer and Studio 2 video game console emulator.
@@ -13,33 +13,37 @@ on modern computers. I ported Paul Robson's well-crafted C code to the Processin
 
 https://github.com/paulscottrobson/studio2-games 
 
-## Studio III Emulator
+The following subsections are in chronological order.
 
-The Studio III game console was never built by RCA, but was sold by manufacturers outside the USA. The game programmers wrote Studio III games using the COSMAC VIP boards for software development and prototyping in 1977.
-An add-on graphics card supplied the color support and a programmable sound card was used for Studio III enhanced sound.
+### SYSTEM 00 Personal Computer
 
-My Studio 3 emulation supports color graphics and programmable sound for Studio III games that use color and programmable sound generation. I was able to add color and sound emulation because I found an archived **Programming Manual for Studio III**, written in September 1977, detailing the color and sound functions. I made some contributions to that document when it was written. 
+The SYSTEM 00 computer is the first personal computer built using discrete TTL integrated circuits. Its instruction set is a subset
+of the CDP1802 microprocessor.
 
-Studio III Pinball Game Screenshot
+### FRED I Computer
 
-![Screenshot of Studio III Pinball Game](Studio2/screenshot/pinball.png)
+### FRED II Computer
 
-## Studio IV
+### RCA COSMAC Computer Game System
 
-The Studio IV game console was in the planning stages, in 1977, but was never built. 
+The RCA COSMAC Computer Game System is based on the FRED II computer. It read tapes to load game programs. 
+The Hagley Library Acc. 2464, Box 919, FRED folder 4, has a document written by 
+Joe Weisbecker in January 1975 titled "Instructions for the RCA COSMAC Commputer Game System".
+I conclude that the games described in the document were written in the late 1974.
 
-## COSMAC VIP Emulator
+One documented game is Bowl/Tag and it runs as a simulated coin arcade game in the RCA COSMAC Computer Game System. 
+Using the WAV file AUD_2464_09_B41_ID01_01 Tag-Bowling.wav purchased from the Hagley Library (see below), I was able to extract
+the ROM image and stored it as an arc file type. This game runs in the emulator.
 
-The COSMAC VIP (Video Interface Processor) CDP18S711 is a single board computer for home hobby use to learn about computers and programming.
-Joe Weisbecker designed the system and wrote a CHIP8 interpreter a simpler streamlined version of the Studio II/III interpreter.
-Later he expanded the interpreter, naming it CHIP8X to handle adapter cards (sound, color video, etc.) for the VIP board.
+A distinguishing characteristic of games that run in FRED II systems is that the first byte of programs is "0", the IDLE instruction that 
+waits for a DMA or interrupt. 
 
-Since the emulator implements the RCA CDP1802 microcomputer instruction set directly, it will run all the interpreters written for Studio II/III or VIP boards.
-The VIP has many major design similarities to the Studio III.
+### RCA Video Coin Arcade Game Console
 
-## RCA Video Arcade Game Console Emulator
+The RCA Video Coin Arcade console games preceded the Studio 2 and were built around June 1975 based on documents from the Hagley Library. 
+A RCA internal correspondence document, "COSMAC Coin Machine - Status Report" dated 26 December, 1974 from Joe Weisbecker and
+Phillip Baltzer describes staged plans for a Video Coin Arcade machine (Hagley Library Acc 2464, Box 919, Folder 4).
 
-The RCA Video Arcade console games preceded the Studio 2 and were built in 1975. 
 The consoles were placed in a shopping mall to evaluate the marketability of the game systems.
 Based on information from the Hagley Museum and Library, Wilmington, Delaware,
 I was able to emulate the circuit board for these games. 
@@ -62,6 +66,38 @@ I wrote a program in Processing to extract the game code instruction bytes encod
 -Box Number AVD B41
 -Cassette Tape AUD_2464_09_B41_ID01_02 Swords.wav
 -The source of WAV files purchased from the Hagley Library and other related materials is from Atariage member "ubersaurus".
+
+### COSMAC ELF
+
+Joe Weisbecker's articles on the COSMAC ELF computer appeared in Popular Electronics, starting August, 1976.
+
+### Studio II Console
+
+The Studio II game console was sold by RCA beginning with its announcement in January 1977, until cancellation in December 1977.
+
+### Studio III Console
+
+The Studio III game console was never built by RCA, but was sold by manufacturers outside the USA. The game programmers wrote Studio III games using the COSMAC VIP boards for software development and prototyping in 1977.
+An add-on graphics card supplied the color support and a programmable sound card was used for Studio III enhanced sound.
+
+My Studio 3 emulation supports color graphics and programmable sound for Studio III games that use color and programmable sound generation. I was able to add color and sound emulation because I found an archived **Programming Manual for Studio III**, written in September 1977, detailing the color and sound functions. I made some contributions to that document when it was written. 
+
+Studio III Pinball Game Screenshot
+
+![Screenshot of Studio III Pinball Game](Studio2/screenshot/pinball.png)
+
+### Studio IV Console
+
+The Studio IV game console was in the planning stages, in 1977, but was never built. 
+
+### COSMAC VIP Computer
+
+The COSMAC VIP (Video Interface Processor) CDP18S711 is a single board computer for home hobby use to learn about computers and programming.
+Joe Weisbecker designed the system and wrote a CHIP8 interpreter a simpler streamlined version of the Studio II/III interpreter.
+Later he expanded the interpreter, naming it CHIP8X to handle adapter cards (sound, color video, etc.) for the VIP board.
+
+Since the emulator implements the RCA CDP1802 microcomputer instruction set directly, it will run all the interpreters written for Studio II/III or VIP boards.
+The VIP has many major design similarities to the Studio III.
 
 ## Running the Emulator
 
@@ -166,7 +202,25 @@ In the Documents folder you will find documents for Studio II/III and VIP games.
 3. Programming_Manual_for_STUDIO_III_Sep77.pdf From https://archive.org
 4. VP-710_RCA_COSMAC_VIP_Game_Manual_Dec78.pdf From https://archive.org 
 
-## Game Developers
+## RCA Game Development
+
+| RCA COSMAC Computer System Game | Author | Notes |
+| --------- | ------ | ----- |
+| Jackpot Game | Joyce Weisbecker | Daughter of Joseph Weisbecker, Code lost |
+| Space War Game | C.T. Wu | Code lost |
+| Match Game | A. Marcantonio | Code lost |
+| Acey-Deucy| Joseph Weisbecker | Code lost |
+| Spot Speedway | Anthony Robbi  | Code lost |
+| Deduce | Joseph Weisbecker | Code lost |
+| Life | M. Blecker | Code lost |
+| Bowl/Tag | Joseph Weisbecker | Extracted from cassette tape, emulation based on FRED II |
+
+| RCA Coin Arcade Game | Author | Notes |
+| --------- | ------ | ----- |
+| Swords | Joseph Weisbecker | Extracted from cassette tape, emulation based on FRED II  |
+| Mines |  | cassette tape?, FRED II |
+| Chase II |  | cassette tape?, Similar to Tag, FRED II |
+| Bowling | Joseph Weisbecker | cassette tape?, FRED II |
 
 | Studio II Monochrome Game | Author | Notes |
 | --------- | ------ | ----- |
