@@ -17,8 +17,8 @@ The following subsections are in chronological order.
 
 ### SYSTEM 00 Personal Computer
 
-The SYSTEM 00 computer is the first personal computer built using discrete TTL integrated circuits. Its instruction set is a subset
-of the CDP1802 microprocessor.
+The SYSTEM 00 computer is the first personal computer built using discrete TTL integrated circuits. Joseph Weisbecker designed and constructed the SYSTEM 00 in 1971-1972. 
+Its instruction set is a subset of the CDP1802 microprocessor.
 
 ### FRED I Computer
 
@@ -215,12 +215,14 @@ In the Documents folder you will find documents for Studio II/III and VIP games.
 | Life | M. Blecker | Code lost |
 | Bowl/Tag | Joseph Weisbecker | Extracted from cassette tape, emulation based on FRED II |
 
-| RCA Coin Arcade Game | Author | Notes |
+
+|      RCA Coin Arcade Game      | Author | Notes |
 | --------- | ------ | ----- |
 | Swords | Joseph Weisbecker | Extracted from cassette tape, emulation based on FRED II  |
 | Mines |  | cassette tape?, FRED II |
 | Chase II |  | cassette tape?, Similar to Tag, FRED II |
 | Bowling | Joseph Weisbecker | cassette tape?, FRED II |
+
 
 | Studio II Monochrome Game | Author | Notes |
 | --------- | ------ | ----- |
@@ -235,6 +237,7 @@ In the Documents folder you will find documents for Studio II/III and VIP games.
 | Gunfighter/Moonship Battle | Andrew Modla  | This is the first Studio II game I wrote |
 | Studio II Point-of-Purchase Demo | Andrew Modla  | 1024 bytes, code lost |
 
+
 | Studio III Color Game | Author | Notes |
 | --------- | ------ | ----- |
 | Doodle/Patterns/Bowling/Blackjack | Joseph Weisbecker, Andrew Modla (Blackjack) | 2048 bytes, Studio III Resident Games Note 3 |
@@ -247,10 +250,12 @@ In the Documents folder you will find documents for Studio II/III and VIP games.
 | TV Typewriter/Ticker Tape | Andrew Modla | 1024 bytes, originally for Studio III, CHIP8 version exists |
 | Studio III Point-of-Purchase Demo | Andrew Modla | 1024 bytes, code lost |
 
+
 | Studio IV Color Game | Author | Notes |
 | --------- | ------ | ----- |
 | Match Game | Andrew Modla | Planned enhanced version, not implemented |
 | Helicopter Gunship | Andrew Modla | Planned, not implemented |
+
 
 | Other Studio II Games | Author | Notes |
 | --------- | ------ | ----- |
@@ -267,10 +272,12 @@ In the Documents folder you will find documents for Studio II/III and VIP games.
 | Invaders | Paul Robson | |
 | Tv Arcade 2012 | Lee Romanow | |
 
+
 | COSMAC VIP Games | Author | Notes |
 | --------- | ------ | ----- |
 | Sword Fighter | Joseph Weisbecker | VIP game  Ref 1 (not CHIP8) The original game was RCA Coin arcade game |
 | Bowling | Gooitzen van der Wal | original by Joseph Weisbecker, converted to CHIP8 by van der Wal |
+
 
 Additional Notes:
 1. Joyce Weisbecker http://www.vintagecomputing.com/index.php/archives/2018/historys-first-female-video-game-designer
