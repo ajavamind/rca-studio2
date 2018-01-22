@@ -17,12 +17,29 @@ The following subsections are in chronological order.
 
 ### SYSTEM 00 Personal Computer
 
-The SYSTEM 00 computer is the first personal computer built using discrete TTL integrated circuits. Joseph Weisbecker designed and constructed the SYSTEM 00 in 1971-1972. 
-Its instruction set is a subset of the CDP1802 microprocessor.
+The SYSTEM 00 computer may be the first personal computer built using discrete TTL integrated circuits. 
+Joseph Weisbecker designed and constructed the SYSTEM 00 in 1971 (October-December) based on schematic circuit diagram dates in the 
+"Microprocessor Manual SYSTEM 00" by Joseph A. Weisbecker. 
+The computer architecture of SYSTEM 00 is the starting point for the RCA CDP1802 microprocessor.
+The computer instruction set is a subset of what would become the RCA CDP1801 and CDP1802 microprocessor instruction set.
+
+http://www.retrotechnology.com/memship/cosmac_system_00.html
+
+http://www.cosmacelf.com/gallery/system-00.html
 
 ### FRED I Computer
 
+FRED is an acronym for "Flexible Recreational Educational Device". 
+
+This document describes the FRED I computer (July 1972):
+
+http://www.retrotechnology.com/memship/Sarnoff_FRED_manual_Weisbecker_Robbi.pdf
+
 ### FRED II Computer
+
+Information about the FRED II is available at:
+
+http://www.retrotechnology.com/memship/cosmac_fred2.html
 
 ### RCA COSMAC Computer Game System
 
@@ -70,6 +87,8 @@ I wrote a program in Processing to extract the game code instruction bytes encod
 ### COSMAC ELF
 
 Joe Weisbecker's articles on the COSMAC ELF computer appeared in Popular Electronics, starting August, 1976.
+
+http://www.exemark.com/Microcontrollers/PopularElecwebc.pdf
 
 ### Studio II Console
 
