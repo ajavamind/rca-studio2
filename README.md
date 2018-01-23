@@ -9,11 +9,15 @@ The emulator code in this repository is based on work by Paul Robson,
 who wrote a RCA COSMAC CDP1802 microcomputer and Studio 2 video game console emulator.
 Paul Robson's emulation code design
 is excellent because it simulates the real-time operaton of the CDP1802 CPU and Studio 2 quite well, when run
-on modern computers. I ported Paul Robson's well-crafted C code to the Processing language (Java).
+on modern computers. 
+
+I ported Paul Robson's well-crafted C code to the Processing language (Java) so that I could use
+its graphics library to create a user interface for playing the games.
+I also made additional enhancements to support other COSMAC systems besides the Studio II console.
 
 https://github.com/paulscottrobson/studio2-games 
 
-The following subsections are in chronological order.
+The following subsections in chronological order describe the evolution of the Studio II.
 
 ### SYSTEM 00 Personal Computer
 
@@ -27,16 +31,17 @@ http://www.retrotechnology.com/memship/cosmac_system_00.html
 
 http://www.cosmacelf.com/gallery/system-00.html
 
-### FRED I Computer
+### FRED Computer
 
 FRED is an acronym for "Flexible Recreational Educational Device". 
 
-This document describes the FRED I computer (July 1972):
+This document describes the FRED computer (July 1972):
 
 http://www.retrotechnology.com/memship/Sarnoff_FRED_manual_Weisbecker_Robbi.pdf
 
 ### FRED II Computer
 
+Based on schematics of the FRED II, it was built around July, 1974 (Hagley Library source). 
 Information about the FRED II is available at:
 
 http://www.retrotechnology.com/memship/cosmac_fred2.html
@@ -45,19 +50,23 @@ http://www.retrotechnology.com/memship/cosmac_fred2.html
 
 The RCA COSMAC Computer Game System is based on the FRED II computer. It read tapes to load game programs. 
 The Hagley Library Acc. 2464, Box 919, FRED folder 4, has a document written by 
-Joe Weisbecker in January 1975 titled "Instructions for the RCA COSMAC Commputer Game System".
+Joe Weisbecker in January 1975 titled "Instructions for the RCA COSMAC Computer Game System".
 I conclude that the games described in the document were written in the late 1974.
 
 One documented game is Bowl/Tag and it runs as a simulated coin arcade game in the RCA COSMAC Computer Game System. 
 Using the WAV file AUD_2464_09_B41_ID01_01 Tag-Bowling.wav purchased from the Hagley Library (see below), I was able to extract
 the ROM image and stored it as an arc file type. This game runs in the emulator.
 
+The procedure and program tool I used to extract the program byte code from a WAV file is available on GitHub at
+
+https://github.com/ajavamind/Extract-WAV-Data
+
 A distinguishing characteristic of games that run in FRED II systems is that the first byte of programs is "0", the IDLE instruction that 
 waits for a DMA or interrupt. 
 
 ### RCA Video Coin Arcade Game Console
 
-The RCA Video Coin Arcade console games preceded the Studio 2 and were built around June 1975 based on documents from the Hagley Library. 
+The RCA Video Coin Arcade console games preceded the Studio 2 and were built around June 1975 based on dated circuit dschematics and documents from the Hagley Library. 
 A RCA internal correspondence document, "COSMAC Coin Machine - Status Report" dated 26 December, 1974 from Joe Weisbecker and
 Phillip Baltzer describes staged plans for a Video Coin Arcade machine (Hagley Library Acc 2464, Box 919, Folder 4).
 
@@ -75,7 +84,7 @@ The game was written by Joseph Weisbecker in 1975.
 https://youtu.be/xbSNnIyc1K4
 
 The "Swords" game was stored on a cassette tape and converted into a WAV file provided by the Hagley Museum and Library.  
-I wrote a program in Processing to extract the game code instruction bytes encoded in the WAV file audio to use with the Arcade game emulator.
+I wrote a program in Processing to extract the game code instruction bytes encoded in the WAV file audio to use with the Arcade game emulator. See https://github.com/ajavamind/Extract-WAV-Data
 
 -Hagley Museum and Library: Sarnoff/RCA Collection
 -Joseph A. Weisbecker's archived manuscripts and materials
@@ -270,12 +279,6 @@ In the Documents folder you will find documents for Studio II/III and VIP games.
 | Studio III Point-of-Purchase Demo | Andrew Modla | 1024 bytes, code lost |
 
 
-| Studio IV Color Game | Author | Notes |
-| --------- | ------ | ----- |
-| Match Game | Andrew Modla | Planned enhanced version, not implemented |
-| Helicopter Gunship | Andrew Modla | Planned, not implemented |
-
-
 | Other Studio II Games | Author | Notes |
 | --------- | ------ | ----- |
 | Computer | ? | Not a game |
@@ -290,6 +293,12 @@ In the Documents folder you will find documents for Studio II/III and VIP games.
 | Berzerk | Paul Robson | |
 | Invaders | Paul Robson | |
 | Tv Arcade 2012 | Lee Romanow | |
+
+
+| Studio IV Color Game | Author | Notes |
+| --------- | ------ | ----- |
+| Match Game | Andrew Modla | Planned enhanced version, not implemented |
+| Helicopter Gunship | Andrew Modla | Planned, not implemented |
 
 
 | COSMAC VIP Games | Author | Notes |
