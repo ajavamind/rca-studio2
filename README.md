@@ -27,6 +27,8 @@ Joseph Weisbecker designed and constructed the SYSTEM 00 in 1971 (October-Decemb
 The computer architecture of SYSTEM 00 is the starting point for the RCA CDP1802 microprocessor.
 The computer instruction set is a subset of what would become the RCA CDP1801 and CDP1802 microprocessor instruction set.
 
+The SYSTEM 00 document contains two sample programs, 1) Deduce game and 2) Display (on OScilloscope).
+
 http://www.retrotechnology.com/memship/cosmac_system_00.html
 
 http://www.cosmacelf.com/gallery/system-00.html
@@ -66,7 +68,7 @@ waits for a DMA or interrupt.
 
 ### RCA Video Coin Arcade Game Console
 
-The RCA Video Coin Arcade console games preceded the Studio 2 and were built around June 1975 based on dated circuit dschematics and documents from the Hagley Library. 
+The RCA Video Coin Arcade console games preceded the Studio 2 and were built around June 1975 based on dated circuit schematics from the Hagley Library. 
 A RCA internal correspondence document, "COSMAC Coin Machine - Status Report" dated 26 December, 1974 from Joe Weisbecker and
 Phillip Baltzer describes staged plans for a Video Coin Arcade machine (Hagley Library Acc 2464, Box 919, Folder 4).
 
