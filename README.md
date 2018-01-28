@@ -70,7 +70,8 @@ waits for a DMA or interrupt.
 
 The RCA Video Coin Arcade console games preceded the Studio 2 and were built around June 1975 based on dated circuit schematics from the Hagley Library. 
 A RCA internal correspondence document, "COSMAC Coin Machine - Status Report" dated 26 December, 1974 from Joe Weisbecker and
-Phillip Baltzer describes staged plans for a Video Coin Arcade machine (Hagley Library Acc 2464, Box 919, Folder 4).
+Phillip Baltzer describes staged plans for a Video Coin Arcade machine (Hagley Library Acc 2464, Box 919, Folder 4). 
+The Hagley library also photos of the Arcade game consoles.
 
 The consoles were placed in a shopping mall to evaluate the marketability of the game systems.
 Based on information from the Hagley Museum and Library, Wilmington, Delaware,
@@ -103,11 +104,11 @@ http://www.exemark.com/Microcontrollers/PopularElecwebc.pdf
 
 ### Studio II Console
 
-The Studio II game console was sold by RCA beginning with its announcement in January 1977, until cancellation in December 1977.
+The Studio II game console was sold by RCA beginning with its announcement in January 1977. The project was canceled in December 1977.
 
 ### Studio III Console
 
-The Studio III game console was never built by RCA, but was sold by manufacturers outside the USA. The game programmers wrote Studio III games using the COSMAC VIP boards for software development and prototyping in 1977.
+The Studio III game console was never manufactured by RCA, but was sold by manufacturers outside the USA. RCA game programmers wrote Studio III games using the COSMAC VIP boards for software development and prototyping in 1977.
 An add-on graphics card supplied the color support and a programmable sound card was used for Studio III enhanced sound.
 
 My Studio 3 emulation supports color graphics and programmable sound for Studio III games that use color and programmable sound generation. I was able to add color and sound emulation because I found an archived **Programming Manual for Studio III**, written in September 1977, detailing the color and sound functions. I made some contributions to that document when it was written. 
@@ -223,15 +224,6 @@ Games were slow for three reasons:
 
 Due to its operating speed and keyboard input, in my opinion, the Studio II system was better suited for puzzles and card games, rather than action games. 
 
-## Documents
-
-In the Documents folder you will find documents for Studio II/III and VIP games. 
-
-1. Game_Instruction_Manual_for_Studio_II_and_Studio_III.pdf This is my personal copy. Stereo 3D photos (L/R side by side) of this document are in the Photos folder. Joe Weisbecker's copy is at the Hagley Museum Library, 298 Buck Road, Wilmington, DE 19807, USA.
-2. MPM-201A_User_Manual_for_the_CDP1802_COSMAC_Microprocessor_1976.pdf From https://archive.org
-3. Programming_Manual_for_STUDIO_III_Sep77.pdf From https://archive.org
-4. VP-710_RCA_COSMAC_VIP_Game_Manual_Dec78.pdf From https://archive.org 
-
 ## RCA Game Development
 
 | RCA COSMAC Computer System Game | Author | Notes |
@@ -265,7 +257,7 @@ In the Documents folder you will find documents for Studio II/III and VIP games.
 | Baseball | Andrew Modla |  Third Studio II game I wrote|
 | Blackjack | Andrew Modla | Note 2 |
 | Gunfighter/Moonship Battle | Andrew Modla  | This is the first Studio II game I wrote |
-| Studio II Point-of-Purchase Demo | Andrew Modla  | 1024 bytes, code lost |
+| Studio II Point-of-Purchase Demo | Andrew Modla  | 1024 bytes |
 
 
 | Studio III Color Game | Author | Notes |
@@ -319,26 +311,41 @@ There is also a VIP CHIP8 version of Blackjack in color.
 There is also a VIP CHIP8 version of Pinball.
 6. There is also a COSMAC VIP CHIP8 version of Bingo.
 
+## Documents and References
+
+1. Game Instruction manual for Studio II and Studio II, 1977, RCA Corporation, David Sarnoff Research Center, Princeton, NJ (Andrew Modla collection) This is my personal copy. Stereo 3D photos (L/R side by side) of this document are in the Photos folder. Joe Weisbecker's copy is at the Hagley Museum and Library, 298 Buck Road, Wilmington, DE 19807, USA.
+2. Internal Memo RE: Studio II & III PROGRAMS, 12/15/1977, Andrew Modla, David Sarnoff Research Center, Princeton, NJ (Andrew Modla collection)
+3. Programming Manual for Studio III, September 1977, RCA Corporation, David Sarnoff Research Center, Princeton, NJ (source: 
+http://bitsavers.org/components/rca/cosmac/ (Programming_Manual_for_STUDIO_III_Sep77.pdf)
+4. MPM-201A_User_Manual_for_the_CDP1802_COSMAC_Microprocessor_1976.pdf From http://bitsavers.org/components/rca/cosmac/ 
+(MPM-201A_User_Manual_for_the_CDP1802_COSMAC_Microprocessor_1976.pdf)
+5. MPM-201B_CDP1802_Users_Manual_Nov77 http://bitsavers.org/pdf/rca/1802/  (MPM-201B_CDP1802_Users_Manual_Nov77.pdf)
+6. VP-710_RCA_COSMAC_VIP_Game_Manual_Dec78.pdf From http://bitsavers.org/components/rca/cosmac/
+(VP-710_RCA_COSMAC_VIP_Game_Manual_Dec78.pdf)
+7. RCA COSMAC Game Manual II (VP-720), 8-1980, RCA Microcomputer Products, New Holland Avenue, Lancaster, PA 127604. (Andrew Modla collection)
+
+Sources of information about RCA COSMAC technology can be found at:
+
+http://www.retrotechnology.com (Herb Johnson)
+
+Hagley Museum and Library, Wilmington, DE 19807, USA https://www.hagley.org/research
+
+The College of New Jersey, Sarnoff Collection, Trenton, NJ, USA
+https://davidsarnoff.tcnj.edu/
+
 ## Credits
 Many thanks to Studio 2 enthusiasts, game programmers and historians, who helped preserve and archive documentation and code, and who wrote 1802/Studio2 emulators. Your dedicated work and enthusiasm are very appreciated.
 This respository contains a complete list of games originally developed by RCA for the Studio II and III.
 
-Some document are from https://archive.org
-
 Special dedication to Joe Weisbecker who started it all. One of his goals for the COSMAC and Studio II was computer and programming education. 
 
 ## Usage
-This respository is intended for educational and historical research. Studio II emulation shows how the games looked and functioned during play. 
-
-## References
-1. RCA COSMAC Game Manual II (VP-720), 8-1980, RCA Microcomputer Products, New Holland Avenue, Lancaster, PA 127604. (Andrew Modla collection)
-2. Game Instruction manual for Studio II and Studio II, 1977, RCA Corporation, David Sarnoff Research Center, Princeton, NJ (Andrew Modla collection)
-3. Internal Memo RE: Studio II & III PROGRAMS, 12/15/1977, Andrew Modla, David Sarnoff Research Center, Princeton, NJ (Andrew Modla collection)
-4. Programming Manual for Studio III, September 1977, RCA Corporation, David Sarnoff Research Center, Princeton, NJ (https://www.archive.org)
+This respository is intended for educational and historical research. Program emulation shows how the games looked and functioned during play. 
 
 ## Postscript
-My intent for this repository is a tribute to Joe Weisbecker's work on personal and educational computers and continue to extend with the goal of education. 
-Writing this is like creating a programmer's memoir. I am able to reconstruct the environment to run code written in the past without the hardware it ran on. 
+My intent for this repository is a tribute to Joe Weisbecker's work on personal and educational computers and continue to extend with the goal of education.
+
+Writing this is like creating a programmer's memoir. I am fortunate to be able to reconstruct the environment to run code written in the past without the hardware it ran on. 
 Many programmer's work is lost over time with a project's termination or expiration, as the technology advances, so being able to
 see and preserve what was done in the distant past is heartening and personally rewarding.
 
