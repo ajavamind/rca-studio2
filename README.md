@@ -120,6 +120,7 @@ Studio III Pinball Game Screenshot
 ### Studio IV Console
 
 The Studio IV game console was in the planning stages, in 1977, but was never built. 
+There is a Studio IV interpreter cassette tape from Joe Weisbecker in the Sarnoff Collection at the College of New Jersey.
 
 ### COSMAC VIP Computer
 
@@ -322,9 +323,12 @@ http://bitsavers.org/components/rca/cosmac/ (Programming_Manual_for_STUDIO_III_S
 5. MPM-201B_CDP1802_Users_Manual_Nov77 http://bitsavers.org/pdf/rca/1802/  (MPM-201B_CDP1802_Users_Manual_Nov77.pdf)
 6. VP-710_RCA_COSMAC_VIP_Game_Manual_Dec78.pdf From http://bitsavers.org/components/rca/cosmac/
 (VP-710_RCA_COSMAC_VIP_Game_Manual_Dec78.pdf)
-7. RCA COSMAC Game Manual II (VP-720), 8-1980, RCA Microcomputer Products, New Holland Avenue, Lancaster, PA 127604. (Andrew Modla collection)
+7. RCA COSMAC Game Manual II (VP-720), 8-1980, RCA Microcomputer Products, New Holland Avenue, Lancaster, PA 17604. (Andrew Modla collection)
 
-Sources of information about RCA COSMAC technology can be found at:
+Studio II manuals can be found at:
+http://bitsavers.org/components/rca/cosmac/studio_II/
+
+Descriptions and sources of information about RCA COSMAC technology can be found at:
 
 http://www.retrotechnology.com (Herb Johnson)
 
