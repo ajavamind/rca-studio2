@@ -122,6 +122,8 @@ Studio III Pinball Game Screenshot
 The Studio IV game console was in the planning stages, in 1977, but was never built. 
 There is a Studio IV interpreter cassette tape from Joe Weisbecker in the Sarnoff Collection at the College of New Jersey.
 
+http://embark.tcnj.edu/OBJ2416?sid=63&x=661
+
 ### COSMAC VIP Computer
 
 The COSMAC VIP (Video Interface Processor) CDP18S711 is a single board computer for home hobby use to learn about computers and programming.
@@ -197,6 +199,7 @@ The emulator reads the following game file types:
 5. ".c8x" Binary program file for COSMAC VIP board RAM, loads at address 0x0300. Assumes VIP ROM at 0x8000, Color RAM at 0xC000
 6. ".vip" Binary program file for COSMAC VIP board RAM, loads at address 0x0000. Assumes VIP ROM at 0x8000
 7. ".arc" Binary program file for RCA Video Arcade game board RAM, loads at address 0x0000. 
+8. ".fd2" Binary program file for RCA FRED 2 computer RAM, loads at address 0x0000. 
 
 ## Studio II/III Game Console Design
 
@@ -239,7 +242,7 @@ Due to its operating speed and keyboard input, in my opinion, the Studio II syst
 | Bowl/Tag | Joseph Weisbecker | Extracted from cassette tape, emulation based on FRED II |
 
 
-|      RCA Coin Arcade Game      | Author | Notes |
+| RCA Coin Arcade Game Console | Author | Notes |
 | --------- | ------ | ----- |
 | Swords | Joseph Weisbecker | Extracted from cassette tape, emulation based on FRED II  |
 | Mines |  | cassette tape?, FRED II |
@@ -259,6 +262,7 @@ Due to its operating speed and keyboard input, in my opinion, the Studio II syst
 | Blackjack | Andrew Modla | Note 2 |
 | Gunfighter/Moonship Battle | Andrew Modla  | This is the first Studio II game I wrote |
 | Studio II Point-of-Purchase Demo | Andrew Modla  | 1024 bytes |
+| Studio II Test Cartridge | Jack Wright  | 1024 bytes |
 
 
 | Studio III Color Game | Author | Notes |
