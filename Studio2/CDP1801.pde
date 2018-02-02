@@ -1,30 +1,29 @@
-/*
-Note: this license does not apply to  the Studio 2 ROM or game images, nor the RCA Databooks and Datasheets. 
-The License applies to the new work only.
+//
+// Note: this license does not apply to  the Studio 2 ROM or game images, nor the RCA Databooks and Datasheets. 
+// The License applies to the new work only.
 
-MIT License
+// MIT License
+//
+// Copyright (c) 2017-2018 Andrew Modla
+// portions Copyright (c) 2016 paulscottrobson
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
 
-Copyright (c) 2017-2018 Andrew Modla
-portions Copyright (c) 2016 paulscottrobson
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 /**
  * RCA CDP 1801 Arcade game console emulation
@@ -37,6 +36,17 @@ SOFTWARE.
 
 import java.io.*;
 
+// Estimated for FRED 2 computer boards
+// These parameters are guesses based partially on play speed and game tempo
+private static final int CLOCK_SPEED_ARCADE        =     (1600000); // 2000000;   // Clock Frequency 
+private static final int CYCLES_PER_SECOND_ARCADE  =     (CLOCK_SPEED_ARCADE/8);  // There are 8 clocks in each cycle (200,000 cycles/Second)
+private static final int FRAMES_PER_SECOND_ARCADE  =     (60);            // NTSC Frames Per Second
+private static final int CYCLES_PER_FRAME_ARCADE   =     (CYCLES_PER_SECOND_ARCADE/FRAMES_PER_SECOND_ARCADE); // Cycles per Frame, Complete (3668)
+private static final int VISIBLE_LINES_ARCADE      =     128;
+private static final int DISPLAY_DMA_CYCLES_PER_FRAME =  (VISIBLE_LINES_ARCADE) * (64/8) * 2;  // 32 rows x 64 columns
+private static final int STATE_2_CYCLES_ARCADE     =     120;  // estimated max interrupt cycles - varies with game (FRED2)
+private static final int STATE_1_CYCLES_ARCADE     =     (CYCLES_PER_FRAME_ARCADE-DISPLAY_DMA_CYCLES_PER_FRAME)-STATE_2_CYCLES_ARCADE;
+
 int dmaCount = 0;
 
 //*******************************************************************************************************
@@ -46,52 +56,23 @@ int CPU1801_Execute()
 {
   int rState = 0;
   int addr = R[P];
-  
-  // debug 
-  //if (addr < 0x1FF) {
-  //  println("R[0] "+hexAddr(addr)+ " "+hexData(READ(addr))+ " prev "+ hexAddr(previous));
-  //}
-  
-  // breakpoints for debug
-  //if (addr == 0x00A2) {
-  //  println("R5="+hexAddr(R[5]));
-  //}
-  //if (addr == 0x002A) {
-  //  println("R5="+hexAddr(R[5]));
-  //}
-  //if (addr == 0x0038) {
-  //  println("0MMM RC="+hexAddr(R[12]));
-  //}
-  //if (addr == 0x0024) {
-  //  println("R5="+hexAddr(R[5]));
-  //}
-  ///////////////////////
-  
+    
   previous = addr;
   opCode = READ(addr);
-  
+    
   if (opCode == 0x70) {
-    if (state == 3) {
-      state = prevState;
-    }
-    else {
-      // ready to exit interrupt with R0 DMA pointer set
-      prevState = 2;
-      //prevState = state;
-      state = 3;
-      rState = state;
-      dmaCount = 32;  // lines 
+    // ready to exit interrupt with R0 DMA pointer set
+    if (state == 2) {
+      cycles = 0;
       screenMemory = (R[0] & 0xFF00) ;     // display location
       scrollOffset = R[0] & 0xFF;          // Get the scrolling offset (for things like the car game)
-      return rState;
     }
   }
-  
+
   R[P]++;
   R[P] &= 0xFFFF;
   cycles -= 2;                                              // 2 x 8 clock Cycles - Fetch and Execute.
-
-  switch(opCode)                                            // Execute dependent on the Operation Code
+  switch(opCode)                                            // Execute dependent on the Operation Code //<>//
   {
   case 0x00: /* "idl" */
     if (dmaCount != 0) {
@@ -936,8 +917,7 @@ int CPU1801_Execute()
     {
     case 1:     // in interrupt                                                                // Main Frame State Ends
       state = 2;                                                               // Switch to Interrupt Preliminary state
-      cycles = 120;                                               // cycles between INT and DMAOUT RET
-      //cycles = STATE_2_CYCLES;                                                // The 29 cycles between INT and DMAOUT.
+      cycles = STATE_2_CYCLES_ARCADE;                                                // The 29 cycles between INT and DMAOUT.
       if (screenEnabled)                                                      // If screen is on
       {
         // Come out of IDL for Interrupt.
@@ -946,11 +926,12 @@ int CPU1801_Execute()
           R[P] &= 0xFFFF;
         }
         INTERRUPT();                                                        // if IE != 0 generate an interrupt.
+        dmaCount = VISIBLE_LINES_ARCADE/4; // 32
       }
       break;
     case 2:                                                                     // Interrupt preliminary ends.
       state = 1;                                                              // Switch to Main Frame State
-      cycles = STATE_1_CYCLES;
+      cycles = STATE_1_CYCLES_ARCADE;
       SYSTEM_Command(HWC_FRAMESYNC, 0);                                        // Synchronise.
       if (toneState != 0) {
         tone(true);

@@ -1,30 +1,29 @@
-/*
-Note: this license does not apply to  the Studio 2 ROM or game images, nor the RCA Databooks and Datasheets. 
-The License applies to the new work only.
+//
+// Note: this license does not apply to  the Studio 2 ROM or game images, nor the RCA Databooks and Datasheets. 
+// The License applies to the new work only.
 
-MIT License
+// MIT License
+//
+// Copyright (c) 2017-2018 Andrew Modla
+// portions Copyright (c) 2016 paulscottrobson
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
 
-Copyright (c) 2017-2018 Andrew Modla
-portions Copyright (c) 2016 paulscottrobson
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 /**
  * RCA Studio II and Studio III Video Game Console Emulator
@@ -41,10 +40,11 @@ SOFTWARE.
  * RCA Arcade game emulation
  */
 
-private final static boolean test = false;  // run test components
+private static boolean test = false;  // run test components
 private static boolean sound = true; // control sound on/off
 private static boolean android = false;
 private static boolean screenSave = false;
+private static boolean doReset = false;
 
 // Microprocessor type
 private final static int SYSTEM00 = 0;
@@ -58,9 +58,14 @@ private final static int STUDIO3 = 1;
 private final static int VIP = 2;
 private final static int ELF = 3;
 private final static int ARCADE = 4;
-private final static int CUSTOM = 5;
-private final static int INITIAL_CONSOLE = STUDIO3;  //STUDIO3; //STUDIO2; CUSTOM; ARCADE; 
-private static int console = INITIAL_CONSOLE;
+private final static int FRED2 = 5;
+private final static int CUSTOM = 6;
+private static int console = STUDIO2;
+
+// Cartridge Mode
+private final static int NORMAL = 0;
+private final static int TEST = 1;
+private static int cartridgeMode = NORMAL;
 
 // CHIP8 Interpreter types
 private final static int ROM_ONLY = 0;  // assumes VIP ROM at 0x8000 but not interpreter
@@ -102,62 +107,72 @@ private static int COIN_ARCADE_PARAMETER_SWITCH = 0;   // 8 is test mode?
 
 //////////////////////////////////////////////////////////////
 
-volatile int gameSelected = 35;//9; // Studio III resident games
+volatile int gameSelected = 0; // Studio II Demo Cartridge
 
 // Game cartridge and information files are in the Processing "data" folder
 String[] gameFileName = {
+/* 0 */  "RCA_demo.st2", // Studio 2 demo cartridge
   // Studio 2 Resident Games
-/* 0 */  "studio2.rom", // Studio 2 internal game ROM with Studio II interpreter
+/* 1 */  "studio2.rom", // Studio 2 internal game ROM with Studio II interpreter
   // Studio 2 game cartridges
-/* 1 */  "SPACEWAR.BIN", 
-/* 2 */  "fun-with-numbers.st2", 
-/* 3 */  "school.st2", 
-/* 4 */  "SPEEDWAY.BIN", 
-/* 5 */  "TENNIS.BIN", 
-/* 6 */  "BASEBALL.BIN", 
-/* 7 */  "blackjack.st2", 
-/* 8 */  "gunfighter-moonship.bin", 
+/* 2 */  "SPACEWAR.BIN", 
+/* 3 */  "fun-with-numbers.st2", 
+/* 4 */  "school.st2", 
+/* 5 */  "SPEEDWAY.BIN", 
+/* 6 */  "TENNIS.BIN", 
+/* 7 */  "BASEBALL.BIN", 
+/* 8 */  "blackjack.st2", 
+/* 9 */  "gunfighter-moonship.bin", 
+/* 10 */ "RCA_TEST_CARTRIDGE_TESTER1.st2",
+
   ////////////////////////////////
+/* 11 */  "RCA_demo.st2", // Studio 3 demo cartridge holding entry
   // Studio 3 game cartridges implement with color graphics.
   //The Victory MPT-02, a clone of the RCA Studio III is a videogame console made by Soundic released around 1978. 
   // Unlike the Studio II the Victory came with 2 detachable controllers. 
-/* 9 */  "victory.rom", // Victory is a Studio 3 internal resident game ROM
+/* 12 */  "victory.rom", // Victory is a Studio 3 internal resident game ROM
   // Studio 3 game cartridges
-/* 10 */  "mathfun.st2", 
-/* 11 */  "biorhythm.st2", 
-/* 12 */  "pinball.st2", 
-/* 13 */  "bingo.st2", 
-/* 14 */  "concentration-match.st2", 
-/* 15 */  "star-wars.st2", 
+/* 13 */  "mathfun.st2", 
+/* 14 */  "biorhythm.st2", 
+/* 15 */  "pinball.st2", 
+/* 16 */  "bingo.st2", 
+/* 17 */  "concentration-match.st2", 
+/* 18 */  "star-wars.st2", 
   ////////////////////////////////
   // Other Studio2 Games 
-/* 16 */  "computer.st2", 
-/* 17 */  "hockey.st2", 
-/* 18 */  "combat.st2", 
-/* 19 */  "Climber.st2", 
-/* 20 */  "scramble.st2", 
-/* 21 */  "rocket.st2", 
-/* 22 */  "outbreak.st2", 
-/* 23 */  "pacman.st2", 
-/* 24 */  "kaboom.st2", 
-/* 25 */  "asteroids.st2", 
-/* 26 */  "berzerk.st2", 
-/* 27 */  "invaders.st2", 
-/* 28 */  "tv-arcade-2012.st2", 
+/* 19 */  "computer.st2", 
+/* 20 */  "hockey.st2", 
+/* 21 */  "combat.st2", 
+/* 22 */  "Climber.st2", 
+/* 23 */  "scramble.st2", 
+/* 24 */  "rocket.st2", 
+/* 25 */  "outbreak.st2", 
+/* 26 */  "pacman.st2", 
+/* 27 */  "kaboom.st2", 
+/* 28 */  "asteroids.st2", 
+/* 29 */  "berzerk.st2", 
+/* 30 */  "invaders.st2", 
+/* 31 */  "tv-arcade-2012.st2", 
   ////////////////////////////////
   // VIP CHIP8 games 
-/* 29 */  "Bowling [Gooitzen van der Wal].ch8", // Chip8 version of J. Weisbecker bowling
-/* 30 */  "Blockout [Steve Houk].c8x", // Chip8x 
-/* 31 */  "ColourTest.c8x", 
-/* 32 */  "Color Kaleidoscope [Steve Houk, 1978].c8x", 
-/* 33 */  "swordfighter[Joe Weisbecker].vip", // swordfighter does not use CHIP8
+/* 32 */  "Bowling [Gooitzen van der Wal].ch8", // Chip8 version of J. Weisbecker bowling
+/* 33 */  "Blockout [Steve Houk].c8x", // Chip8x 
+/* 34 */  "ColourTest.c8x", 
+/* 35 */  "Color Kaleidoscope [Steve Houk, 1978].c8x", 
+/* 36 */  "swordfighter[Joe Weisbecker].vip", // swordfighter does not use CHIP8
   ////////////////////////////////
-  // RCA Video Arcade games (1975 pre-dates Studio 2) 
-/* 34 */  "AUD_2464_09_B41_ID01_01 Tag-Bowling.wav.arc", // coin arcade game bowling
-/* 35 */  "AUD_2464_09_B41_ID01_02 Swords.wav.arc", // coin arcade game swords
+  // RCA Video Coin Arcade games (1975 pre-dates Studio 2) 
+/* 37 */  "AUD_2464_09_B41_ID01_01 Tag-Bowling.wav.fd2", 
+/* 38 */  "AUD_2464_09_B41_ID02_01 Coin Bowling.wav.arc",
+/* 39 */  "AUD_2464_09_B41_ID01_02 Swords.wav.arc", 
+  ////////////////////////////////
+  // Test area
+/* 40 */ //"S.572.2 VIP special-1_of_5.wav.vip",
+/* 41 */ ///"S.572_16_of_16.wav.raw.vip",
 };
 
 String[] gameTitle = {
+  "RCA Studio 2 Demo",
   "Studio2 Resident Games", // Studio 2 resident games: Doodle/Patterns/Bowling/Freeway/Addition
   "SpaceWar", 
   "Fun With Numbers", 
@@ -167,7 +182,9 @@ String[] gameTitle = {
   "Baseball", 
   "Blackjack", 
   "Gunfighter/Moonship", 
+  "RCA Studio 2 Test",
   /////////////////////////
+  "RCA Studio 3 Demo",
   "Studio 3 Resident Games", // Studio 3 resident games: Doodle/Patterns/Bowling/Blackjack1/Blackjack2
   "MathFun/Quiz", 
   "Biorhythm", 
@@ -196,56 +213,61 @@ String[] gameTitle = {
   "Color Kaleidoscope CHIP8X", 
   "VIP Swordfighter",
   ////////////////////////
-  "RCA Arcade Tag/Bowling", 
-  "RCA Arcade Swords", 
+  "RCA Coin Tag/Bowl", 
+  "RCA Coin Arcade Bowling", 
+  "RCA Coin Arcade Swords", 
 };
 
 String[] gameInfoFileName = {
   // Studio 2 Resident Games
-/* 0 */  "studio2.txt", // Studio 2 internal game ROM with Studio II interpreter
+  "RCA_demo.txt",
+  "studio2.txt", // Studio 2 internal game ROM with Studio II interpreter
   // Studio 2 game cartridges
-/* 1 */  "spacewar.txt", 
-/* 2 */  "fun-with-numbers.txt", 
-/* 3 */  "school.txt", 
-/* 4 */  "speedway.txt", 
-/* 5 */  "tennis.txt", 
-/* 6 */  "baseball.txt", 
-/* 7 */  "blackjack.txt", 
-/* 8 */  "gunfighter-moonship.txt", 
-/* 9 */  "victory.txt", // Victory is a Studio 3 internal resident game ROM
+  "spacewar.txt", 
+  "fun-with-numbers.txt", 
+  "school.txt", 
+  "speedway.txt", 
+  "tennis.txt", 
+  "baseball.txt", 
+  "blackjack.txt", 
+  "gunfighter-moonship.txt", 
+  "RCA_demo.txt",
+  "",
+  "victory.txt", // Victory is a Studio 3 internal resident game ROM
   // Studio 3 game cartridges
-/* 10 */  "mathfun.txt", 
-/* 11 */  "biorhythm.txt", 
-/* 12 */  "pinball.txt", 
-/* 13 */  "bingo.txt", 
-/* 14 */  "concentration-match.txt", 
-/* 15 */  "star-wars.txt", 
+  "mathfun.txt", 
+  "biorhythm.txt", 
+  "pinball.txt", 
+  "bingo.txt", 
+  "concentration-match.txt", 
+  "star-wars.txt", 
   ////////////////////////////////
   // Other Studio2 Games 
-/* 16 */  "computer.txt", 
-/* 17 */  "hockey.txt", 
-/* 18 */  "combat.txt", 
-/* 19 */  "Climber.txt", 
-/* 20 */  "scramble.txt", 
-/* 21 */  "rocket.txt", 
-/* 22 */  "outbreak.txt", 
-/* 23 */  "pacman.txt", 
-/* 24 */  "kaboom.txt", 
-/* 25 */  "asteroids.txt", 
-/* 26 */  "berzerk.txt", 
-/* 27 */  "invaders.txt", 
-/* 28 */  "tv-arcade-2012.txt", 
+  "computer.txt", 
+  "hockey.txt", 
+  "combat.txt", 
+  "Climber.txt", 
+  "scramble.txt", 
+  "rocket.txt", 
+  "outbreak.txt", 
+  "pacman.txt", 
+  "kaboom.txt", 
+  "asteroids.txt", 
+  "berzerk.txt", 
+  "invaders.txt", 
+  "tv-arcade-2012.txt", 
   ////////////////////////////////
   // VIP CHIP8 games 
-/* 29 */  "Bowling [Gooitzen van der Wal].txt", // Chip8 version of J. Weisbecker bowling
-/* 30 */  "Blockout [Steve Houk].txt", // Chip8x 
-/* 31 */  "ColourTest.txt", 
-/* 32 */  "Color Kaleidoscope [Steve Houk, 1978].txt", 
-/* 33 */  "swordfighter[Joe Weisbecker].txt", // swordfighter does not use CHIP8
+  "Bowling [Gooitzen van der Wal].txt", // Chip8 version of J. Weisbecker bowling
+  "Blockout [Steve Houk].txt", // Chip8x 
+  "ColourTest.txt", 
+  "Color Kaleidoscope [Steve Houk, 1978].txt", 
+  "swordfighter[Joe Weisbecker].txt", // swordfighter does not use CHIP8
   ////////////////////////////////
-  // RCA Video Arcade games (1975 pre-dates Studio 2) 
-/* 34 */  "AUD_2464_09_B41_ID01_01 Tag-Bowling.wav.txt", // coin arcade game bowling
-/* 35 */  "AUD_2464_09_B41_ID01_02 Swords.wav.txt", // coin arcade game swords
+  // RCA Video Arcade games (1974-1975 pre-dates Studio 2) 
+  "AUD_2464_09_B41_ID01_01 Tag-Bowling.wav.txt", 
+  "AUD_2464_09_B41_ID02_01 Coin Bowling.wav.txt",
+  "AUD_2464_09_B41_ID01_02 Swords.wav.txt", 
 };
 
 
@@ -284,6 +306,12 @@ void setup()
   // set default frame rate 60 for the Studio 2 update screen speed
   frameRate(60);  // change to higher frame rate to speed up game play using faster computer
 
+  if (!(gameInfoFileName.length == gameTitle.length &&
+    gameTitle.length == gameFileName.length)) {
+    println("Internal Error game arrays do not match");
+    test = true;  // force test loop
+  }
+  
   // run test code here when configured
   if (test) {
     testDisplayScreen();
@@ -291,6 +319,7 @@ void setup()
       // loop forever
     }
   }
+  
   studio2_memory = new int[0x10000];
   for (int i=0; i<0x10000; i++) {
     studio2_memory[i] = 0xFF;
@@ -307,31 +336,29 @@ void setup()
 void draw() 
 {
   int nextState;
+  if (doReset) {
+    doReset = false;
+    systemReset();
+  }
   if (displayInfo) {
-    
-  } else {
-    if (console == ARCADE) {
-      while (true) {
+    displayInfo = false;
+    // TO DO display game information
+  } 
+  else {
+    while (true) {
+      if (console == ARCADE || console == FRED2)
         nextState = CPU1801_Execute();  // execute one 1801 CPU instruction until state changes
-        if (nextState == 3) {
-          updateGUI();
-          displayScreen(false, width, 3*height/8, CPU_GetScreenMemoryAddress(), CPU_GetScreenScrollOffset());
-        }
-        if (nextState == 1) {
-          break; // leave draw() until the next frame
-        }
-      }
-    } else {
-      while (true) {
+      else
         nextState = CPU_Execute();  // execute one 1802 CPU instruction until frame state changes
-        if (nextState == 1) {
-          updateGUI();
-          displayScreen(false, width, 3*height/8, CPU_GetScreenMemoryAddress(), CPU_GetScreenScrollOffset());
-          break; // leave draw() until the next frame
-        }
+        
+      if (nextState == 1) {
+        updateGUI();
+        displayScreen(false, width, 3*height/8, CPU_GetScreenMemoryAddress(), CPU_GetScreenScrollOffset());
+        break; // leave draw() until the next frame
       }
     }
   }
+  
   if (screenSave) {
     save("screenshot/save"+saveCounter+".png");
     println("Save Screenshot "+"save"+saveCounter+".png");
@@ -345,7 +372,10 @@ void draw()
  */
 void systemReset() {
   coin = false;
+  toneState = 0;
   tone(false);
+  setFreq(0);
+  dmaCount = 0;
   if (gameFileName[gameSelected].toLowerCase().endsWith(".ch8")) {
     console = VIP;
     interpreter = CHIP8;
@@ -357,13 +387,19 @@ void systemReset() {
     interpreter = ROM_ONLY;
   } else if (gameFileName[gameSelected].toLowerCase().endsWith(".arc")) {
     console = ARCADE;
+  } else if (gameFileName[gameSelected].toLowerCase().endsWith(".fd2")) {
+    console = FRED2;
   } else if (gameFileName[gameSelected].toLowerCase().endsWith(".cus")) {
     console = CUSTOM;
   } else {
-    console = INITIAL_CONSOLE;
+    if (gameSelected >= 0 && gameSelected <= 10)
+      console = STUDIO2;
+    else
+      console = STUDIO3;
   }
+  
   COLOR_MAP = INITIAL_COLOR_MAP;
-  if (console == STUDIO2 || console == ARCADE)
+  if (console == STUDIO2 || console == ARCADE || console == FRED2)
     backgroundColor = 1;
   else
     backgroundColor = 0;
@@ -377,8 +413,8 @@ void systemReset() {
     if (interpreter == CHIP8X) {
       COLOR_MAP = 0xC000;
     }
-  } else if (console == ARCADE) {
-    // Arcade Game development boards
+  } else if (console == ARCADE || console == FRED2) {
+    // Arcade and FRED Game development boards
     RAM = 0x0800;
     VIDEO_RAM = 0x0900;
   } else if (console == CUSTOM) {
@@ -395,6 +431,16 @@ void systemReset() {
   println("Load " + gameTitle[gameSelected]);
   loadGameBinary(gameFileName[gameSelected]);
   loadGameInfo(gameInfoFileName[gameSelected]);
+  
+  if (gameFileName[gameSelected].startsWith("RCA_TEST_CARTRIDGE"))
+    cartridgeMode = TEST;
+  else
+    cartridgeMode = NORMAL;
+
+  if (READ(0) == 0) { //<>//
+    R[0] = 1;  // skip over idl instruction, must be a RCA FRED COSMAC Game System
+  }
+
 }
 
 public boolean isAndroid() {

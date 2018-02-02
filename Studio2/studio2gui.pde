@@ -1,29 +1,25 @@
-/*
-Note: this license does not apply to  the Studio 2 ROM or game images, nor the RCA Databooks and Datasheets. 
-The License applies to the new work only.
+//
+// MIT License
+//
+// Copyright (c) 2017-2018 Andrew Modla
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
 
-MIT License
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
 
-Copyright (c) 2017-2018 Andrew Modla
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 
 int black = color(0);   // black
@@ -245,7 +241,7 @@ private void drawSetup() {
   if (console == STUDIO2 || console == STUDIO3) {
     aKeyboard = new Keyboard(10, "A", 3*KEY_HSPACING, vertOffset + KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING);
     bKeyboard = new Keyboard(10, "B", width/2+KEY_HSPACING, vertOffset+ KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING);
-  } else if (console == ARCADE) {
+  } else if (console == ARCADE || console == FRED2) {
     aKeyboard = new Keyboard(5, "A", 3*KEY_HSPACING, vertOffset + KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING);
     bKeyboard = new Keyboard(5, "B", width/2+KEY_HSPACING, vertOffset+ KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING);
   } else if (console == CUSTOM) {
@@ -272,7 +268,7 @@ public void drawKeyboards() {
   resetKey.draw();
   cartridge.draw();
   infoKey.draw();
-  if (console == ARCADE) {
+  if (console == ARCADE || console == FRED2) {
     coinKey.draw();
   }
 }
@@ -321,7 +317,7 @@ public void mousePressed() {
   // common areas 
   if (resetKey.isPressed(mouseX, mouseY)) {
     resetUpdate = true;
-    systemReset();
+    doReset = true;
     println("reset");
     return;
   }
@@ -343,14 +339,14 @@ public void mousePressed() {
     displayUpdate = true;
     return;
   }
-  if (console == ARCADE) {
+  if (console == ARCADE || console == FRED2) {
     if (coinKey.isPressed(mouseX, mouseY)) {
       coin = true;
     }
     return;
   }
   if (infoKey.isPressed(mouseX, mouseY)) {
-    displayInfo ^= true;
+    displayInfo = true;
     return;
   }
 }

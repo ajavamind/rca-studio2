@@ -1,30 +1,29 @@
-/*
-Note: this license does not apply to  the Studio 2 ROM or game images, nor the RCA Databooks and Datasheets. 
-The License applies to the new work only.
+//
+// Note: this license does not apply to  the Studio 2 ROM or game images, nor the RCA Databooks and Datasheets. 
+// The License applies to the new work only.
 
-MIT License
+// MIT License
+//
+// Copyright (c) 2017-2018 Andrew Modla
+// portions Copyright (c) 2016 paulscottrobson
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
 
-Copyright (c) 2017-2018 Andrew Modla
-portions Copyright (c) 2016 paulscottrobson
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 /**
  * Written by Andrew Modla
@@ -122,7 +121,7 @@ void checkAllKeys()
 
 void debugInfo() {
   println("screenEnabled="+screenEnabled);
-  println("P="+ hexData(P) +" X="+ hexData(X) + " R[X]="+hex(R[X]) + " IE=" +IE +" state="+state + " cycles="+cycles + " coin="+coin);
+  println("P="+ hexData(P) +" X="+ hexData(X) + " R[X]="+hex(R[X]) + " IE=" +IE + " Q="+ Q +" state="+state + " cycles="+cycles + " coin="+coin);
   println(" R[0]="+hex(R[0])+" R[1]="+hex(R[1]) +" R[2]="+hex(R[2]) +" R[3]="+hex(R[3]));
   println(" R[4]="+hex(R[4])+" R[5]="+hex(R[5]) +" R[6]="+hex(R[6]) +" R[7]="+hex(R[7]));
   println(" R[8]="+hex(R[8])+" R[9]="+hex(R[9]) +" R[10]="+hex(R[10]) +" R[11]="+hex(R[11]));
@@ -240,7 +239,8 @@ void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int s
     xc = 0;
     for (x = 0; x < (VIDEO_SCREEN_WIDTH/8); x++)                    // 8 bytes per line.
     {
-      pixByte = studio2_memory[screenData+offset++] & 0xFF;                            // Get next pixel.
+      pixByte = studio2_memory[(screenData+offset)& 0xFFFF] & 0xFF;        // Get next pixel.
+      offset++;
       rx = xc + x * xs * 8;                                                     // Calculate horizontal coordinate
       if (console == STUDIO3 || (console == VIP && interpreter == CHIP8X)) {
         int colorIndex = studio2_memory[COLOR_MAP + x + 8*(y/4)] & 0x0007;
@@ -399,6 +399,16 @@ void loadGameBinary(String fileName)
   }
   // .ARC binary file for Arcade Game consoles
   else if (fileName.toLowerCase().endsWith(".arc")) { 
+    address = 0x0000;
+    for (int i=0; i<data.length; i++) {
+      if (!((address >= RAM && address < (RAM+RAM_SIZE)))) {
+        studio2_memory[address] = data[i] & 0xFF;
+      }
+      address++;
+    }
+  }
+  // .FD2 binary file for RCA COSMAC FRED 2 Game Systems
+  else if (fileName.toLowerCase().endsWith(".fd2")) { 
     address = 0x0000;
     for (int i=0; i<data.length; i++) {
       if (!((address >= RAM && address < (RAM+RAM_SIZE)))) {

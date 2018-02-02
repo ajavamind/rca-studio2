@@ -1,30 +1,29 @@
-/* //<>//
-Note: this license does not apply to  the Studio 2 ROM or game images, nor the RCA Databooks and Datasheets. 
-The License applies to the new work only.
+// //<>//
+// Note: this license does not apply to  the Studio 2 ROM or game images, nor the RCA Databooks and Datasheets. 
+// The License applies to the new work only.
 
-MIT License
+// MIT License
+//
+// Copyright (c) 2017-2018 Andrew Modla
+// portions Copyright (c) 2016 paulscottrobson
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
 
-Copyright (c) 2017-2018 Andrew Modla
-portions Copyright (c) 2016 paulscottrobson
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 /**
  * Converted to Processing/Java programming environment by Andrew Modla
@@ -41,14 +40,12 @@ private static final int HWC_UPDATEQ        =     1;
 private static final int HWC_FRAMESYNC      =     2;
 private static final int HWC_SETKEYPAD      =     3;
 
-//private static final int CLOCK_SPEED =            (4000000/2);                                        // Clock Frequency (2,000,000 Hz)
 private static final int CLOCK_SPEED =            (3521280/2);                                         // Clock Frequency (1,760,640 Hz)
 private static final int CYCLES_PER_SECOND   =    (CLOCK_SPEED/8);                                     // There are 8 clocks in each cycle (220,080 cycles/Second)
 private static final int FRAMES_PER_SECOND  =     (60);                                                // NTSC Frames Per Second
 private static final int LINES_PER_FRAME    =     (262);                                               // Lines Per NTSC Frame
 private static final int CYCLES_PER_FRAME   =     (CYCLES_PER_SECOND/FRAMES_PER_SECOND);               // Cycles per Frame, Complete (3668)
 private static final int CYCLES_PER_LINE    =     (CYCLES_PER_FRAME/LINES_PER_FRAME);                  // Cycles per Display Line (14)
-
 private static final int VISIBLE_LINES     =      (128);                                               // 128 visible lines per frame
 private static final int NON_DISPLAY_LINES  =     (LINES_PER_FRAME-VISIBLE_LINES);                     // Number of non-display lines per frame. (134)
 private static final int EXEC_CYCLES_PER_FRAME =  (NON_DISPLAY_LINES*CYCLES_PER_LINE);                 // Cycles where 1802 not generating video per frame (1876)
@@ -69,7 +66,6 @@ static int[] R = new int[16];                                                   
 static int _temp;                                                                // Temporary register
 static int cycles;                                                                // Cycles till state switch
 static int state;                                                                 // Frame position state (NOT 1802 internal state)
-static int prevState;
 static int screenMemory = -1;                                                  // Current Screen Pointer (-1 = off)
 static int scrollOffset;                                                          // Vertical scroll offset e.g. R0 = $nnXX at 29 cycles
 static boolean screenEnabled;                                                         // Screen on (IN 1 on, OUT 1 off)
@@ -101,9 +97,36 @@ static String[] mnemonics = { "idl", "ldn r1", "ldn r2", "ldn r3", "ldn r4", "ld
 private final static int READ(int address)
 {
   if (address >= studio2_memory.length) {
+    println("Emulator error READ address " + hex(address));
     return 0xFF;
   }
-  return studio2_memory[address] & 0xFF;
+  
+  // Only test cartridge is hardware specific for Studio 2 console
+  // It uses memory mirroring that may not exist in other hardware
+  // Normal cartridges should not use mirroring
+  if (console == STUDIO2 && cartridgeMode == TEST) {
+    // account for hardware memory mirroring
+    if (address >= 0x8000) {
+       println("READ address " + hex(address));
+       return (studio2_memory[RAM | (address & 0x01FF)] & 0xFF);
+    }
+    else if (address >= 0x4000) {
+     //println("READ address " + hex(address));
+     return (studio2_memory[0x0400 | (address & 0x03FF)] & 0xFF);
+    }
+    else if (address >= 0x2000) {
+       //println("READ address " + hex(address));
+       return (studio2_memory[address & 0x07FF] & 0xFF);
+    }
+    else if (address >= 0x0800) {
+       return (studio2_memory[RAM | (address & 0x01FF)] & 0xFF);
+    }
+    else {
+       return (studio2_memory[address] & 0xFF);
+    }
+  } 
+
+  return (studio2_memory[address] & 0xFF);
 }
 
 //*******************************************************************************************************
@@ -116,17 +139,42 @@ private final static void WRITE(int address, int data)
   //  println("write "+hex(address) + " value "+ hex(data));
   //  return;
   //}
+  
+  if (console == STUDIO2 && cartridgeMode == TEST) {
+    // account for hardware memory mirroring) 
+    if (address >= 0x8000) {
+      studio2_memory[(address & 0x01FF) | RAM ] = data & 0xFF;
+      println("write memory "+hex(address) + " " + hex(data));
+    }
+    else if (address >= 0x2000) {
+      studio2_memory[(address & 0x01FF) | RAM ] = data & 0xFF;
+      println("write memory "+hex(address) + " " + hex(data));
+    }
+    else if (address >= 0x0A00) {
+      studio2_memory[(address & 0x01FF) | RAM ] = data & 0xFF;
+      println("write memory "+hex(address) + " " + hex(data));
+   }
+    else if (address >= 0x0800) {
+      studio2_memory[(address & 0x01FF) | RAM ] = data & 0xFF;
+    }
+    else {
+      println("write to ROM "+hex(address));
+    }
+    return;
+  }
+  
   if ((address >= RAM) && (address < (RAM+RAM_SIZE))) // only RAM space is writeable
   {
     studio2_memory[address] = data & 0xFF;
   } else if ((console == STUDIO3) && (address >= COLOR_MAP) && (address < (COLOR_MAP+COLOR_MAP_SIZE))) {
     studio2_memory[address] = data & 0xFF;
     //println("write color map memory "+ hex(address) + " value="+(data&0xFF));
-  } else if (console == VIP || console == CUSTOM || console == ARCADE) {
+  } else if (console == VIP || console == CUSTOM || console == ARCADE || console == FRED2) {
     studio2_memory[address] = data & 0xFF;
   } else {
     println("Attempt at "+ hex(R[P]-1) + " to write ROM memory "+hex(address) + " "+ hex(data));
   }
+  
   // debug
   //if (address >= 0x900 && address < 0xA00) {
   //  println("write "+hex(address) + " value "+ hex(data));
@@ -217,7 +265,7 @@ private final static int READEFLAG(int flag) {
   {
   case 1:  // EF1
     //println("EF1");
-    if (console == ARCADE) {
+    if (console == ARCADE || console == FRED2) {
       // center A switch pressed
       retVal = isPressedA[5];
       //isPressedA[5] = 0;
@@ -225,18 +273,25 @@ private final static int READEFLAG(int flag) {
     }
     else {
       // EF1 detects not in display
-      retVal = 1;               // Permanently set to '1' so BN1 in interrupts always fails
+      if (cartridgeMode == NORMAL)
+        retVal = 1;               // Permanently set to '1' so BN1 in interrupts always fails
+      else { // Test cartridge
+        if (P == 1) // check if using resident ROM interrupt program counter
+          retVal = 1;
+        else
+          retVal = 0;
+      }
     }
     break;
   case 2: // EF2
-    if (console == ARCADE) {
+    if (console == ARCADE || console == FRED2) {
       //println("EF2");
       //retVal = 1;
     }
     break;
   case 3: // EF3
     //println("EF3");
-    if (console == ARCADE) {
+    if (console == ARCADE || console == FRED2) {
       // center B switch pressed
       retVal = isPressedB[5];
       //isPressedB[5] = 0;
@@ -250,7 +305,7 @@ private final static int READEFLAG(int flag) {
     break;
   case 4: // EF4
     //println("EF4");
-    if (console == ARCADE) {
+    if (console == ARCADE || console == FRED2) {
       if (coin) {
         retVal = 1;
         //if (retVal == 1) println("Coin reset");
@@ -279,13 +334,13 @@ private final static void UPDATEIO(int portID, int data) {
     if (console == STUDIO2) { // || console == VIP)
       screenEnabled = false;
     }
-    else if (console == ARCADE) {
+    else if (console == ARCADE || console == FRED2) {
       // TV selected
       //println("TV selected "+ hex(data));
     }
     break;
   case 2:
-    if (console == ARCADE) {
+    if (console == ARCADE || console == FRED2) {
       //println("start Arcade Display "+ hex(data));
       screenEnabled = true;
     }
@@ -295,20 +350,29 @@ private final static void UPDATEIO(int portID, int data) {
     }
     break;
   case 3:
+    println("out 63 set tone "+hex(data));  // FRED 1.5 coin games
+    if (console == FRED2) {
+      if (data != 0) {
+        toneState = 1;
+      }
+      else {
+        toneState = 0;
+      }
+    }
     break;
   case 4:
-    if (console != ARCADE) {
+    if (console != ARCADE && console != FRED2) {
       // Studio III programmable sound generator
       setFreq(data);
     }
     break;
   case 5:
-    if (console == ARCADE) {
+    if (console == ARCADE || console == FRED2) {
       setFreq(data);
     }
     break;
   case 6:
-    if (console == ARCADE) {
+    if (console == ARCADE || console == FRED2) {
       if (data != 0) {
         toneState = 1;
       }
@@ -327,19 +391,19 @@ private final static int INPUTIO(int portID) {
   switch (portID)
   {
   case 1:
-    if (console != ARCADE) {
+    if (console != ARCADE && console != FRED2) {
       // IN 1 turns the display on.
       screenEnabled = true;
     }
     break;
   case 5:  // 4 Bit Parameter switch code
-    if (console == ARCADE) {
+    if (console == ARCADE || console == FRED2) {
       retVal = COIN_ARCADE_PARAMETER_SWITCH;
       //println("Parameter switch read "+ retVal);
     }
     break;
   case 6: // Switches bit 0-7 
-    if (console == ARCADE) {
+    if (console == ARCADE || console == FRED2) {
       retVal = 0;  
       coin = false;
       if (isPressedA[4] == 1) {
@@ -393,7 +457,7 @@ private final static int INPUTIO(int portID) {
 //                                              Monitor ROM
 //*******************************************************************************************************
 
-// 2048 byte studio 2studio2_memory ROM image, includes interpreter (1K) and built-in games (1K)
+// 2048 byte studio 2 ROM image, includes interpreter (1K) and built-in games (1K)
 static int[] studio2 = {144, 177, 180, 165, 171, 248, 8, 178, 182, 184, 248, 28, 161, 248, 191, 162, 248, 107, 164, 248, 3, 181, 212, 122, 66, 246, 66, 112, 34, 120, 34, 115, 192, 0, 35, 126, 82, 25, 248, 9, 176, 248, 208, 168, 139, 160, 226, 32, 160, 226, 32, 160, 226, 32, 160, 128, 32, 160, 60, 47, 32, 160, 56, 60, 40, 8, 50, 71, 255, 1, 88, 136, 251, 205, 58, 64, 8, 50, 23, 123, 48, 24, 25, 137, 174, 147, 190, 153, 238, 244, 86, 246, 230, 244, 185, 86, 69, 242, 86, 212, 0, 0, 226, 34, 105, 18, 212, 150, 183, 148, 188, 69, 172, 175, 246, 246, 246, 246, 50, 148, 249, 224, 172, 143, 250, 15, 249, 192, 166, 5, 246, 246, 246, 246, 249, 192, 167, 76, 179, 140, 252, 15, 172, 76, 163, 211, 48, 107, 143, 250, 15, 179, 69, 48, 144, 34, 226, 248, 211, 115, 69, 249, 240, 82, 230, 71, 210, 86, 248, 203, 166, 145, 126, 86, 212, 134, 251, 192, 58, 82, 66, 181, 66, 165, 212, 69, 86, 212, 100, 10, 1, 6, 58, 199, 21, 212, 6, 58, 194, 5, 165, 212, 21, 133, 34, 82, 149, 34, 82, 37, 69, 165, 134, 250, 15, 181, 212, 134, 250, 15, 186, 69, 170, 212, 0, 0, 0, 0, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 1, 2, 0, 210, 202, 191, 196, 78, 185, 61, 155, 86, 217, 229, 175, 191, 0, 164, 248, 201, 167, 7, 254, 254, 254, 254, 166, 248, 208, 231, 244, 167, 248, 2, 188, 248, 146, 172, 220, 16, 15, 189, 220, 8, 15, 250, 15, 174, 15, 250, 128, 190, 7, 173, 37, 69, 246, 51, 78, 246, 51, 73, 246, 51, 61, 246, 51, 188, 248, 16, 175, 145, 86, 22, 47, 143, 58, 53, 212, 230, 142, 50, 60, 74, 243, 86, 22, 22, 46, 48, 62, 248, 204, 175, 15, 189, 157, 251, 2, 50, 99, 157, 251, 8, 50, 109, 157, 251, 4, 50, 151, 157, 251, 6, 50, 114, 212, 7, 255, 8, 87, 220, 24, 147, 245, 95, 212, 7, 252, 8, 48, 102, 142, 50, 249, 6, 246, 86, 59, 129, 158, 58, 129, 248, 128, 190, 29, 22, 6, 118, 86, 59, 147, 38, 6, 249, 128, 86, 22, 158, 50, 147, 145, 190, 29, 22, 46, 48, 114, 142, 50, 249, 6, 254, 86, 59, 165, 158, 50, 165, 145, 190, 45, 22, 6, 126, 86, 59, 184, 38, 6, 249, 1, 86, 22, 158, 58, 184, 248, 128, 190, 45, 22, 46, 48, 151, 147, 188, 248, 235, 172, 145, 175, 158, 50, 212, 45, 142, 50, 225, 220, 29, 220, 141, 252, 7, 173, 46, 48, 199, 142, 50, 225, 220, 45, 220, 141, 252, 9, 173, 46, 48, 212, 143, 58, 230, 21, 212, 5, 165, 212, 22, 211, 248, 9, 189, 237, 6, 242, 50, 244, 175, 6, 243, 93, 48, 233, 220, 32, 15, 255, 1, 95, 220, 8, 15, 250, 15, 95, 158, 241, 95, 141, 87, 212, 34, 249, 35, 195, 192, 47, 26, 37, 31, 56, 35, 39, 51, 41, 43, 96, 32, 32, 32, 112, 240, 16, 112, 16, 240, 128, 240, 16, 240, 128, 240, 144, 240, 144, 240, 16, 240, 144, 144, 144, 240, 16, 16, 16, 16, 160, 160, 240, 32, 32, 134, 250, 15, 50, 71, 230, 69, 244, 86, 212, 6, 255, 1, 58, 225, 21, 212, 69, 230, 243, 50, 77, 21, 21, 212, 150, 188, 7, 172, 69, 246, 51, 155, 246, 51, 106, 246, 51, 109, 246, 51, 112, 7, 48, 79, 12, 86, 212, 6, 92, 212, 230, 6, 191, 145, 190, 248, 188, 174, 44, 28, 145, 92, 14, 245, 59, 135, 86, 12, 252, 1, 92, 48, 124, 78, 246, 59, 121, 159, 86, 140, 87, 212, 239, 211, 150, 191, 135, 227, 244, 175, 19, 48, 144, 6, 87, 212, 35, 54, 226, 112, 158, 192, 69, 163, 10, 86, 212, 6, 90, 212, 74, 86, 212, 6, 90, 26, 212, 6, 170, 212, 6, 250, 15, 86, 230, 138, 241, 170, 212, 248, 203, 167, 134, 250, 15, 175, 251, 15, 58, 204, 7, 175, 226, 34, 143, 82, 98, 248, 202, 166, 6, 50, 219, 54, 221, 21, 212, 63, 217, 143, 87, 48, 226, 86, 5, 165, 212, 69, 90, 34, 226, 134, 250, 15, 82, 138, 244, 170, 18, 212, 145, 90, 138, 42, 58, 242, 212, 109, 2, 110, 10, 62, 253, 192, 109, 4, 169, 255, 2, 242, 168, 159, 2, 242, 0, 102, 168, 210, 178, 248, 177, 21, 179, 17, 177, 4, 177, 4, 177, 1, 177, 2, 177, 5, 176, 5, 163, 43, 105, 4, 121, 255, 228, 57, 36, 20, 0, 3, 3, 128, 24, 24, 24, 24, 24, 24, 24, 24, 232, 58, 19, 60, 232, 60, 192, 96, 15, 34, 249, 112, 63, 192, 105, 2, 108, 6, 96, 127, 34, 158, 35, 84, 108, 6, 226, 35, 84, 192, 108, 8, 96, 32, 34, 158, 192, 105, 3, 168, 211, 176, 3, 19, 78, 139, 255, 8, 171, 212, 105, 4, 137, 164, 35, 136, 98, 130, 147, 40, 224, 96, 2, 108, 6, 35, 150, 228, 226, 226, 226, 226, 226, 226, 112, 119, 35, 150, 228, 232, 135, 192, 98, 128, 130, 164, 147, 34, 192, 35, 136, 131, 20, 147, 36, 192, 162, 16, 147, 34, 243, 182, 243, 166, 243, 179, 114, 255, 192, 106, 1, 35, 104, 106, 0, 35, 104, 110, 127, 62, 173, 192, 106, 1, 35, 185, 106, 0, 35, 185, 192, 35, 136, 131, 21, 75, 184, 35, 61, 19, 193, 74, 200, 3, 203, 192, 3, 206, 192, 54, 203, 212, 55, 206, 212, 35, 104, 35, 143, 35, 104, 192, 210, 227, 212, 227, 214, 227, 216, 227, 107, 0, 192, 34, 11, 192, 97, 209, 105, 1, 242, 172, 146, 20, 232, 240, 112, 234, 192, 0, 34, 11, 146, 17, 35, 209, 97, 100, 35, 185, 23, 248, 106, 1, 209, 14, 210, 57, 211, 139, 212, 141, 213, 143, 20, 0, 105, 2, 104, 0, 109, 4, 232, 20, 106, 1, 210, 55, 106, 0, 37, 6, 20, 20, 75, 16, 91, 5, 20, 51, 110, 8, 62, 40, 56, 46, 232, 46, 36, 111, 226, 20, 20, 104, 255, 20, 18, 232, 57, 105, 2, 96, 130, 168, 48, 109, 4, 35, 195, 106, 0, 37, 6, 20, 67, 91, 5, 20, 67, 75, 88, 251, 175, 36, 111, 226, 232, 86, 112, 65, 176, 0, 109, 8, 168, 48, 252, 172, 76, 92, 36, 113, 226, 232, 103, 213, 107, 20, 94, 208, 94, 20, 107, 155, 193, 99, 1, 131, 194, 67, 138, 99, 5, 140, 53, 75, 133, 76, 138, 124, 2, 226, 108, 8, 192, 124, 8, 226, 108, 2, 192, 22, 3, 21, 19, 109, 4, 35, 195, 168, 208, 184, 131, 176, 5, 35, 163, 103, 21, 110, 48, 62, 159, 109, 3, 102, 12, 100, 255, 101, 255, 119, 255, 55, 175, 19, 191, 104, 0, 168, 130, 96, 3, 194, 3, 242, 175, 136, 36, 112, 181, 105, 0, 98, 132, 35, 114, 63, 205, 118, 255, 111, 32, 54, 205, 20, 249, 106, 1, 37, 6, 20, 225, 155, 33, 68, 225, 109, 2, 130, 131, 66, 245, 100, 0, 20, 225, 106, 0, 37, 6, 20, 195, 155, 33, 69, 195, 109, 2, 130, 131, 66, 245, 101, 0, 20, 195, 150, 17, 35, 209, 105, 0, 232, 157, 20, 157, 66, 181, 66, 165, 21, 21, 212, 107, 10, 123, 255, 223, 15, 59, 8, 192, 109, 2, 4, 255, 165, 227, 96, 8, 35, 230, 168, 208, 177, 9, 183, 178, 177, 7, 176, 8, 165, 235, 105, 0, 37, 217, 37, 217, 100, 10, 103, 18, 101, 120, 99, 32, 104, 32, 109, 32, 102, 6, 96, 10, 168, 129, 106, 1, 208, 75, 106, 0, 208, 71, 21, 61, 176, 1, 21, 77, 176, 3, 106, 1, 210, 133, 216, 137, 106, 0, 212, 179, 214, 179, 62, 97, 69, 97, 117, 255, 110, 60, 63, 77, 115, 255, 144, 128, 21, 119, 109, 2, 136, 5, 75, 115, 120, 254, 21, 117, 120, 2, 136, 4, 51, 141, 97, 1, 35, 143, 99, 16, 53, 141, 35, 104, 19, 191, 96, 0, 21, 83, 96, 10, 21, 83, 105, 1, 108, 2, 37, 203, 152, 241, 3, 99, 71, 173, 150, 193, 105, 0, 168, 129, 242, 166, 203, 255, 130, 178, 66, 77, 37, 203, 119, 255, 21, 77, 37, 250, 103, 18, 21, 77, 155, 193, 92, 4, 21, 197, 84, 21, 21, 89, 116, 1, 105, 1, 37, 203, 21, 89, 68, 195, 116, 255, 21, 191, 232, 205, 226, 5, 224, 232, 211, 192, 104, 26, 109, 4, 21, 210, 224, 228, 232, 221, 121, 1, 192, 60, 224, 212, 0, 64, 128, 192, 4, 68, 132, 196, 180, 252, 180, 48, 180, 252, 180, 16, 186, 254, 186, 56, 186, 254, 186, 98, 4, 86, 4, 98, 6, 146, 97, 192, 100, 0, 168, 219, 176, 5, 39, 65, 116, 1, 84, 11, 22, 27, 102, 1, 38, 41, 102, 0, 38, 41, 22, 9, 35, 104, 106, 1, 35, 104, 167, 134, 103, 155, 38, 148, 19, 191, 103, 125, 70, 47, 103, 121, 167, 144, 39, 78, 119, 1, 98, 112, 148, 40, 96, 1, 39, 70, 35, 117, 168, 219, 176, 5, 35, 163, 150, 161, 39, 65, 168, 32, 176, 128, 168, 210, 184, 248, 176, 1, 35, 68, 102, 0, 105, 1, 168, 217, 176, 4, 167, 84, 224, 228, 167, 88, 96, 10, 35, 230, 168, 96, 96, 10, 177, 1, 112, 107, 38, 190, 81, 0, 38, 177, 81, 10, 22, 155, 134, 20, 38, 190, 134, 20, 81, 0, 38, 177, 86, 10, 22, 169, 111, 95, 63, 137, 39, 65, 150, 17, 35, 143, 192, 103, 193, 39, 78, 119, 1, 39, 78, 192, 167, 104, 102, 20, 38, 146, 96, 4, 34, 249, 112, 163, 22, 135, 167, 114, 102, 15, 38, 146, 22, 135, 167, 124, 38, 146, 111, 63, 63, 183, 167, 124, 38, 146, 192, 105, 0, 168, 208, 184, 8, 184, 6, 184, 6, 184, 0, 176, 56, 167, 98, 224, 228, 101, 24, 232, 212, 85, 24, 108, 8, 85, 0, 108, 2, 63, 239, 92, 2, 117, 1, 92, 8, 117, 255, 207, 4, 127, 0, 232, 236, 226, 22, 210, 210, 249, 216, 249, 213, 247, 22, 220, 107, 0, 155, 129, 109, 6, 108, 0, 97, 0, 105, 0, 63, 3, 92, 2, 117, 1, 92, 8, 117, 255, 232, 15, 225, 225, 226, 232, 24, 111, 7, 23, 38, 105, 1, 103, 10, 119, 255, 151, 129, 39, 149, 51, 203, 55, 28, 85, 25, 23, 60, 85, 255, 23, 60, 168, 240, 243, 166, 83, 0, 23, 60, 83, 30, 152, 193, 23, 1, 105, 0, 232, 64, 192, 169, 255, 2, 242, 192, 105, 3, 99, 211, 151, 52, 224, 192, 39, 70, 228, 232, 83, 192, 60, 36, 36, 60, 215, 151, 87, 23, 182, 118, 54, 149, 85, 116, 63, 63, 63, 63, 63, 63, 238, 132, 229, 36, 228, 119, 21, 117, 69, 119, 238, 138, 238, 40, 232, 103, 36, 167, 33, 119, 125, 85, 85, 69, 69, 119, 68, 119, 17, 119, 246, 134, 229, 132, 244, 95, 73, 73, 201, 223, 60, 32, 56, 32, 32, 98, 96, 130, 132, 147, 34, 192, 167, 88, 98, 88, 130, 132, 242, 179, 243, 166, 98, 209, 147, 36, 192, 109, 2, 98, 96, 130, 132, 99, 0, 147, 36, 113, 1, 110, 4, 62, 185, 192, 195, 1, 67, 202, 39, 149, 67, 202, 39, 156, 232, 200, 39, 171, 192, 39, 156, 232, 207, 232, 211, 23, 36, 232, 213, 39, 171, 87, 5, 23, 243, 87, 2, 23, 229, 87, 1, 23, 229, 23, 36, 76, 227, 104, 0, 96, 4, 39, 188, 120, 1, 112, 235, 23, 36, 76, 241, 104, 6, 39, 188, 104, 4, 39, 188, 23, 36, 187};
 
 //*******************************************************************************************************
@@ -409,7 +473,7 @@ void CPU_Reset()
   IE = 1;                                                             // Set IE to 1
   DF = DF & 1;                                                        // Make DF a valid value as it is 1-bit.
 
-  state = 1;                                                          // State 1
+  state = 1;   // State 1
   cycles = STATE_1_CYCLES;                                            // Run this many cycles.
   screenEnabled = false;
 
@@ -423,8 +487,12 @@ void CPU_Reset()
     else if (interpreter == CHIP8X)
       loadBinary("chip8x.ram", 0x0000);
     R[1] = VIDEO_RAM | 0x00FF;
-    println("R[1] "+hex(R[1]));
+    println("VIP R[1]="+hexAddr(R[1]));
   } else if (console == ARCADE) {
+    //
+  } else if (console == FRED2) {
+    //
+  } else if (console == CUSTOM) {
     //
   }
 
@@ -435,10 +503,6 @@ void CPU_Reset()
     }
   }
   
-  if (READ(0) == 0) {
-    R[0] = 1;  // skip over idl or sep 0 instruction
-  }
-
 }
 
 String hexAddr(int addr) {
@@ -465,9 +529,6 @@ int CPU_Execute()
   //}
   
   // breakpoints for debug
-  //if (addr == 0x00A2) {
-  //  println("R5="+hexAddr(R[5]));
-  //}
   //if (addr == 0x002A) {
   //  println("R5="+hexAddr(R[5]));
   //}
@@ -1514,7 +1575,7 @@ static int CPU_GetScreenMemoryAddress()
 
 static int CPU_GetScreenScrollOffset()
 {
-  return scrollOffset;
+  return scrollOffset & 0xFF;
 }
 
 
