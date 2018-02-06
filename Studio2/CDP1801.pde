@@ -42,12 +42,16 @@ private static final int CLOCK_SPEED_ARCADE        =     (1600000); // 2000000; 
 private static final int CYCLES_PER_SECOND_ARCADE  =     (CLOCK_SPEED_ARCADE/8);  // There are 8 clocks in each cycle (200,000 cycles/Second)
 private static final int FRAMES_PER_SECOND_ARCADE  =     (60);            // NTSC Frames Per Second
 private static final int CYCLES_PER_FRAME_ARCADE   =     (CYCLES_PER_SECOND_ARCADE/FRAMES_PER_SECOND_ARCADE); // Cycles per Frame, Complete (3668)
-private static final int VISIBLE_LINES_ARCADE      =     128;
+private static final int VISIBLE_LINES_ARCADE      =     64;  // Guess for Arcade! could be 128, used to set dmaCount that can change timing
+private static final int DMA_COUNT                 =     VISIBLE_LINES_ARCADE/4;  // eems to provide the best timing, lacking Arcade documentation to know for sure.
+//private static final int VISIBLE_LINES_ARCADE      =     128;  // Guess for Arcade! could be 128, used to set dmaCount that can change timing
+//private static final int DMA_COUNT                 =     VISIBLE_LINES_ARCADE/4;  // seems to provide the best timing, lacking Arcade documentation to know for sure.
 private static final int DISPLAY_DMA_CYCLES_PER_FRAME =  (VISIBLE_LINES_ARCADE) * (64/8) * 2;  // 32 rows x 64 columns
-private static final int STATE_2_CYCLES_ARCADE     =     120;  // estimated max interrupt cycles - varies with game (FRED2)
+private static final int STATE_2_CYCLES_ARCADE     =     140;  // estimated max interrupt cycles - varies with game (FRED2)
 private static final int STATE_1_CYCLES_ARCADE     =     (CYCLES_PER_FRAME_ARCADE-DISPLAY_DMA_CYCLES_PER_FRAME)-STATE_2_CYCLES_ARCADE;
 
-int dmaCount = 0;
+int dmaCount = 0; //<>//
+int unusedCycles = 0;
 
 //*******************************************************************************************************
 // Execute one CDP1801 microprocessor instruction
@@ -63,6 +67,7 @@ int CPU1801_Execute()
   if (opCode == 0x70) {
     // ready to exit interrupt with R0 DMA pointer set
     if (state == 2) {
+      unusedCycles = cycles;
       cycles = 0;
       screenMemory = (R[0] & 0xFF00) ;     // display location
       scrollOffset = R[0] & 0xFF;          // Get the scrolling offset (for things like the car game)
@@ -916,8 +921,8 @@ int CPU1801_Execute()
     switch(state)
     {
     case 1:     // in interrupt                                                                // Main Frame State Ends
-      state = 2;                                                               // Switch to Interrupt Preliminary state
-      cycles = STATE_2_CYCLES_ARCADE;                                                // The 29 cycles between INT and DMAOUT.
+      state = 2;                                                              // Switch to Interrupt Preliminary state
+      cycles = STATE_2_CYCLES_ARCADE;                                         // Max cycles between INT and DMAOUT.
       if (screenEnabled)                                                      // If screen is on
       {
         // Come out of IDL for Interrupt.
@@ -926,12 +931,13 @@ int CPU1801_Execute()
           R[P] &= 0xFFFF;
         }
         INTERRUPT();                                                        // if IE != 0 generate an interrupt.
-        dmaCount = VISIBLE_LINES_ARCADE/4; // 32
+        dmaCount = DMA_COUNT; // 16 or 32
       }
       break;
-    case 2:                                                                     // Interrupt preliminary ends.
+    case 2:                                                                   // Interrupt preliminary ends.
       state = 1;                                                              // Switch to Main Frame State
-      cycles = STATE_1_CYCLES_ARCADE;
+      cycles = STATE_1_CYCLES_ARCADE+unusedCycles;
+      unusedCycles = 0;
       SYSTEM_Command(HWC_FRAMESYNC, 0);                                        // Synchronise.
       if (toneState != 0) {
         tone(true);
