@@ -12,7 +12,7 @@ is excellent because it simulates the real-time operaton of the CDP1802 CPU and 
 on modern computers. 
 
 I ported Paul Robson's well-crafted C code to the Processing language (Java) so that I could use
-its graphics library to create a user interface for playing the games.
+the Processing graphics library to create a user interface for playing the games.
 I also made additional enhancements to support other COSMAC systems besides the Studio II console.
 
 https://github.com/paulscottrobson/studio2-games 
@@ -24,8 +24,12 @@ The following subsections in chronological order describe the evolution of the S
 The SYSTEM 00 computer may be the first personal computer built using discrete TTL integrated circuits. 
 Joseph Weisbecker designed and constructed the SYSTEM 00 in 1971 (October-December) based on schematic circuit diagram dates in the 
 "Microprocessor Manual SYSTEM 00" by Joseph A. Weisbecker. 
+
 The computer architecture of SYSTEM 00 is the starting point for the RCA CDP1802 microprocessor.
 The computer instruction set is a subset of what would become the RCA CDP1801 and CDP1802 microprocessor instruction set.
+
+SYSTEM 00 used an oscilloscope for a video display and supported a resolution of 32 x 32 pixels (display memory is 128 bytes).
+There is also a 16 x 64 resolution for display 4 lines with a max of 10 characters per line usig a 5x7 dot martrix character representation.
 
 The SYSTEM 00 document contains two sample programs, 1) Deduce game and 2) Display (on OScilloscope).
 
@@ -86,7 +90,7 @@ The game was written by Joseph Weisbecker in 1975.
 
 https://youtu.be/xbSNnIyc1K4
 
-The "Swords" game was stored on a cassette tape and converted into a WAV file provided by the Hagley Museum and Library.  
+The "Swords" game was stored on an analog cassette tape and was digitized into a WAV file provided by the Hagley Museum and Library.  
 I wrote a program in Processing to extract the game code instruction bytes encoded in the WAV file audio to use with the Arcade game emulator. See https://github.com/ajavamind/Extract-WAV-Data
 
 -Hagley Museum and Library: Sarnoff/RCA Collection
@@ -211,9 +215,12 @@ memory location 0x0400).
 Resident game ROMs (3072 bytes) for Studio III included a game instruction pseudo code interpreter (starting at location 0) and resident games Doodle, Pattern, Bowling 
 (starting at 0x0400), and Blackjack (starting at location 0x0C00). 
 
-The only difference between the Studio II and Studio III interpreters is that the Studio III interpreter replaced a 3 byte branch instruction with 2 byte instructions.
-This was needed for correct video display timing. Note that in the Studio III programming manual, there is a caution note to not use 3 byte instructions in 1802 machine 
-language subroutines. Color and sound features used in games were programmed in the game cartridge.
+The only difference between the Studio II and Studio III interpreters is that the Studio III interpreter replaced a 3 byte branch instruction with 1 byte NOP instruction in the interrupt service routine to make room for a code change that checks the EF1 line.
+This 3 machine cycle instruction is still needed for correct video display timing (29 machine cycles before the first DMA out of the video display memory). 
+Note that in the Studio III programming manual, there is a caution note to not use any 3 machine cycle instructions (NOP, Long Branch)
+in a program's 1802 machine language subroutines embedded in the game interpretive code. 
+
+Color and sound features used in games were programmed in the game cartridge.
 
 There was an engineering cost trade-off that favored limits to ROM size and hardware complexity versis faster game speed, screen display size, and color/sound features.
 By using interpreter psuedo code to write games instead of coding directly with 1802 CPU instructions, small game ROM size was made possible, with shared functions in
