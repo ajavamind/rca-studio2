@@ -318,7 +318,7 @@ There is also a VIP CHIP8 version of Pinball.
 
 ## Documents and References
 
-1. Game Instruction manual for Studio II and Studio II, 1977, RCA Corporation, David Sarnoff Research Center, Princeton, NJ (Andrew Modla collection) This is my personal copy. Stereo 3D photos (L/R side by side) of this document are in the Photos folder. Joe Weisbecker's copy is at the Hagley Museum and Library, 298 Buck Road, Wilmington, DE 19807, USA.
+1. Game Instruction Manual for Studio II and Studio II, 1977, RCA Corporation, David Sarnoff Research Center, Princeton, NJ (Andrew Modla collection) This is my personal copy. Stereo 3D photos (L/R side by side) of this document are in the Photos folder. Joe Weisbecker's copy is at the Hagley Museum and Library, 298 Buck Road, Wilmington, DE 19807, USA.
 2. Internal Memo RE: Studio II & III PROGRAMS, 12/15/1977, Andrew Modla, David Sarnoff Research Center, Princeton, NJ (Andrew Modla collection)
 3. Programming Manual for Studio III, September 1977, RCA Corporation, David Sarnoff Research Center, Princeton, NJ (source: 
 http://bitsavers.org/components/rca/cosmac/ (Programming_Manual_for_STUDIO_III_Sep77.pdf)
@@ -328,6 +328,9 @@ http://bitsavers.org/components/rca/cosmac/ (Programming_Manual_for_STUDIO_III_S
 6. VP-710_RCA_COSMAC_VIP_Game_Manual_Dec78.pdf From http://bitsavers.org/components/rca/cosmac/
 (VP-710_RCA_COSMAC_VIP_Game_Manual_Dec78.pdf)
 7. RCA COSMAC Game Manual II (VP-720), 8-1980, RCA Microcomputer Products, New Holland Avenue, Lancaster, PA 17604. (Andrew Modla collection)
+
+Video display chip CDP1861 documentation can be found here along with other hardware data specification sheets:
+http://www.cosmacelf.com/publications/data-sheets/  cdp1861.pdf
 
 Studio II manuals can be found at:
 http://bitsavers.org/components/rca/cosmac/studio_II/
