@@ -13,7 +13,9 @@ on modern computers.
 
 I ported Paul Robson's well-crafted C code to the Processing language (Java) so that I could use
 the Processing graphics library to create a user interface for playing the games.
-I also made additional enhancements to support other COSMAC systems besides the Studio II console.
+I also added enhancements to support other COSMAC systems emulation besides the Studio II console.
+These include Studio III color and sound, RCA Arcade games (1975), RCA FRED Computer Game System (1974)
+and COSMAC VIP board (using CHIP8 and CHIP8X color interpreters).
 
 https://github.com/paulscottrobson/studio2-games 
 
