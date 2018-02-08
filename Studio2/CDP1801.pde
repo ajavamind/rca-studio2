@@ -43,14 +43,14 @@ private static final int CYCLES_PER_SECOND_ARCADE  =     (CLOCK_SPEED_ARCADE/8);
 private static final int FRAMES_PER_SECOND_ARCADE  =     (60);            // NTSC Frames Per Second
 private static final int CYCLES_PER_FRAME_ARCADE   =     (CYCLES_PER_SECOND_ARCADE/FRAMES_PER_SECOND_ARCADE); // Cycles per Frame, Complete (3668)
 private static final int VISIBLE_LINES_ARCADE      =     64;  // Guess for Arcade! could be 128, used to set dmaCount that can change timing
-private static final int DMA_COUNT                 =     VISIBLE_LINES_ARCADE/4;  // eems to provide the best timing, lacking Arcade documentation to know for sure.
+private static final int DMA_COUNT                 =     VISIBLE_LINES_ARCADE/4;  // seems to provide the best timing, lacking Arcade documentation to know for sure.
 //private static final int VISIBLE_LINES_ARCADE      =     128;  // Guess for Arcade! could be 128, used to set dmaCount that can change timing
 //private static final int DMA_COUNT                 =     VISIBLE_LINES_ARCADE/4;  // seems to provide the best timing, lacking Arcade documentation to know for sure.
 private static final int DISPLAY_DMA_CYCLES_PER_FRAME =  (VISIBLE_LINES_ARCADE) * (64/8) * 2;  // 32 rows x 64 columns
 private static final int STATE_2_CYCLES_ARCADE     =     140;  // estimated max interrupt cycles - varies with game (FRED2)
 private static final int STATE_1_CYCLES_ARCADE     =     (CYCLES_PER_FRAME_ARCADE-DISPLAY_DMA_CYCLES_PER_FRAME)-STATE_2_CYCLES_ARCADE;
 
-int dmaCount = 0; //<>//
+int dmaCount = 0;
 int unusedCycles = 0;
 
 //*******************************************************************************************************

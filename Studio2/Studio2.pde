@@ -101,6 +101,7 @@ private final static int RAM_SIZE = 0x200; // Working and Video display RAM
 private static int INITIAL_VIDEO_RAM = 0x900;  // Studio 2 and 3 starting location
 private static int VIDEO_RAM = INITIAL_VIDEO_RAM;  // Studio 2 and 3 starting location
 // Video RAM is 64 x 32 pixels stored in 256 bytes
+private static int DISPLAY_SIZE = 256;
 
 private static int COIN_ARCADE_AD_ROM = 0x0A00;  // splash barker screen
 private static int COIN_ARCADE_PARAMETER_SWITCH = 0;   // 8 is test mode?
@@ -312,6 +313,11 @@ void setup()
     test = true;  // force test loop
   }
   
+  studio2_memory = new int[0x10000];
+  for (int i=0; i<0x10000; i++) {
+    studio2_memory[i] = 0xFF;
+  }
+
   // run test code here when configured
   if (test) {
     testDisplayScreen();
@@ -320,10 +326,6 @@ void setup()
     }
   }
   
-  studio2_memory = new int[0x10000];
-  for (int i=0; i<0x10000; i++) {
-    studio2_memory[i] = 0xFF;
-  }
   initSound();
   systemReset();
   drawConsole();
@@ -353,7 +355,7 @@ void draw()
         
       if (nextState == 1) {
         updateGUI();
-        displayScreen(false, width, 3*height/8, CPU_GetScreenMemoryAddress(), CPU_GetScreenScrollOffset());
+        displayScreen(false, width, 3*height/8, CPU_GetScreenMemoryAddress(), CPU_GetScreenScrollOffset(), CPU_GetScreenSize());
         break; // leave draw() until the next frame
       }
     }
@@ -437,7 +439,7 @@ void systemReset() {
   else
     cartridgeMode = NORMAL;
 
-  if (READ(0) == 0) { //<>//
+  if (READ(0) == 0) {
     R[0] = 1;  // skip over idl instruction, must be a RCA FRED COSMAC Game System
   }
 
@@ -457,9 +459,25 @@ public boolean isAndroid() {
  * Test Display Emulation
  */
 void testDisplayScreen() {
-  int pattern = 0xAA;
+  int pattern = 0x00;
   for (int i=0; i<256; i++) {
+    if (i % 32 == 0)
+      pattern = pattern ^ 0xCC;
     studio2_memory[i+VIDEO_RAM] = pattern;
   }
-  displayScreen(true, width, height/2, VIDEO_RAM, CPU_GetScreenScrollOffset());
+  pattern = 0x33;
+  for (int i=0; i<256; i++) {
+    studio2_memory[i+VIDEO_RAM+256] = pattern;
+  }
+  pattern = 0x00;
+  for (int i=0; i<256; i++) {
+    studio2_memory[i+VIDEO_RAM+512] = pattern;
+  }
+  pattern = 0xFF;
+  for (int i=0; i<256; i++) {
+    studio2_memory[i+VIDEO_RAM+768] = pattern;
+  }
+  //displayScreen(true, width, height/2, VIDEO_RAM, CPU_GetScreenScrollOffset(), DISPLAY_SIZE);
+  //displayScreen(true, width, height/2, VIDEO_RAM, CPU_GetScreenScrollOffset(), 512);
+  displayScreen(false, width, height/2, VIDEO_RAM, CPU_GetScreenScrollOffset(), 1024);
 }

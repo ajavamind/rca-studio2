@@ -199,17 +199,21 @@ static int SYSTEM_Command(int cmd, int param)
  */
 private static final int VIDEO_SCREEN_WIDTH = 64;  // pixels
 private static final int VIDEO_SCREEN_HEIGHT = 32; // pixels
-void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int screenData, int scrollOffset)
+void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int displayData, int scrollOffset, int displaySize)
 {
   int xc, yc, xs, ys, x, y, pixByte;
   int rx, ry, rw, rh;   // defines drawing rectangle coorinates
   int drawWidth;
   int drawHeight;
   int hOffset;
+  int pages = displaySize/256;
+  int mask = displaySize-1;
+  int displayHeight = pages * VIDEO_SCREEN_HEIGHT;
+  
   drawWidth = screenWidth - screenWidth/16;
   drawHeight = screenHeight - screenHeight/8;
   xs = drawWidth / (VIDEO_SCREEN_WIDTH + 2);  // pixel width
-  ys = xs;  // pixel height
+  ys = xs/pages;  // pixel height
   hOffset = (screenWidth - 64*xs)/2;
   xc = xs; //0;
   yc = ys; //0;
@@ -218,7 +222,7 @@ void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int s
   // Erase screen display
   fill(bgColor[backgroundColor]);
   rect(0, 0, screenWidth, screenHeight - 2*ys);
-  if (screenData == -1) {
+  if (displayData == -1) {
     //println("screen OFF");
     return; // Screen off, exit.
   }
@@ -227,33 +231,33 @@ void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int s
   if (isDebugMode)
     stroke(color(255, 0, 0));  // debug outline
   else 
-  noStroke();
+    noStroke();
 
   fill(fgr);
   rw = xs;
-  rh = ys;                                                                // Set cell width and height
-  for (y = 0; y < VIDEO_SCREEN_HEIGHT; y++)                               // One line at a time.
+  rh = ys;                  // Set cell width and height
+  for (y = 0; y < displayHeight; y++)                               // One line at a time.
   {
-    int offset = ((y * 8 + scrollOffset) & 0xFF);                   // Work out where data comes from.
-    ry = yc + ys * y;                                                             // Calculate vertical coordinate
+    int offset = ((y * 8 + scrollOffset) & mask);                   // Work out where data comes from.
+    ry = yc + ys * y;                                               // Calculate vertical coordinate
     xc = 0;
     for (x = 0; x < (VIDEO_SCREEN_WIDTH/8); x++)                    // 8 bytes per line.
     {
-      pixByte = studio2_memory[(screenData+offset)& 0xFFFF] & 0xFF;        // Get next pixel.
+      pixByte = studio2_memory[(displayData+offset)& 0xFFFF] & 0xFF;   // Get next 8 pixels
       offset++;
-      rx = xc + x * xs * 8;                                                     // Calculate horizontal coordinate
+      rx = xc + x * xs * 8;                                         // Calculate horizontal coordinate
       if (console == STUDIO3 || (console == VIP && interpreter == CHIP8X)) {
         int colorIndex = studio2_memory[COLOR_MAP + x + 8*(y/4)] & 0x0007;
         fill(colorMap[colorIndex]);
       }
-      while (pixByte != 0)                                                        // if something to render.
+      while (pixByte != 0)                                          // if something to render.
       {
         // if bit 7 set draw pixel
         if ((pixByte & 0x80) != 0) {
-          rect(hOffset+rx, ry, rw, rh);
+          rect(hOffset+rx, ry, rw, rh);                             // draw rectangle when pixel set
         }
-        pixByte = (pixByte << 1) & 0xFF;                                        // shift to left, lose overflow.
-        rx = rx + xs;                                                       // next coordinate across.
+        pixByte = (pixByte << 1) & 0xFF;                            // shift to left, lose overflow.
+        rx = rx + xs;                                               // next coordinate across.
       }
     }
   }
@@ -295,7 +299,7 @@ void displayInfo(int screenWidth, int screenHeight, String[] text, int offset)
   //  xc = 0;
   //  for (x = 0; x < (VIDEO_SCREEN_WIDTH/8); x++)                    // 8 bytes per line.
   //  {
-  //    pixByte = studio2_memory[screenData+offset++] & 0xFF;                            // Get next pixel.
+  //    pixByte = studio2_memory[displayData+offset++] & 0xFF;                            // Get next pixel.
   //    rx = xc + x * xs * 8;                                                     // Calculate horizontal coordinate
   //    if (console == STUDIO3 || (console == VIP && interpreter == CHIP8X)) {
   //      int colorIndex = studio2_memory[COLOR_MAP + x + 8*(y/4)] & 0x0007;

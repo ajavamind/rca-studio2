@@ -58,7 +58,8 @@ private static final int EXEC_CYCLES_PER_FRAME =  (NON_DISPLAY_LINES*CYCLES_PER_
 // State 2 : 29 cycles with N1 = 1
 
 private static final int STATE_1_CYCLES     =     (EXEC_CYCLES_PER_FRAME);
-private static final int STATE_2_CYCLES     =     (29);
+private static final int CYCLES_BEFORE_DMA  =     29;  // from the start of the display generated interrupt 
+private static final int STATE_2_CYCLES     =     CYCLES_BEFORE_DMA;
 
 static int D, X, P, T;                                                               // 1802 8 bit registers
 static int DF, IE, Q;                                                               // 1802 1 bit registers
@@ -101,9 +102,9 @@ private final static int READ(int address)
     return 0xFF;
   }
   
-  // Only test cartridge is hardware specific for Studio 2 console
+  // Studio 2 test cartridge is hardware specific for Studio 2 console
   // It uses memory mirroring that may not exist in other hardware
-  // Normal cartridges should not use mirroring
+  // Normal cartridges do not use mirroring
   if (console == STUDIO2 && cartridgeMode == TEST) {
     // account for hardware memory mirroring
     if (address >= 0x8000) {
@@ -140,6 +141,9 @@ private final static void WRITE(int address, int data)
   //  return;
   //}
   
+  // Studio 2 test cartridge is hardware specific for Studio 2 console
+  // It uses memory mirroring that may not exist in other hardware
+  // Normal cartridges do not use mirroring
   if (console == STUDIO2 && cartridgeMode == TEST) {
     // account for hardware memory mirroring) 
     if (address >= 0x8000) {
@@ -153,14 +157,14 @@ private final static void WRITE(int address, int data)
     else if (address >= 0x0A00) {
       studio2_memory[(address & 0x01FF) | RAM ] = data & 0xFF;
       println("write memory "+hex(address) + " " + hex(data));
-   }
+    }
     else if (address >= 0x0800) {
       studio2_memory[(address & 0x01FF) | RAM ] = data & 0xFF;
     }
     else {
       println("write to ROM "+hex(address));
     }
-    return;
+   return;
   }
   
   if ((address >= RAM) && (address < (RAM+RAM_SIZE))) // only RAM space is writeable
@@ -1521,7 +1525,7 @@ int CPU_Execute()
     case 2:                                                                     // Interrupt preliminary ends.
       state = 1;                                                              // Switch to Main Frame State
       cycles = STATE_1_CYCLES;
-      screenMemory = (R[0] & 0xFF00) ;     // display location
+      screenMemory = (R[0] & 0xFF00) ;     // display page location at start of DMA
       scrollOffset = R[0] & 0xFF;          // Get the scrolling offset (for things like the car game)
       SYSTEM_Command(HWC_FRAMESYNC, 0);                                        // Synchronise.
       if (toneState != 0) {
@@ -1532,7 +1536,7 @@ int CPU_Execute()
       break;
     } // switch
     rState = state;                                                      // Return state as state has switched
-    cycles--;                                                                   // Time out when cycles goes -ve so deduct 1.
+    cycles--;                                                            // Time out when cycles goes negative so deduct 1.
   }
   return rState;
 }
@@ -1567,6 +1571,22 @@ static int CPU_GetScreenMemoryAddress()
     scrollOffset *= 1;
   }
   return (screenEnabled) ? screenMemory : -1;
+}
+
+static int CPU_GetScreenSize()
+{
+  if (cartridgeMode == NORMAL)
+    return DISPLAY_SIZE;
+  // println("VIDEO_RAM="+ hex(VIDEO_RAM));
+  // println("screenMemory="+ hex(screenMemory));
+  // println("screenSize="+hex(VIDEO_RAM - screenMemory + 256));
+  
+  // Studio 2 test cartridge uses highest resolution
+  if (screenMemory != 0 && screenMemory != VIDEO_RAM) {
+    return (VIDEO_RAM - screenMemory + 256); //<>//
+  } else {
+    return DISPLAY_SIZE;
+  }
 }
 
 //*******************************************************************************************************
