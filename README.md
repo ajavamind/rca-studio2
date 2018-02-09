@@ -31,7 +31,7 @@ The computer architecture of SYSTEM 00 is the starting point for the RCA CDP1802
 The computer instruction set is a subset of what would become the RCA CDP1801 and CDP1802 microprocessor instruction set.
 
 SYSTEM 00 used an oscilloscope for a video display and supported a resolution of 32 x 32 pixels (display memory is 128 bytes).
-There is also a 16 x 64 resolution for display 4 lines with a max of 10 characters per line usig a 5x7 dot martrix character representation.
+There is also a 64 x 16 resolution for display 4 lines with a max of 10 characters per line usig a 5x7 dot martrix character representation.
 
 The SYSTEM 00 document contains two sample programs, 1) Deduce game and 2) Display (on OScilloscope).
 
@@ -231,11 +231,11 @@ the interpreter.
 The hardware design was elegant and relatively simple.
 
 Games were slow for three reasons: 
-1. No game instruction execution occurs during screen update cycles. The screen draw update uses 50% of the CDP1802 processor time.
+1. No game instruction execution occurs during screen display update frame cycles. The screen display update uses 49% of the CDP1802 processor time. The remainder, 51% of the total processor time, can be used for game play at a rate of 60 frames per second. This means that a game writer only has 0.85% of the processor time to generate one frame of game play! Because the display is low resolution, 64 wide x 32 high pixels, there was sufficient time to update the display without excessive flicker.
 2. Decoding interpreter pseudo code.
 3. Drawing graphics with software instructions without hardware assistance (for example, no hardware sprite graphics).
 
-Due to its operating speed and keyboard input, in my opinion, the Studio II system was better suited for puzzles and card games, rather than action games. 
+Due to its operating speed, low resolution, and keyboard input, in my opinion, the Studio II system was better suited for puzzles and card games, rather than action games. 
 
 ## RCA Game Development
 
