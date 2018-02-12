@@ -10,12 +10,13 @@ who wrote a RCA COSMAC CDP1802 microcomputer and Studio 2 video game console emu
 Paul Robson's emulation code design
 is excellent because it simulates the real-time operaton of the CDP1802 CPU and Studio 2 quite well, when run
 on modern computers. 
+I made further improvements to the emulation for precise timing of the CDP1802 DMA operations.
 
 I ported Paul Robson's well-crafted C code to the Processing language (Java) so that I could use
 the Processing graphics library to create a user interface for playing the games.
 I also added enhancements to support other COSMAC systems emulation besides the Studio II console.
-These include Studio III color and sound, RCA Arcade games (1975), RCA FRED Computer Game System (1974)
-and COSMAC VIP board (using CHIP8 and CHIP8X color interpreters).
+These include RCA FRED Computer Game System (1974), RCA Arcade games (1975), Studio III color and sound (1977),
+and COSMAC VIP board (1978 using CHIP8 and CHIP8X color interpreters).
 
 https://github.com/paulscottrobson/studio2-games 
 
@@ -56,7 +57,8 @@ http://www.retrotechnology.com/memship/cosmac_fred2.html
 
 ### RCA COSMAC Computer Game System
 
-The RCA COSMAC Computer Game System is based on the FRED II computer. It read tapes to load game programs. 
+The RCA COSMAC Computer Game System is based on the FRED II computer and uses the CDP1801 microprocessor. 
+It read tapes to load game programs. 
 The Hagley Library Acc. 2464, Box 919, FRED folder 4, has a document written by 
 Joe Weisbecker in January 1975 titled "Instructions for the RCA COSMAC Computer Game System".
 I conclude that the games described in the document were written in the late 1974.
@@ -69,8 +71,10 @@ The procedure and program tool I used to extract the program byte code from a WA
 
 https://github.com/ajavamind/Extract-WAV-Data
 
-A distinguishing characteristic of games that run in FRED II systems is that the first byte of programs is "0", the IDLE instruction that 
-waits for a DMA or interrupt. 
+A distinguishing characteristic of games that run in FRED II systems is that the first byte of programs is "0", the IDLE instruction that waits for a DMA or interrupt. 
+There is a note in the RCA CDP1801 data sheet (file number 900):
+
+> "If a DMA request is used to bring the processor out of IDLE, it will increment te contents of R(0) by 1. The first instruction will, therefore, be fetched from memory location 0001 and not 0000. Thus, program execution begins at location 0001 with R(0) as the program counter. It is recommended that MEM.LOC.0000 not be used by the program."
 
 ### RCA Video Coin Arcade Game Console
 
@@ -142,8 +146,9 @@ The VIP has many major design similarities to the Studio III.
 ## Running the Emulator
 
 You will need to download the Processing SDK to run the emulated games. Please donate to the Processing Foundation. 
+From the Processing web page:
 
-> Processing is a flexible software sketchbook and a language for learning how to code within the context of the visual arts. Since 2001, Processing has promoted software literacy within the visual arts and visual literacy within technology. There are tens of thousands of students, artists, designers, researchers, and hobbyists who use Processing for learning and prototyping.
+> "Processing is a flexible software sketchbook and a language for learning how to code within the context of the visual arts. Since 2001, Processing has promoted software literacy within the visual arts and visual literacy within technology. There are tens of thousands of students, artists, designers, researchers, and hobbyists who use Processing for learning and prototyping."
 
 https://processing.org/
 
