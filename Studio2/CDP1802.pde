@@ -1,4 +1,4 @@
-// //<>//
+//
 // Note: this license does not apply to  the Studio 2 ROM or game images, nor the RCA Databooks and Datasheets. 
 // The License applies to the new work only.
 
@@ -41,14 +41,18 @@ private static final int HWC_FRAMESYNC      =     2;
 private static final int HWC_SETKEYPAD      =     3;
 
 private static final int CLOCK_SPEED =            (3521280/2);                                         // Clock Frequency (1,760,640 Hz)
-private static final int CYCLES_PER_SECOND   =    (CLOCK_SPEED/8);                                     // There are 8 clocks in each cycle (220,080 cycles/Second)
+private static final int CYCLES_PER_SECOND  =     (CLOCK_SPEED/8);                                     // There are 8 clocks in each cycle (220,080 cycles/Second)
 private static final int FRAMES_PER_SECOND  =     (60);                                                // NTSC Frames Per Second
 private static final int LINES_PER_FRAME    =     (262);                                               // Lines Per NTSC Frame
 private static final int CYCLES_PER_FRAME   =     (CYCLES_PER_SECOND/FRAMES_PER_SECOND);               // Cycles per Frame, Complete (3668)
 private static final int CYCLES_PER_LINE    =     (CYCLES_PER_FRAME/LINES_PER_FRAME);                  // Cycles per Display Line (14)
-private static final int VISIBLE_LINES     =      (128);                                               // 128 visible lines per frame
+private static final int VISIBLE_LINES      =     (128);                                               // 128 visible lines per frame
+private static final int DMA_CYCLES_PER_LINE =    (8);                                                 // Cycles used by DMA per line
+private static final int CYCLES_BETWEEN_DMA =     (6);                                                 // Instruction cycles between DMA fetches
 private static final int NON_DISPLAY_LINES  =     (LINES_PER_FRAME-VISIBLE_LINES);                     // Number of non-display lines per frame. (134)
-private static final int EXEC_CYCLES_PER_FRAME =  (NON_DISPLAY_LINES*CYCLES_PER_LINE);                 // Cycles where 1802 not generating video per frame (1876)
+// Cycles where 1802 is not displaying video per frame (1876). This is the number of available game instructions per frame 51%
+// Cycles 3668 total per frame EXEC_CYCLES_PER_FRAME == CYCLES_PER_FRAME
+private static final int EXEC_CYCLES_PER_FRAME =  (NON_DISPLAY_LINES*CYCLES_PER_LINE + VISIBLE_LINES*(DMA_CYCLES_PER_LINE+CYCLES_BETWEEN_DMA));
 
 // Note: this means that there are 1876*60/2 approximately instructions per second, about 56,280. With an instruction rate of
 // approx 8m per second, this means each instruction is limited to 8,000,000 / 56,280 * (128/312.5) about 58 AVR instructions for each
@@ -57,8 +61,8 @@ private static final int EXEC_CYCLES_PER_FRAME =  (NON_DISPLAY_LINES*CYCLES_PER_
 // State 1 : 1876 cycles till interrupt N1 = 0
 // State 2 : 29 cycles with N1 = 1
 
-private static final int STATE_1_CYCLES     =     (EXEC_CYCLES_PER_FRAME);
-private static final int CYCLES_BEFORE_DMA  =     29;  // from the start of the display generated interrupt 
+private static final int CYCLES_BEFORE_DMA  =     29;  // cycles from the start of the display generated interrupt before first DMA
+private static final int STATE_1_CYCLES     =     (EXEC_CYCLES_PER_FRAME-CYCLES_BEFORE_DMA);
 private static final int STATE_2_CYCLES     =     CYCLES_BEFORE_DMA;
 
 static int D, X, P, T;                                                               // 1802 8 bit registers
@@ -66,6 +70,9 @@ static int DF, IE, Q;                                                           
 static int[] R = new int[16];                                                     // 1802 16 bit registers
 static int _temp;                                                                // Temporary register
 static int cycles;                                                                // Cycles till state switch
+static int dmaCount = 0;
+static int betweenDMAcycles = 0;
+static int EF1 = 1;
 static int state;                                                                 // Frame position state (NOT 1802 internal state)
 static int screenMemory = -1;                                                  // Current Screen Pointer (-1 = off)
 static int scrollOffset;                                                          // Vertical scroll offset e.g. R0 = $nnXX at 29 cycles
@@ -73,11 +80,15 @@ static boolean screenEnabled;                                                   
 static int displayPointer;
 static volatile boolean coin = false;  // Arcade Game coin entered when true
 static int keyboardLatch;                                                         // Value stored in Keyboard Select Latch (Studio 2)
-static int[] studio2_memory;                                          // RAM development space for emulation
+static int[] studio2_memory;                                          // RAM development board space for emulation
+// boardMemory
 
+// Debug variables
 static boolean step = false;  // for debug
 static int previous = 0;  // for debug
 static int opCode = 0;
+static int trigger = 0;
+static int instructionCycles = 0;  // debug
 
 /**
  * 1802 CPU State (used for debug machine state saves)
@@ -278,7 +289,7 @@ private final static int READEFLAG(int flag) {
     else {
       // EF1 detects not in display
       if (cartridgeMode == NORMAL)
-        retVal = 1;               // Permanently set to '1' so BN1 in interrupts always fails
+        retVal = EF1;               // Permanently set to '1' so BN1 in interrupts always fails
       else { // Test cartridge
         if (P == 1) // check if using resident ROM interrupt program counter
           retVal = 1;
@@ -524,24 +535,14 @@ String hexData(int data) {
 //*******************************************************************************************************
 int CPU_Execute()
 {
-  int rState = 0;
+  int rState = 0; //<>//
   int addr = R[P];
   
-  // debug 
+  // debug ///////////////
   //if (addr < 0x1FF) {
   //  println("R[0] "+hexAddr(addr)+ " "+hexData(READ(addr))+ " prev "+ hexAddr(previous));
   //}
   
-  // breakpoints for debug
-  //if (addr == 0x002A) {
-  //  println("R5="+hexAddr(R[5]));
-  //}
-  //if (addr == 0x0038) {
-  //  println("0MMM RC="+hexAddr(R[12]));
-  //}
-  //if (addr == 0x0024) {
-  //  println("R5="+hexAddr(R[5]));
-  //}
   ///////////////////////
   
   previous = addr;
@@ -550,7 +551,8 @@ int CPU_Execute()
   R[P]++;
   R[P] &= 0xFFFF;
   cycles -= 2;                                              // 2 x 8 clock Cycles - Fetch and Execute.
-
+  //instructionCycles += 2;  // debug
+  
   switch(opCode)                                            // Execute dependent on the Operation Code
   {
   case 0x00: /* "idl" */
@@ -997,6 +999,7 @@ int CPU_Execute()
     WRITE(R[X], D);
     break;
   case 0x70: /* "ret" */
+    //println("R0="+hex(R[0])+" screenMemory="+ hex(screenMemory));
     RETURN();
     IE = 1;
     break;
@@ -1505,13 +1508,35 @@ int CPU_Execute()
     break;
   } // switch
 
-  if (cycles < 0)                                                                 // Time for a state switch.
+  // DMA R0 Updates
+  if (betweenDMAcycles > 0) {
+    betweenDMAcycles -= 2;
+    if (betweenDMAcycles <= 0) {
+      if (dmaCount > 0) {
+        dmaCount--;
+        if (dmaCount > 0) {
+          cycles -= DMA_CYCLES_PER_LINE;  // 8 DMAs per line
+          //instructionCycles += DMA_CYCLES_PER_LINE;
+          R[0] = (R[0] + 1) & 0xFFFF;
+          betweenDMAcycles = CYCLES_BETWEEN_DMA;  // 3 instructions between DMA requests
+        }
+      }
+    }
+  }
+  
+  // EF1 update
+  if (dmaCount <= 4 && dmaCount > 0) 
+    EF1 = 0;
+  else
+    EF1 = 1;
+
+  if (cycles <= 0)                                                             // Time for a state switch.
   {
     switch(state)
     {
-    case 1:                                                                     // Main Frame State Ends
-      state = 2;                                                               // Switch to Interrupt Preliminary state
-      cycles = STATE_2_CYCLES;                                                // The 29 cycles between INT and DMAOUT.
+    case 1:                                                                   // Main Frame State Ends
+      state = 2;                                                              // Switch to Interrupt Preliminary state
+      cycles = STATE_2_CYCLES;                                                // The 29 cycles between INT and first DMAOUT.
       if (screenEnabled)                                                      // If screen is on
       {
         if (READ(R[P]) == 0) {
@@ -1519,14 +1544,18 @@ int CPU_Execute()
           R[P] &= 0xFFFF;
         }
         // Come out of IDL for Interrupt.
-        INTERRUPT();                                                        // if IE != 0 generate an interrupt.
+        //println("inst "+instructionCycles);
+        //instructionCycles = 0;
+        INTERRUPT();                                                          // if IE != 0 generate an interrupt.
       }
       break;
-    case 2:                                                                     // Interrupt preliminary ends.
+    case 2:                                                                   // Interrupt preliminary ends.
       state = 1;                                                              // Switch to Main Frame State
       cycles = STATE_1_CYCLES;
       screenMemory = (R[0] & 0xFF00) ;     // display page location at start of DMA
       scrollOffset = R[0] & 0xFF;          // Get the scrolling offset (for things like the car game)
+      dmaCount = VISIBLE_LINES;
+      betweenDMAcycles = CYCLES_BETWEEN_DMA;  // this starts DMA emulation
       SYSTEM_Command(HWC_FRAMESYNC, 0);                                        // Synchronise.
       if (toneState != 0) {
         tone(true);
@@ -1536,7 +1565,6 @@ int CPU_Execute()
       break;
     } // switch
     rState = state;                                                      // Return state as state has switched
-    cycles--;                                                            // Time out when cycles goes negative so deduct 1.
   }
   return rState;
 }
@@ -1566,10 +1594,6 @@ CPU1802STATE CPU_ReadState(CPU1802STATE s)
 
 static int CPU_GetScreenMemoryAddress()
 {
-  if (scrollOffset != 0)
-  {
-    scrollOffset *= 1;
-  }
   return (screenEnabled) ? screenMemory : -1;
 }
 
@@ -1577,13 +1601,14 @@ static int CPU_GetScreenSize()
 {
   if (cartridgeMode == NORMAL)
     return DISPLAY_SIZE;
-  // println("VIDEO_RAM="+ hex(VIDEO_RAM));
-  // println("screenMemory="+ hex(screenMemory));
-  // println("screenSize="+hex(VIDEO_RAM - screenMemory + 256));
+    
+   //println("VIDEO_RAM="+ hex(VIDEO_RAM));
+   //println("screenMemory="+ hex(screenMemory));
+   //println("screenSize="+hex(VIDEO_RAM - screenMemory + 256));
   
   // Studio 2 test cartridge uses highest resolution
-  if (screenMemory != 0 && screenMemory != VIDEO_RAM) {
-    return (VIDEO_RAM - screenMemory + 256); //<>//
+  if (screenMemory == 0x600) {
+    return (1024); //<>//
   } else {
     return DISPLAY_SIZE;
   }

@@ -348,11 +348,11 @@ void draw()
   } 
   else {
     while (true) {
-      if (console == ARCADE || console == FRED2)
+      if (console == ARCADE || console == FRED2) {
         nextState = CPU1801_Execute();  // execute one 1801 CPU instruction until state changes
-      else
+      } else {
         nextState = CPU_Execute();  // execute one 1802 CPU instruction until frame state changes
-        
+      }
       if (nextState == 1) {
         updateGUI();
         displayScreen(false, width, 3*height/8, CPU_GetScreenMemoryAddress(), CPU_GetScreenScrollOffset(), CPU_GetScreenSize());
@@ -440,7 +440,7 @@ void systemReset() {
     cartridgeMode = NORMAL;
 
   if (READ(0) == 0) {
-    R[0] = 1;  // skip over idl instruction, must be a RCA FRED COSMAC Game System
+    R[0] = 1;  // skip over IDL instruction, must be a RCA FRED COSMAC 1801 Game System
   }
 
 }

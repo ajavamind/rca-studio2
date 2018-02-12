@@ -41,16 +41,15 @@ import java.io.*;
 private static final int CLOCK_SPEED_ARCADE        =     (1600000); // 2000000;   // Clock Frequency 
 private static final int CYCLES_PER_SECOND_ARCADE  =     (CLOCK_SPEED_ARCADE/8);  // There are 8 clocks in each cycle (200,000 cycles/Second)
 private static final int FRAMES_PER_SECOND_ARCADE  =     (60);            // NTSC Frames Per Second
-private static final int CYCLES_PER_FRAME_ARCADE   =     (CYCLES_PER_SECOND_ARCADE/FRAMES_PER_SECOND_ARCADE); // Cycles per Frame, Complete (3668)
-private static final int VISIBLE_LINES_ARCADE      =     64;  // Guess for Arcade! could be 128, used to set dmaCount that can change timing
-private static final int DMA_COUNT                 =     VISIBLE_LINES_ARCADE/4;  // seems to provide the best timing, lacking Arcade documentation to know for sure.
-//private static final int VISIBLE_LINES_ARCADE      =     128;  // Guess for Arcade! could be 128, used to set dmaCount that can change timing
-//private static final int DMA_COUNT                 =     VISIBLE_LINES_ARCADE/4;  // seems to provide the best timing, lacking Arcade documentation to know for sure.
-private static final int DISPLAY_DMA_CYCLES_PER_FRAME =  (VISIBLE_LINES_ARCADE) * (64/8) * 2;  // 32 rows x 64 columns
-private static final int STATE_2_CYCLES_ARCADE     =     140;  // estimated max interrupt cycles - varies with game (FRED2)
-private static final int STATE_1_CYCLES_ARCADE     =     (CYCLES_PER_FRAME_ARCADE-DISPLAY_DMA_CYCLES_PER_FRAME)-STATE_2_CYCLES_ARCADE;
+private static final int CYCLES_PER_FRAME_ARCADE   =     (CYCLES_PER_SECOND_ARCADE / FRAMES_PER_SECOND_ARCADE); // Cycles per Frame (3333.33)
+private static final int VISIBLE_LINES_ARCADE      =     128;  // Guess for Arcade! Used to set dmaCount that can change timing
+private static final int DMA_COUNT_PER_LINE        =     8;
+private static final int DMA_COUNT                 =     (VISIBLE_LINES_ARCADE / DMA_COUNT_PER_LINE);  // (16)
+// seems to provide the best game timing, lacking Arcade documentation to know for sure.
+private static final int DISPLAY_DMA_CYCLES_PER_FRAME =  (VISIBLE_LINES_ARCADE * DMA_COUNT_PER_LINE);  // 1024     32 rows x 64 columns
+private static final int STATE_2_CYCLES_ARCADE     =     140;  // estimated max interrupt cycles used - varies with game (FRED2)
+private static final int STATE_1_CYCLES_ARCADE     =     (CYCLES_PER_FRAME_ARCADE - DISPLAY_DMA_CYCLES_PER_FRAME) - STATE_2_CYCLES_ARCADE; // 2169
 
-int dmaCount = 0;
 int unusedCycles = 0;
 
 //*******************************************************************************************************
@@ -76,12 +75,17 @@ int CPU1801_Execute()
 
   R[P]++;
   R[P] &= 0xFFFF;
+  
+  // Only two machine cycles per instruction
   cycles -= 2;                                              // 2 x 8 clock Cycles - Fetch and Execute.
+  instructionCycles += 2;  // debug
+
   switch(opCode)                                            // Execute dependent on the Operation Code //<>//
   {
   case 0x00: /* "idl" */
     if (dmaCount != 0) {
       dmaCount--;
+      instructionCycles++;  // debug
     }
     else {
       R[P]--;
@@ -916,11 +920,11 @@ int CPU1801_Execute()
     break;
   } // switch
 
-  if (cycles < 0)                                                                 // Time for a state switch.
+  if (cycles < 0)                                                             // Time for a state switch.
   {
     switch(state)
     {
-    case 1:     // in interrupt                                                                // Main Frame State Ends
+    case 1:     // in interrupt                                               // Main Frame State Ends
       state = 2;                                                              // Switch to Interrupt Preliminary state
       cycles = STATE_2_CYCLES_ARCADE;                                         // Max cycles between INT and DMAOUT.
       if (screenEnabled)                                                      // If screen is on
@@ -930,8 +934,10 @@ int CPU1801_Execute()
           R[P]++;        
           R[P] &= 0xFFFF;
         }
+        //println("inst "+instructionCycles);
+        instructionCycles = 0;  // debug
         INTERRUPT();                                                        // if IE != 0 generate an interrupt.
-        dmaCount = DMA_COUNT; // 16 or 32
+        dmaCount = DMA_COUNT;
       }
       break;
     case 2:                                                                   // Interrupt preliminary ends.
@@ -947,7 +953,7 @@ int CPU1801_Execute()
       break;
     } // switch
     rState = state;                                                      // Return state as state has switched
-    cycles--;                                                                   // Time out when cycles goes -ve so deduct 1.
+    cycles--;                                                            // Time out when cycles goes negative so deduct 1.
   }
   return rState;
 }
