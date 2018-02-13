@@ -244,7 +244,15 @@ Due to its operating speed, low resolution, and keyboard input, in my opinion, t
 
 ## RCA Game Development
 
-| RCA COSMAC Computer System Game | Author | Notes |
+| SYSTEM 00 Discrete Logic Computer | Author | Notes |
+| --------- | ------ | ----- |
+| Deduce | Joseph Weisbecker | from SYSTEM 00 Manual 12/7/1971 |
+
+| RCA FRED I Discrete Logic Computer | Author | Notes |
+| --------- | ------ | ----- |
+| Deduce | Joseph Weisbecker | from FRED System Manual July 1972 |
+
+| RCA COSMAC Computer System Game (FRED II) | Author | Notes |
 | --------- | ------ | ----- |
 | Jackpot Game | Joyce Weisbecker | Daughter of Joseph Weisbecker, Code lost |
 | Space War Game | C.T. Wu | Code lost |
