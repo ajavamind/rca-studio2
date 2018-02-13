@@ -365,7 +365,7 @@ private final static void UPDATEIO(int portID, int data) {
     }
     break;
   case 3:
-    println("out 63 set tone "+hex(data));  // FRED 1.5 coin games
+    //println("out 63 set tone "+hex(data));  // FRED 1.5 coin games
     if (console == FRED2) {
       if (data != 0) {
         toneState = 1;
@@ -535,7 +535,7 @@ String hexData(int data) {
 //*******************************************************************************************************
 int CPU_Execute()
 {
-  int rState = 0; //<>//
+  int rState = 0;
   int addr = R[P];
   
   // debug ///////////////

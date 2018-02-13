@@ -268,54 +268,36 @@ void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int d
  */
 void displayInfo(int screenWidth, int screenHeight, String[] text, int offset)
 {
-  int xc, yc, xs, ys, x, y, pixByte;
-  int rx, ry, rw, rh;   // defines drawing rectangle coorinates
+  int x, y;
   int drawWidth;
   int drawHeight;
-  int hOffset;
-  drawWidth = screenWidth - screenWidth/16;
-  drawHeight = screenHeight - screenHeight/8;
-  xs = drawWidth / (VIDEO_SCREEN_WIDTH + 2);  // pixel width
-  ys = xs;  // pixel height
-  hOffset = (screenWidth - 64*xs)/2;
-  xc = xs; //0;
-  yc = ys; //0;
-  rx = xc;
-  ry = yc;
-  // Erase screen display
-  fill(bgColor[backgroundColor]);
-  rect(0, 0, screenWidth, screenHeight - 2*ys);
-  //println("screen ON");
-  color fgr = WHITE;       // Painting color.
-  noStroke();
+  
+  if (text.length == 0)
+    return;
+    
+  int end = TEXT_PAGE_SIZE;
 
-  fill(fgr);
-  //rw = xs;
-  //rh = ys;                                                                // Set cell width and height
-  //for (y = 0; y < VIDEO_SCREEN_HEIGHT; y++)                               // One line at a time.
-  //{
-  //  int offset = ((y * 8 + scrollOffset) & 0xFF);                   // Work out where data comes from.
-  //  ry = yc + ys * y;                                                             // Calculate vertical coordinate
-  //  xc = 0;
-  //  for (x = 0; x < (VIDEO_SCREEN_WIDTH/8); x++)                    // 8 bytes per line.
-  //  {
-  //    pixByte = studio2_memory[displayData+offset++] & 0xFF;                            // Get next pixel.
-  //    rx = xc + x * xs * 8;                                                     // Calculate horizontal coordinate
-  //    if (console == STUDIO3 || (console == VIP && interpreter == CHIP8X)) {
-  //      int colorIndex = studio2_memory[COLOR_MAP + x + 8*(y/4)] & 0x0007;
-  //      fill(colorMap[colorIndex]);
-  //    }
-  //    while (pixByte != 0)                                                        // if something to render.
-  //    {
-  //      // if bit 7 set draw pixel
-  //      if ((pixByte & 0x80) != 0) {
-  //        rect(hOffset+rx, ry, rw, rh);
-  //      }
-  //      pixByte = (pixByte << 1) & 0xFF;                                        // shift to left, lose overflow.
-  //      rx = rx + xs;                                                       // next coordinate across.
-  //    }
-  //  }
-  //}
+  if (offset >= TEXT_PAGE_SIZE)
+    end = offset + TEXT_PAGE_SIZE;
+  if (end > text.length)
+    end = text.length;
+  drawWidth = screenWidth;
+  drawHeight = screenHeight - screenHeight/8;
+  x = 10;
+  y = 50;
+  
+  // Erase screen display
+  fill(128);
+  rect(0, 0, drawWidth, drawHeight);
+  setTextSize(FONT_SIZE/2); //<>//
+  fill(BLACK);
+  textAlign(LEFT, BASELINE);
+  //println("offset="+offset + " end="+end);
+  for (int i=offset; i<end; i++) {
+    text(text[i], x, y );
+    y += 50;
+  }
+  
 }
 
 /**
@@ -472,5 +454,12 @@ void loadBinary(String fileName, int address)
 void loadGameInfo(String fileName)
 {
   println("Info Filename: "+fileName);
-  textInfo = loadStrings(fileName);
+  textInfo = loadStrings(fileName); //<>//
+  if (textInfo != null && textInfo.length > 0) {
+    for (int i=0; i< textInfo.length; i++) {
+      println(textInfo[i]);
+    }
+  } else {
+    println("missing info file");
+  }
 }

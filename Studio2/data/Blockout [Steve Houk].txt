@@ -1,33 +1,27 @@
-16. VIP Blockout
+VIP Blockout
 
-VIP Blockout is a fast action two-player game of skill, strategy, coordination and
-excitement!
+Written by Steve Houk
 
-Two players each using their own keypad control the movement of their respective
-lines (one solid and one checkered).
+VIP Blockout is a fast action two-player game of skill,
+strategy, coordination and excitement!
 
-The object is for each player to maneuver his/her line in such a manner as to avoid
-collision with another line while at the same time trying to cause the opponent to
-collide with one.  As the play continues, the speed of the movement increases
-demanding faster thought and response.
+Two players each using their own keypad control the movement of 
+their respective lines (one solid and one checkered).
 
+The object is for each player to maneuver his/her line to avoid
+collision with another line while at the same time trying to cause 
+your opponent to collide with one.  As the play continues, 
+the speed of the movement increases demanding faster thought and response.
 
-How to Play VIP Blockout
+- Movement of each player's line is controlled by pressing 2 to move line up, 8 down,
+  4 left and 6 right.
 
-1. DO NOT Load the CHIP-8 interpreter!  The entire game listing startsing at location
-   0000 is provided.  Load game in location 0000 through 048F.
+- If the program is executed in a normal manner, by flipping the toggle switch to run,
+  the playing field is defined by a boarder around it's perimeter.  However, if key 0
+  is pressed while the run switch is flipped, the boarder is not generated and then
+  the lines can wrap around the screen.
 
-2. Turn RUN switch on.
-
-3. Movement of each player's line is controlled by pressing 2 to move line up, 8 down,
-   4 left and 6 right.
-
-4. If the program is executed in a normal manner, by flipping the toggle switch to run,
-   the playing field is defined by a boarder around it's perimeter.  However, if key 0
-   is pressed while the run switch is flipped, the boarder is not generated and then
-   the lines can wrap around the screen.
-
-5. A match consists of nine games, the winner geting the most points.
+- A match consists of nine games, the winner geting the most points.
 
 Notes:  
 1. This game is programmed in color and has sound effects.  It can be used with the

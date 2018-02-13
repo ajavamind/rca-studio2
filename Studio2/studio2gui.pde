@@ -47,6 +47,9 @@ boolean resetUpdate = false;
 boolean displayInfo = false;
 
 static String[] textInfo;
+static String TEXT_SCROLL = " <<<               >>>";
+static int textOffset = 0;
+static int TEXT_PAGE_SIZE = 14;
 
 class Key {
   int x, y, w, h; // location
@@ -198,7 +201,7 @@ class Keyboard {
     // keyboard
     for (int i=0; i< list.length; i++) {
       //if (list[i] != null)
-        list[i].draw();
+      list[i].draw();
     }
   }
 
@@ -206,9 +209,9 @@ class Keyboard {
     int pressed = -1;
     for (int i=0; i<list.length; i++) {
       //if (list[i] != null) {
-        if (list[i].isPressed(x, y)) {
-          pressed = list[i].getValue();
-          break;
+      if (list[i].isPressed(x, y)) {
+        pressed = list[i].getValue();
+        break;
         //}
       }
     }
@@ -318,35 +321,58 @@ public void mousePressed() {
   if (resetKey.isPressed(mouseX, mouseY)) {
     resetUpdate = true;
     doReset = true;
+    displayInfo = false;
     println("reset");
     return;
   }
   key = cartridge.getPressed(mouseX, mouseY, 2);
   if (key == 2) {
-    gameSelected++;
-    if (gameSelected >= gameTitle.length) {
-      gameSelected = 0;
+    if (displayInfo) {
+      cartridge.setCap(TEXT_SCROLL);
+      if (((textOffset)/TEXT_PAGE_SIZE) < ((textInfo.length/TEXT_PAGE_SIZE))) {
+        textOffset += TEXT_PAGE_SIZE;
+      }
+    } else {
+      gameSelected++;
+      if (gameSelected >= gameTitle.length) {
+        gameSelected = 0;
+      }
+      cartridge.setCap(gameTitle[gameSelected]);
     }
-    cartridge.setCap(gameTitle[gameSelected]);
     displayUpdate = true;
     return;
   } else if (key == 1) {
-    gameSelected--;
-    if (gameSelected < 0) {
-      gameSelected = gameTitle.length-1;
+    if (displayInfo) {
+      cartridge.setCap(TEXT_SCROLL);
+      textOffset -= TEXT_PAGE_SIZE;
+      if (textOffset < 0)
+        textOffset = 0;
+    } else {
+      gameSelected--;
+      if (gameSelected < 0) {
+        gameSelected = gameTitle.length-1;
+      }
+      cartridge.setCap(gameTitle[gameSelected]);
     }
-    cartridge.setCap(gameTitle[gameSelected]);
     displayUpdate = true;
     return;
   }
   if (console == ARCADE || console == FRED2) {
     if (coinKey.isPressed(mouseX, mouseY)) {
       coin = true;
+      return;
     }
-    return;
   }
   if (infoKey.isPressed(mouseX, mouseY)) {
-    displayInfo = true;
+    displayInfo = !displayInfo;
+    if (displayInfo) {
+      cartridge.setCap(TEXT_SCROLL);
+      textOffset = 0;
+    }
+    else {
+      cartridge.setCap(gameTitle[gameSelected]);
+    }
+    displayUpdate = true;
     return;
   }
 }

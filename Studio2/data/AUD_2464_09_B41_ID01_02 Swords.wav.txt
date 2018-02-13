@@ -1,8 +1,10 @@
-RCA Swords Arcade Game (1975) by Joe Weisbecker
+RCA Coin Arcade Swords Game
+
+Written by Joe Weisbecker, 1975
 
 After coin insert:
 press A center button for 1 player
 press B center button for 2 players
 
-Center button moves sword
-Arrow keys move sword fighter up, down, left, right
+Center button moves sword: low, level, high
+Arrow keys move your sword fighter up, down, left, right

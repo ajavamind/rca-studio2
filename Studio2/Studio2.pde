@@ -232,8 +232,8 @@ String[] gameInfoFileName = {
   "baseball.txt", 
   "blackjack.txt", 
   "gunfighter-moonship.txt", 
-  "RCA_demo.txt",
-  "",
+  "RCA_TEST_CARTRIDGE_TESTER1.txt",
+  "RCA_StudioIIIdemo.txt",
   "victory.txt", // Victory is a Studio 3 internal resident game ROM
   // Studio 3 game cartridges
   "mathfun.txt", 
@@ -343,10 +343,9 @@ void draw()
     systemReset();
   }
   if (displayInfo) {
-    displayInfo = false;
-    // TO DO display game information
-  } 
-  else {
+    updateGUI();
+    displayInfo(width, 3*height/8, textInfo, textOffset);
+  } else {
     while (true) {
       if (console == ARCADE || console == FRED2) {
         nextState = CPU1801_Execute();  // execute one 1801 CPU instruction until state changes

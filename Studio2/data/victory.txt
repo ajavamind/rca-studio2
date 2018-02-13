@@ -1,0 +1,10 @@
+Studio III Resident Games
+
+Written by Joe Weisbecker and Andrew Modla (1977)
+
+Select Game on Keyboard A
+1 Doodle 
+2 Patterns 
+3 Bowling  
+4 Blackjack (one player) 
+5 Blackjack (two players) 
