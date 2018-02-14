@@ -47,19 +47,21 @@ private static boolean screenSave = false;
 private static boolean doReset = false;
 
 // Microprocessor type
-private final static int SYSTEM00 = 0;
+private final static int CDP1800 = 0;  // SYSTEM 00 and FRED I discrete logic architectures
 private final static int CDP1801 = 1;
 private final static int CDP1802 = 2;
 private static int cpu = CDP1802;
 
 // Console or Development Board types
-private final static int STUDIO2 = 0;  
-private final static int STUDIO3 = 1;  
-private final static int VIP = 2;
-private final static int ELF = 3;
-private final static int ARCADE = 4;
-private final static int FRED2 = 5;
-private final static int CUSTOM = 6;
+private final static int SYSTEM00 = 0;
+private final static int FRED1    = 1;
+private final static int FRED2    = 2;
+private final static int ARCADE   = 3;
+private final static int STUDIO2  = 4;  
+private final static int STUDIO3  = 5;  
+private final static int VIP      = 6;
+private final static int ELF      = 7;
+private final static int CUSTOM   = 8;
 private static int console = STUDIO2;
 
 // Cartridge Mode
