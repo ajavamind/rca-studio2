@@ -2,9 +2,19 @@ RCA Coin Arcade Swords Game
 
 Written by Joe Weisbecker, 1975
 
-After coin insert:
-press A center button for 1 player
-press B center button for 2 players
+Press 25 cent button to start play.
+
+Press A center button for 1 player 
+against the computer.
+
+Press B center button for 2 player game
 
 Center button moves sword: low, level, high
 Arrow keys move your sword fighter up, down, left, right
+
+Source: Hagley Museum and Library
+Wilmington, Delaware
+
+Joseph A. Weisbecker Papers
+Personal computer cassette tape Box AVD41: 
+AUD_2464_09_B41_ID01_02 Swords.wav

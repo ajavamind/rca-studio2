@@ -1,10 +1,13 @@
 Studio III Resident Games
-
 Written by Joe Weisbecker and Andrew Modla (1977)
+
+From Victory MPT-02 console made by Soundic 1978
+Clone of the Studio III, Color, PAL, 1.76 MHz
+This interpreter was modified for NTSC
 
 Select Game on Keyboard A
 1 Doodle 
 2 Patterns 
 3 Bowling  
-4 Blackjack (one player) 
-5 Blackjack (two players) 
+4 Blackjack1 (one player) 
+5 Blackjack2 (two players) 

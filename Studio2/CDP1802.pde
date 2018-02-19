@@ -1,4 +1,4 @@
-//
+// //<>// //<>//
 // Note: this license does not apply to  the Studio 2 ROM or game images, nor the RCA Databooks and Datasheets. 
 // The License applies to the new work only.
 
@@ -41,6 +41,8 @@ private static final int HWC_FRAMESYNC      =     2;
 private static final int HWC_SETKEYPAD      =     3;
 
 private static final int CLOCK_SPEED =            (3521280/2);                                         // Clock Frequency (1,760,640 Hz)
+//private static final int CLOCK_SPEED =  (3579546/2);                                         // Clock Frequency (1,789,773 Hz)
+//private static final int CLOCK_SPEED =  (3500000/2);                                         // Clock Frequency (1,750,000 Hz)
 private static final int CYCLES_PER_SECOND  =     (CLOCK_SPEED/8);                                     // There are 8 clocks in each cycle (220,080 cycles/Second)
 private static final int FRAMES_PER_SECOND  =     (60);                                                // NTSC Frames Per Second
 private static final int LINES_PER_FRAME    =     (262);                                               // Lines Per NTSC Frame
@@ -112,29 +114,25 @@ private final static int READ(int address)
     println("Emulator error READ address " + hex(address));
     return 0xFF;
   }
-  
+
   // Studio 2 test cartridge is hardware specific for Studio 2 console
   // It uses memory mirroring that may not exist in other hardware
   // Normal cartridges do not use mirroring
   if (console == STUDIO2 && cartridgeMode == TEST) {
     // account for hardware memory mirroring
     if (address >= 0x8000) {
-       println("READ address " + hex(address));
-       return (studio2_memory[RAM | (address & 0x01FF)] & 0xFF);
-    }
-    else if (address >= 0x4000) {
-     //println("READ address " + hex(address));
-     return (studio2_memory[0x0400 | (address & 0x03FF)] & 0xFF);
-    }
-    else if (address >= 0x2000) {
-       //println("READ address " + hex(address));
-       return (studio2_memory[address & 0x07FF] & 0xFF);
-    }
-    else if (address >= 0x0800) {
-       return (studio2_memory[RAM | (address & 0x01FF)] & 0xFF);
-    }
-    else {
-       return (studio2_memory[address] & 0xFF);
+      println("READ address " + hex(address));
+      return (studio2_memory[RAM | (address & 0x01FF)] & 0xFF);
+    } else if (address >= 0x4000) {
+      //println("READ address " + hex(address));
+      return (studio2_memory[0x0400 | (address & 0x03FF)] & 0xFF);
+    } else if (address >= 0x2000) {
+      //println("READ address " + hex(address));
+      return (studio2_memory[address & 0x07FF] & 0xFF);
+    } else if (address >= 0x0800) {
+      return (studio2_memory[RAM | (address & 0x01FF)] & 0xFF);
+    } else {
+      return (studio2_memory[address] & 0xFF);
     }
   } 
 
@@ -151,7 +149,7 @@ private final static void WRITE(int address, int data)
   //  println("write "+hex(address) + " value "+ hex(data));
   //  return;
   //}
-  
+
   // Studio 2 test cartridge is hardware specific for Studio 2 console
   // It uses memory mirroring that may not exist in other hardware
   // Normal cartridges do not use mirroring
@@ -160,24 +158,20 @@ private final static void WRITE(int address, int data)
     if (address >= 0x8000) {
       studio2_memory[(address & 0x01FF) | RAM ] = data & 0xFF;
       println("write memory "+hex(address) + " " + hex(data));
-    }
-    else if (address >= 0x2000) {
+    } else if (address >= 0x2000) {
       studio2_memory[(address & 0x01FF) | RAM ] = data & 0xFF;
       println("write memory "+hex(address) + " " + hex(data));
-    }
-    else if (address >= 0x0A00) {
+    } else if (address >= 0x0A00) {
       studio2_memory[(address & 0x01FF) | RAM ] = data & 0xFF;
       println("write memory "+hex(address) + " " + hex(data));
-    }
-    else if (address >= 0x0800) {
+    } else if (address >= 0x0800) {
       studio2_memory[(address & 0x01FF) | RAM ] = data & 0xFF;
-    }
-    else {
+    } else {
       println("write to ROM "+hex(address));
     }
-   return;
+    return;
   }
-  
+
   if ((address >= RAM) && (address < (RAM+RAM_SIZE))) // only RAM space is writeable
   {
     studio2_memory[address] = data & 0xFF;
@@ -189,7 +183,7 @@ private final static void WRITE(int address, int data)
   } else {
     println("Attempt at "+ hex(R[P]-1) + " to write ROM memory "+hex(address) + " "+ hex(data));
   }
-  
+
   // debug
   //if (address >= 0x900 && address < 0xA00) {
   //  println("write "+hex(address) + " value "+ hex(data));
@@ -207,7 +201,7 @@ private final static void WRITE(int address, int data)
 private final static int FETCH2() {
   int val = READ(R[P]++);
   R[P] &= 0xFFFF;
-  return (val);
+  return (val & 0xFF);
 }
 
 private final static void FETCH3() {   
@@ -285,16 +279,15 @@ private final static int READEFLAG(int flag) {
       retVal = isPressedA[5];
       //isPressedA[5] = 0;
       //if (retVal == 1) println("EF1");
-    }
-    else {
-      // EF1 detects not in display
-      if (cartridgeMode == NORMAL)
-        retVal = EF1;               // Permanently set to '1' so BN1 in interrupts always fails
-      else { // Test cartridge
+    } else {
+      // EF1 detects display area update finished
+      if (cartridgeMode == TEST) {
         if (P == 1) // check if using resident ROM interrupt program counter
-          retVal = 1;
+          retVal = 1;  // Permanently set to '1' so BN1 in interrupts always fails
         else
           retVal = 0;
+      } else {
+        retVal = EF1;               
       }
     }
     break;
@@ -311,8 +304,7 @@ private final static int READEFLAG(int flag) {
       retVal = isPressedB[5];
       //isPressedB[5] = 0;
       //if (retVal == 1) println("EF3");
-    }
-    else {
+    } else {
       // EF3 detects keypressed on VIP and ELF but differently.
       SYSTEM_Command(HWC_SETKEYPAD, 1);
       retVal = SYSTEM_Command(HWC_READKEYBOARD, keyboardLatch);
@@ -325,8 +317,7 @@ private final static int READEFLAG(int flag) {
         retVal = 1;
         //if (retVal == 1) println("Coin reset");
       }
-    }
-    else {
+    } else {
       // EF4 key press
       SYSTEM_Command(HWC_SETKEYPAD, 2);
       retVal = SYSTEM_Command(HWC_READKEYBOARD, keyboardLatch);
@@ -348,8 +339,7 @@ private final static void UPDATEIO(int portID, int data) {
     // OUT 1 turns the display off on a Studio 2, changed for Studio 3
     if (console == STUDIO2) { // || console == VIP)
       screenEnabled = false;
-    }
-    else if (console == ARCADE || console == FRED2) {
+    } else if (console == ARCADE || console == FRED2) {
       // TV selected
       //println("TV selected "+ hex(data));
     }
@@ -358,8 +348,7 @@ private final static void UPDATEIO(int portID, int data) {
     if (console == ARCADE || console == FRED2) {
       //println("start Arcade Display "+ hex(data));
       screenEnabled = true;
-    }
-    else {
+    } else {
       // OUT 2 sets the keyboard latch (both S2 & VIP)
       keyboardLatch = (data & 0x0F);  // Lower 4 bits only
     }
@@ -369,8 +358,7 @@ private final static void UPDATEIO(int portID, int data) {
     if (console == FRED2) {
       if (data != 0) {
         toneState = 1;
-      }
-      else {
+      } else {
         toneState = 0;
       }
     }
@@ -390,8 +378,7 @@ private final static void UPDATEIO(int portID, int data) {
     if (console == ARCADE || console == FRED2) {
       if (data != 0) {
         toneState = 1;
-      }
-      else {
+      } else {
         toneState = 0;
       }
     }
@@ -423,14 +410,12 @@ private final static int INPUTIO(int portID) {
       coin = false;
       if (isPressedA[4] == 1) {
         retVal |= 0x01;
-       }
-      else {
+      } else {
         retVal &= 0xFE;
       }
       if (isPressedA[2] == 1) {
         retVal |= 0x02;
-      }
-      else {
+      } else {
         retVal &= 0xFD;
       }
       if (isPressedA[6] == 1)
@@ -493,8 +478,10 @@ void CPU_Reset()
   screenEnabled = false;
 
   // PC Version copy ROM code into 4k space.
-  if (console == STUDIO2 || console == STUDIO3) {
+  if (console == STUDIO2) {
     for (int i = 0; i < 2048; i++) studio2_memory[i] = studio2[i];
+  } else if (console == STUDIO3) {
+    loadBinary("studio3ntsc.rom", 0x0000);
   } else if (console == VIP) {
     loadBinary("vip.rom", 0x8000);
     if (interpreter == CHIP8)
@@ -517,7 +504,6 @@ void CPU_Reset()
       studio2_memory[COLOR_MAP+i] = WHITE;
     }
   }
-  
 }
 
 String hexAddr(int addr) {
@@ -537,22 +523,33 @@ int CPU_Execute()
 {
   int rState = 0;
   int addr = R[P];
-  
+
   // debug ///////////////
-  //if (addr < 0x1FF) {
-  //  println("R[0] "+hexAddr(addr)+ " "+hexData(READ(addr))+ " prev "+ hexAddr(previous));
-  //}
-  
+
+  //if (P == 1 && addr == 0x3a)
+  //  println("At "+hexAddr(addr)+ " R[0] "+hex(R[0]) + " dma "+dmaCount);
+
+  //if (dmaCount >0 && addr == 0x3c) // studio 2
+  //  println("At "+hexAddr(addr)+ " "+ hex(studio2_memory[addr]) + " R[0] "+hex(R[0]) + " dma "+dmaCount + " " + EF1);
+
+  //if (dmaCount >=0 && addr == 0x41) // studio 3
+  //  println("At "+hexAddr(addr)+ " "+ hex(studio2_memory[addr]) + " R[0] "+hex(R[0]) + " dma "+dmaCount + " " + EF1);
+
   ///////////////////////
-  
+
   previous = addr;
   opCode = READ(addr);
-  
+
   R[P]++;
   R[P] &= 0xFFFF;
   cycles -= 2;                                              // 2 x 8 clock Cycles - Fetch and Execute.
-  //instructionCycles += 2;  // debug
-  
+  instructionCycles += 2;  // debug
+
+  if (dmaCount >= 0 && dmaCount <= 3) 
+    EF1 = 1;
+  else
+    EF1 = 0;
+
   switch(opCode)                                            // Execute dependent on the Operation Code
   {
   case 0x00: /* "idl" */
@@ -1508,27 +1505,34 @@ int CPU_Execute()
     break;
   } // switch
 
-  // DMA R0 Updates
-  if (betweenDMAcycles > 0) {
+  if (dmaCount > 0) {
     betweenDMAcycles -= 2;
-    if (betweenDMAcycles <= 0) {
-      if (dmaCount > 0) {
-        dmaCount--;
-        if (dmaCount > 0) {
+    if (betweenDMAcycles <= 0) {       
+      dmaCount--;
+      if (dmaCount >= 1) {
+        if (console == STUDIO3) {
           cycles -= DMA_CYCLES_PER_LINE;  // 8 DMAs per line
-          //instructionCycles += DMA_CYCLES_PER_LINE;
-          R[0] = (R[0] + 1) & 0xFFFF;
+          instructionCycles += 8;
+          R[0] = (R[0] + DMA_CYCLES_PER_LINE) & 0xFFFF;
           betweenDMAcycles = CYCLES_BETWEEN_DMA;  // 3 instructions between DMA requests
+        } else {
+          cycles -= DMA_CYCLES_PER_LINE;  // 8 DMAs per line
+          instructionCycles += 8;
+          R[0] = (R[0] + DMA_CYCLES_PER_LINE) & 0xFFFF;
+          betweenDMAcycles = CYCLES_BETWEEN_DMA;  // 3 instructions between DMA requests
+        }
+      } 
+      if (dmaCount == 1) {
+        betweenDMAcycles = 0;
+        if (screenEnabled) {
+          displaySize = R[0] - screenMemory;
+          //println("R[0]=" + hex(R[0]) + " addr " + hex(addr));
+          //println("screenMemory=" + hex(screenMemory));
+          //println("displaySize=" + hex(displaySize));
         }
       }
     }
   }
-  
-  // EF1 update
-  if (dmaCount <= 4 && dmaCount > 0) 
-    EF1 = 0;
-  else
-    EF1 = 1;
 
   if (cycles <= 0)                                                             // Time for a state switch.
   {
@@ -1545,7 +1549,7 @@ int CPU_Execute()
         }
         // Come out of IDL for Interrupt.
         //println("inst "+instructionCycles);
-        //instructionCycles = 0;
+        instructionCycles = 0;
         INTERRUPT();                                                          // if IE != 0 generate an interrupt.
       }
       break;
@@ -1555,7 +1559,12 @@ int CPU_Execute()
       screenMemory = (R[0] & 0xFF00) ;     // display page location at start of DMA
       scrollOffset = R[0] & 0xFF;          // Get the scrolling offset (for things like the car game)
       dmaCount = VISIBLE_LINES;
-      betweenDMAcycles = CYCLES_BETWEEN_DMA;  // this starts DMA emulation
+      //if (console == STUDIO3)
+      //  dmaCount = 192;  // PAL
+      betweenDMAcycles = CYCLES_BETWEEN_DMA;  // this starts first DMA emulation
+      R[0] = (R[0] + 8) & 0xFFFF;  // first DMA
+      cycles -= 8;
+      instructionCycles += 8;
       SYSTEM_Command(HWC_FRAMESYNC, 0);                                        // Synchronise.
       if (toneState != 0) {
         tone(true);
@@ -1601,14 +1610,16 @@ static int CPU_GetScreenSize()
 {
   if (cartridgeMode == NORMAL)
     return DISPLAY_SIZE;
+  if (cartridgeMode == VIP64x64)
+    return 2*DISPLAY_SIZE;
     
-   //println("VIDEO_RAM="+ hex(VIDEO_RAM));
-   //println("screenMemory="+ hex(screenMemory));
-   //println("screenSize="+hex(VIDEO_RAM - screenMemory + 256));
-  
+  //println("VIDEO_RAM="+ hex(VIDEO_RAM));
+  //println("screenMemory="+ hex(screenMemory));
+  //println("screenSize="+hex(VIDEO_RAM - screenMemory + 256));
+
   // Studio 2 test cartridge uses highest resolution
   if (screenMemory == 0x600) {
-    return (1024); //<>//
+    return (1024);
   } else {
     return DISPLAY_SIZE;
   }

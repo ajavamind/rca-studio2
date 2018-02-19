@@ -34,10 +34,14 @@
  * https://github.com/paulscottrobson/studio2-games
  *
  * Studio 2 emulation: black and white graphics, single tone sound
+ *
+ * Added the following features:
  * Studio 3 emulation: color graphics, color background, and
  * programmable sound tone generator
  * VIP computer board emulation
  * RCA Arcade game emulation
+ *
+ * Added Android platform support.
  */
 
 private static boolean test = false;  // run test components
@@ -65,8 +69,9 @@ private final static int CUSTOM   = 8;
 private static int console = STUDIO2;
 
 // Cartridge Mode
-private final static int NORMAL = 0;
-private final static int TEST = 1;
+private final static int NORMAL   = 0;
+private final static int TEST     = 1;
+private final static int VIP64x64 = 2;
 private static int cartridgeMode = NORMAL;
 
 // CHIP8 Interpreter types
@@ -102,8 +107,10 @@ private static int RAM = INITIAL_RAM; // Studio 2 and 3
 private final static int RAM_SIZE = 0x200; // Working and Video display RAM
 private static int INITIAL_VIDEO_RAM = 0x900;  // Studio 2 and 3 starting location
 private static int VIDEO_RAM = INITIAL_VIDEO_RAM;  // Studio 2 and 3 starting location
+
 // Video RAM is 64 x 32 pixels stored in 256 bytes
 private static int DISPLAY_SIZE = 256;
+private static int displaySize = DISPLAY_SIZE;
 
 private static int COIN_ARCADE_AD_ROM = 0x0A00;  // splash barker screen
 private static int COIN_ARCADE_PARAMETER_SWITCH = 0;   // 8 is test mode?
@@ -131,9 +138,12 @@ String[] gameFileName = {
   ////////////////////////////////
 /* 11 */  "RCA_demo.st2", // Studio 3 demo cartridge holding entry
   // Studio 3 game cartridges implement with color graphics.
-  //The Victory MPT-02, a clone of the RCA Studio III is a videogame console made by Soundic released around 1978. 
+  // The Victory MPT-02, a clone of the RCA Studio III is a videogame console made by Soundic released around 1978. 
   // Unlike the Studio II the Victory came with 2 detachable controllers. 
-/* 12 */  "victory.rom", // Victory is a Studio 3 internal resident game ROM
+  // The victory.rom expects PAL video with 192 visible lines
+  // The victoryntsc.rom is a modification for NTSC video with 128 visible lines
+  // Modified as follows: byte 0x40 changed from 0x2D to 0x33 in the interrupt routine
+/* 12 */  "victoryntsc.rom", // Victory is a Studio 3 internal resident game ROM
   // Studio 3 game cartridges
 /* 13 */  "mathfun.st2", 
 /* 14 */  "biorhythm.st2", 
@@ -170,6 +180,8 @@ String[] gameFileName = {
 /* 39 */  "AUD_2464_09_B41_ID01_02 Swords.wav.arc", 
   ////////////////////////////////
   // Test area
+/* 40 */ "photo.vip",
+
 /* 40 */ //"S.572.2 VIP special-1_of_5.wav.vip",
 /* 41 */ ///"S.572_16_of_16.wav.raw.vip",
 };
@@ -219,6 +231,7 @@ String[] gameTitle = {
   "RCA Coin Tag/Bowl", 
   "RCA Coin Arcade Bowling", 
   "RCA Coin Arcade Swords", 
+  "4096 Picture"
 };
 
 String[] gameInfoFileName = {
@@ -271,6 +284,7 @@ String[] gameInfoFileName = {
   "AUD_2464_09_B41_ID01_01 Tag-Bowling.wav.txt", 
   "AUD_2464_09_B41_ID02_01 Coin Bowling.wav.txt",
   "AUD_2464_09_B41_ID01_02 Swords.wav.txt", 
+  "photo.txt"
 };
 
 
@@ -379,6 +393,8 @@ void systemReset() {
   tone(false);
   setFreq(0);
   dmaCount = 0;
+  betweenDMAcycles = 0;
+
   if (gameFileName[gameSelected].toLowerCase().endsWith(".ch8")) {
     console = VIP;
     interpreter = CHIP8;
@@ -435,13 +451,16 @@ void systemReset() {
   loadGameBinary(gameFileName[gameSelected]);
   loadGameInfo(gameInfoFileName[gameSelected]);
   
+  // special conditions for testing - temporary solutions until Console.pde fully implemented
   if (gameFileName[gameSelected].startsWith("RCA_TEST_CARTRIDGE"))
     cartridgeMode = TEST;
+  else if (gameFileName[gameSelected].startsWith("photo.vip"))
+    cartridgeMode = VIP64x64;
   else
     cartridgeMode = NORMAL;
 
   if (READ(0) == 0) {
-    R[0] = 1;  // skip over IDL instruction, must be a RCA FRED COSMAC 1801 Game System
+    R[0] = 1;  // skip over IDL instruction, found a RCA FRED COSMAC 1801 Game System
   }
 
 }

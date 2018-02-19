@@ -80,7 +80,7 @@ int CPU1801_Execute()
   cycles -= 2;                                              // 2 x 8 clock Cycles - Fetch and Execute.
   instructionCycles += 2;  // debug
 
-  switch(opCode)                                            // Execute dependent on the Operation Code //<>//
+  switch(opCode)                                            // Execute dependent on the Operation Code //<>// //<>//
   {
   case 0x00: /* "idl" */
     if (dmaCount != 0) {
@@ -433,11 +433,11 @@ int CPU1801_Execute()
     UPDATEIO(1, READ(R[X]));
     R[X]++;
     R[X] &= 0xFFFF;
-    if (console == STUDIO3) {
-      backgroundColor++;
-      if (backgroundColor >= bgColor.length)
-        backgroundColor = 0;
-    }
+    //if (console == STUDIO3) {
+    //  backgroundColor++;
+    //  if (backgroundColor >= bgColor.length)
+    //    backgroundColor = 0;
+    //}
     break;
   case 0x62: /* "out 2" */
     UPDATEIO(2, READ(R[X]));

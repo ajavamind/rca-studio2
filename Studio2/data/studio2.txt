@@ -2,3 +2,9 @@ Studio II Resident Games
 
 Written by Joe Weisbecker, 1976
 
+Select Game on Keyboard A:
+1 Doodle
+2 Patterns
+3 Bowling
+4 Freeway
+5 Addition

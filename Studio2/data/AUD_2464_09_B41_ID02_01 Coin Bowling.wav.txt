@@ -1,3 +1,35 @@
 Coin Arcade Bowling
 
-by Joe Weisbecker, 1974
+by Joe Weisbecker, 1975
+
+Press 25 cent button to start play.
+
+Two players (A & B) can compete in this
+Computerized Bowling Game.
+
+How to Play
+
+When it's your turn , push the top, middle, or
+bottom button to roll ball.
+
+top button    - hook up
+middle button - straight ball
+bottom button - hook down
+
+How to Score
+
+Spare counts 15 points.
+(All pins down with 2 balls)
+
+Strike counts 25 points.
+(All pins down with first ball.
+You don't get a second ball)
+
+Otherwise, each pin knocked down counts 1 point.
+
+Source: Hagley Museum and Library
+Wilmington, Delaware
+
+Joseph A. Weisbecker Papers
+Personal computer cassette tape Box AVD41: 
+AUD_2464_09_B41_ID02_01 Coin Bowling.wav

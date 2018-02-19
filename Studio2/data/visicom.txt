@@ -1,0 +1,6 @@
+Visicom COM-100 made by Toshiba 1978
+
+Clone of the Studio 3, Color, NTSC, 1.76 MHz 
+
+Resident Games:
+Doodle, Patterns Bowling, Freeway, and Additions

@@ -207,6 +207,8 @@ void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int d
   int drawHeight;
   int hOffset;
   int pages = displaySize/256;
+  if (pages == 0)
+    pages = 1;
   int mask = displaySize-1;
   int displayHeight = pages * VIDEO_SCREEN_HEIGHT;
   
@@ -289,7 +291,7 @@ void displayInfo(int screenWidth, int screenHeight, String[] text, int offset)
   // Erase screen display
   fill(128);
   rect(0, 0, drawWidth, drawHeight);
-  setTextSize(FONT_SIZE/2); //<>//
+  setTextSize(FONT_SIZE/2); //<>// //<>//
   fill(BLACK);
   textAlign(LEFT, BASELINE);
   //println("offset="+offset + " end="+end);
@@ -309,6 +311,8 @@ void loadGameBinary(String fileName)
   println("Filename: "+fileName);
   int address;
   byte[] data = loadBytes(fileName);
+  
+  // Decode file type to process contents of file
   if (fileName.toLowerCase().endsWith(".st2")) { // Studio 2 Cartridge file
     String header="";
     try {
@@ -403,7 +407,7 @@ void loadGameBinary(String fileName)
       address++;
     }
   }
-  // .CUS binary file for Arcade Game consoles
+  // .CUS binary file testing consoles
   else if (fileName.toLowerCase().endsWith(".cus")) { 
     address = 0x0000;
     for (int i=0; i<data.length; i++) {
@@ -454,12 +458,12 @@ void loadBinary(String fileName, int address)
 void loadGameInfo(String fileName)
 {
   println("Info Filename: "+fileName);
-  textInfo = loadStrings(fileName); //<>//
-  if (textInfo != null && textInfo.length > 0) {
-    for (int i=0; i< textInfo.length; i++) {
-      println(textInfo[i]);
-    }
-  } else {
-    println("missing info file");
-  }
+  textInfo = loadStrings(fileName);
+  //if (textInfo != null && textInfo.length > 0) {
+  //  for (int i=0; i< textInfo.length; i++) {
+  //    println(textInfo[i]);
+  //  }
+  //} else {
+  //  println("missing info file");
+  //}
 }
