@@ -78,16 +78,17 @@ There is a note in the RCA CDP1801 data sheet (file number 900):
 
 ### RCA Video Coin Arcade Game Console
 
-The RCA Video Coin Arcade console games preceded the Studio 2 and were built around June 1975 based on dated circuit schematics from the Hagley Library. 
+The RCA Video Coin Arcade console games preceded the Studio 2 and were built around June 1975 based on dated 
+circuit schematics from the Hagley Library. 
 A RCA internal correspondence document, "COSMAC Coin Machine - Status Report" dated 26 December, 1974 from Joe Weisbecker and
 Phillip Baltzer describes staged plans for a Video Coin Arcade machine (Hagley Library Acc 2464, Box 919, Folder 4). 
-The Hagley library also photos of the Arcade game consoles.
+The Hagley library has photos of the Arcade game consoles.
 
 The consoles were placed in a shopping mall to evaluate the marketability of the game systems.
 Based on information from the Hagley Museum and Library, Wilmington, Delaware,
 I was able to emulate the circuit board for these games. 
-The console game board used the 1801 (two integrated circuits) as the microprocessor.
-The RCA Arcade consoles had a screen resolution of 32x64 pixels that was the same as the Studio 2.
+The console game board used the 1801 microprocessor (two integrated circuits).
+The RCA Arcade consoles had a screen resolution of 64x32 pixels that is the same as the Studio 2.
 
 ![Screenshot of RCA Arcade Swords Game](Studio2/screenshot/screen5.png)
 
@@ -118,10 +119,13 @@ The Studio II game console was sold by RCA beginning with its announcement in Ja
 
 ### Studio III Console
 
-The Studio III game console was never manufactured by RCA, but was sold by manufacturers outside the USA. RCA game programmers wrote Studio III games using the COSMAC VIP boards for software development and prototyping in 1977.
+The Studio III game console was never manufactured by RCA, but was sold by manufacturers outside the USA. 
+RCA game programmers wrote Studio III games using COSMAC VIP boards for software development and prototyping in 1977.
 An add-on graphics card supplied the color support and a programmable sound card was used for Studio III enhanced sound.
 
-My Studio 3 emulation supports color graphics and programmable sound for Studio III games that use color and programmable sound generation. I was able to add color and sound emulation because I found an archived **Programming Manual for Studio III**, written in September 1977, detailing the color and sound functions. I made some contributions to that document when it was written. 
+My Studio 3 emulation supports color graphics and programmable sound for Studio III games 
+that use color and programmable sound generation. 
+I was able to add color and sound emulation when I found an archived **Programming Manual for Studio III**, written in September 1977, detailing the color and sound functions. I made some contributions to that document when it was written. 
 
 Studio III Pinball Game Screenshot
 
@@ -180,7 +184,7 @@ For debug the following keys may be used (upper or lower case):
 - 'C' Arcade Game toggles coin insertion flip-flop emulation
 - 'P' Arcade Game toggles circuit board parameter switch emulation
 
-The "gameSelected" variable is an array index used to select the game to run. It is set by default to the Studio 3 ROM.
+The "gameSelected" variable is an array index used to select the game to run. It is set by default to the Studio 2 Demo Cartridge ROM.
 
 
 ## Emulator Performance
@@ -200,7 +204,12 @@ https://github.com/etxmato/emma_02
 
 Many thanks to Marcel van Tongeren for his contributions on the Emma 02 site.
 
-I thought the Studio III resident game ROM, with the color Blackjack game that I wrote, was lost, but I discovered it was preserved at the EMMA 02 site under the [Victory MPT-02](http://www.emma02.hobby-site.com/victory.html) videogame console made by Soundic.
+I thought the Studio III resident game ROM, with the color Blackjack game that I wrote, was lost, but I discovered it was preserved
+at the EMMA 02 site under the [Victory MPT-02](http://www.emma02.hobby-site.com/victory.html) videogame console made by Soundic.
+This ROM is written for PAL video TV. I modified this interpreter interrupt routine to work with NTSC.
+The reason I did this was because the PAL console runs games slower due to displaying 192 lines versus 128 lines for NTSC.
+The coding technique I use emulates actual games instruction timing and accounts for 
+the extra lines being displayed in PAL video TV making those consoles run slower as did the actual console hardware.
 
 The emulator reads the following game file types:
 1. ".st2" Studio II cartridge format, loads at specific ROM address locations defined in the file
@@ -216,21 +225,27 @@ The emulator reads the following game file types:
 
 Looking back at the games, it is amazing to me how much game function was squeezed into a small 1024 byte ROM cartridge.
  
-Resident game ROMs (2048 bytes) for Studio II included a game instruction pseudo code interpreter (starting at memory location 0) and resident games (starting at 
-memory location 0x0400).
+Resident game ROMs (2048 bytes) for Studio II included a game instruction pseudo code interpreter (starting at memory location 0)
+and resident games Doodle, Patterns, Bowling, Freeway, and Addition (starting at memory location 0x0400).
 
-Resident game ROMs (3072 bytes) for Studio III included a game instruction pseudo code interpreter (starting at location 0) and resident games Doodle, Pattern, Bowling 
-(starting at 0x0400), and Blackjack (starting at location 0x0C00). 
+Resident game ROMs (3072 bytes) for Studio III included a game instruction pseudo code interpreter (starting at location 0)
+and resident games Doodle, Pattern, Bowling (starting at 0x0400), and one and two player Blackjack (starting at location 0x0C00). 
 
-The only difference between the Studio II and Studio III interpreters is that the Studio III interpreter replaced a 3 byte branch instruction with 1 byte NOP instruction in the interrupt service routine to make room for a code change that checks the EF1 line.
-This 3 machine cycle instruction is still needed for correct video display timing (29 machine cycles before the first DMA out of the video display memory). 
+The only difference between the Studio II and Studio III interpreters (first 1024 bytes of Victory MPT-02 Studio III clone) 
+is that the Studio III interpreter replaced a 3 byte branch
+instruction with 1 byte NOP instruction in the interrupt service routine to make room for a code 
+that handles either 128 (NTSC) or 192 (PAL) display lines using the EF1 line.
+This 3 machine cycle instruction is still needed for correct video display timing (29 machine cycles 
+before the first DMA out of the video display memory). 
 Note that in the Studio III programming manual, there is a caution note to not use any 3 machine cycle instructions (NOP, Long Branch)
 in a program's 1802 machine language subroutines embedded in the game interpretive code. 
 
 Color and sound features used in games were programmed in the game cartridge.
 
-There was an engineering cost trade-off that favored limits to ROM size and hardware complexity versis faster game speed, screen display size, and color/sound features.
-By using interpreter psuedo code to write games instead of coding directly with 1802 CPU instructions, small game ROM size was made possible, with shared functions in
+There was an engineering cost trade-off that favored limits to ROM size and hardware complexity versis faster game speed, 
+screen display size, and color/sound features.
+By using interpreter psuedo code to write games instead of coding directly with 1802 CPU instructions, 
+small game ROM size was made possible, with shared functions in
 the interpreter. 
 
 The hardware design was elegant and relatively simple.
@@ -326,7 +341,10 @@ Due to its operating speed, low resolution, and keyboard input, in my opinion, t
 | --------- | ------ | ----- |
 | Sword Fighter | Joseph Weisbecker | VIP game  Ref 1 (not CHIP8) The original game was RCA Coin arcade game |
 | Bowling | Gooitzen van der Wal | original by Joseph Weisbecker, converted to CHIP8 by van der Wal |
-
+| Blockout | Steve Houk  |    |
+| Color Test |  Paul Robson |    |
+| Color Kaleidoscope | Steve Houk   |    |
+| 4096 Picture | Joseph Weisbecker | Cat Photo by Andrew Modla 2018 |
 
 Additional Notes:
 1. Joyce Weisbecker http://www.vintagecomputing.com/index.php/archives/2018/historys-first-female-video-game-designer
