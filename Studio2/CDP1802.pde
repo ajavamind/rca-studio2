@@ -91,7 +91,8 @@ static int previous = 0;  // for debug
 static int opCode = 0;
 static int trigger = 0;
 static int instructionCycles = 0;  // debug
-
+static int[] wpage = new int[256];
+static int[] rpage = new int[256];
 /**
  * 1802 CPU State (used for debug machine state saves)
  */
@@ -114,6 +115,9 @@ private final static int READ(int address)
     println("Emulator error READ address " + hex(address));
     return 0xFF;
   }
+// debug
+  rpage[address/256] =1;
+// end debug
 
   // Studio 2 test cartridge is hardware specific for Studio 2 console
   // It uses memory mirroring that may not exist in other hardware
@@ -150,6 +154,10 @@ private final static void WRITE(int address, int data)
   //  return;
   //}
 
+// debug
+  wpage[address/256] =1;
+// end debug
+
   // Studio 2 test cartridge is hardware specific for Studio 2 console
   // It uses memory mirroring that may not exist in other hardware
   // Normal cartridges do not use mirroring
@@ -172,6 +180,11 @@ private final static void WRITE(int address, int data)
     return;
   }
 
+  if (console == STUDIO4) {
+    studio2_memory[address] = data & 0xFF;
+    return;
+  }
+  
   if ((address >= RAM) && (address < (RAM+RAM_SIZE))) // only RAM space is writeable
   {
     studio2_memory[address] = data & 0xFF;
@@ -287,7 +300,7 @@ private final static int READEFLAG(int flag) {
         else
           retVal = 0;
       } else {
-        retVal = EF1;               
+        retVal = EF1;
       }
     }
     break;
@@ -328,6 +341,8 @@ private final static int READEFLAG(int flag) {
 }
 
 private final static void UPDATEIO(int portID, int data) { 
+  //if (portID != 5 && portID !=0 && portID != 2)
+  //  println("AT " + hex(previous) +" OUT "+ hex(portID) + " "+ hex(data));
   switch (portID)
   {
     //  set Q
@@ -390,6 +405,7 @@ private final static void UPDATEIO(int portID, int data) {
 
 private final static int INPUTIO(int portID) {
   int retVal = 0xFF;  // data bus has pull up resistors for logic 1 value
+  println("INP "+ hex(portID));
   switch (portID)
   {
   case 1:
@@ -527,6 +543,9 @@ int CPU_Execute()
   // debug ///////////////
 
   //if (P == 1 && addr == 0x3a)
+  //  println("At "+hexAddr(addr)+ " R[0] "+hex(R[0]) + " dma "+dmaCount);
+
+  //if (P == 1 && addr == 0x5f)
   //  println("At "+hexAddr(addr)+ " R[0] "+hex(R[0]) + " dma "+dmaCount);
 
   //if (dmaCount >0 && addr == 0x3c) // studio 2
@@ -1558,9 +1577,20 @@ int CPU_Execute()
       cycles = STATE_1_CYCLES;
       screenMemory = (R[0] & 0xFF00) ;     // display page location at start of DMA
       scrollOffset = R[0] & 0xFF;          // Get the scrolling offset (for things like the car game)
-      dmaCount = VISIBLE_LINES;
-      //if (console == STUDIO3)
-      //  dmaCount = 192;  // PAL
+      if (console == STUDIO4) {
+        dmaCount = 0;
+        betweenDMAcycles = 0;  // this starts first DMA emulation
+        //R[0] = (R[0] + 8) & 0xFFFF;  // first DMA
+        //cycles -= 8;
+        //instructionCycles += 8;
+        //println("screenMemory="+screenMemory);
+      } else {
+        dmaCount = VISIBLE_LINES;
+        betweenDMAcycles = CYCLES_BETWEEN_DMA;  // this starts first DMA emulation
+        R[0] = (R[0] + 8) & 0xFFFF;  // first DMA
+        cycles -= 8;
+        instructionCycles += 8;
+      }
       betweenDMAcycles = CYCLES_BETWEEN_DMA;  // this starts first DMA emulation
       R[0] = (R[0] + 8) & 0xFFFF;  // first DMA
       cycles -= 8;
@@ -1612,7 +1642,7 @@ static int CPU_GetScreenSize()
     return DISPLAY_SIZE;
   if (cartridgeMode == VIP64x64)
     return 2*DISPLAY_SIZE;
-    
+
   //println("VIDEO_RAM="+ hex(VIDEO_RAM));
   //println("screenMemory="+ hex(screenMemory));
   //println("screenSize="+hex(VIDEO_RAM - screenMemory + 256));

@@ -107,6 +107,15 @@ void checkAllKeys()
         //  INTERRUPT();  // if IE != 0 generate an interrupt.
         } else if (key == 'd' || key == 'D') {
           debugInfo();
+        } else if (key == 'm' || key == 'M') {
+          for (int i=0; i<256; i++) {
+            if (wpage[i] != 0) 
+              println("Write RAM "+ hex(256*i));
+            if (rpage[i] != 0) 
+              println("Read  RAM "+ hex(256*i));
+          }
+        } else if (key == 'v' || key == 'V') {
+          screenEnabled = true;
         } else if(key == 'p' || key == 'P') { // parameter on/off
           if (COIN_ARCADE_PARAMETER_SWITCH == 0)
             COIN_ARCADE_PARAMETER_SWITCH = 8;
@@ -411,9 +420,9 @@ void loadGameBinary(String fileName)
   else if (fileName.toLowerCase().endsWith(".cus")) { 
     address = 0x0000;
     for (int i=0; i<data.length; i++) {
-      if (!((address >= RAM && address < (RAM+RAM_SIZE)))) {
+      //if (!((address >= RAM && address < (RAM+RAM_SIZE)))) {
         studio2_memory[address] = data[i] & 0xFF;
-      }
+      //}
       address++;
     }
   }

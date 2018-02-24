@@ -1,0 +1,11 @@
+Studio IV Interpreter
+Written by Joe Weisbecker
+
+Final version dated 1/1/1978
+
+Source:
+The Sarnoff Collection, The College of New Jersey
+Weisbecker Collection
+Accession S.572.21 cassette tape, no case 
+Side B labeled Studio IV lang. -- 8P/00; V3 final 1/1/78
+Read into 0000-07FF

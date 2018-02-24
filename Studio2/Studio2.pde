@@ -63,9 +63,10 @@ private final static int FRED2    = 2;
 private final static int ARCADE   = 3;
 private final static int STUDIO2  = 4;  
 private final static int STUDIO3  = 5;  
-private final static int VIP      = 6;
-private final static int ELF      = 7;
-private final static int CUSTOM   = 8;
+private final static int STUDIO4  = 6;  
+private final static int VIP      = 7;
+private final static int ELF      = 8;
+private final static int CUSTOM   = 9;
 private static int console = STUDIO2;
 
 // Cartridge Mode
@@ -104,7 +105,7 @@ private static int COLOR_MAP = INITIAL_COLOR_MAP;
 private final static int COLOR_MAP_SIZE = 0x40;
 private static int INITIAL_RAM = 0x800; // Studio 2 and 3
 private static int RAM = INITIAL_RAM; // Studio 2 and 3
-private final static int RAM_SIZE = 0x200; // Working and Video display RAM
+private static int RAM_SIZE = 0x200; // Working and Video display RAM
 private static int INITIAL_VIDEO_RAM = 0x900;  // Studio 2 and 3 starting location
 private static int VIDEO_RAM = INITIAL_VIDEO_RAM;  // Studio 2 and 3 starting location
 
@@ -181,7 +182,7 @@ String[] gameFileName = {
   ////////////////////////////////
   // Test area
 /* 40 */ "photo.vip",
-
+/*    */ "S.572.21B_Studio_IV_Interpreter_final_1_of_1.rom",
 /* 40 */ //"S.572.2 VIP special-1_of_5.wav.vip",
 /* 41 */ ///"S.572_16_of_16.wav.raw.vip",
 };
@@ -231,7 +232,8 @@ String[] gameTitle = {
   "RCA Coin Tag/Bowl", 
   "RCA Coin Arcade Bowling", 
   "RCA Coin Arcade Swords", 
-  "4096 Picture"
+  "4096 Picture",
+  "Studio IV Interpreter",
 };
 
 String[] gameInfoFileName = {
@@ -284,7 +286,8 @@ String[] gameInfoFileName = {
   "AUD_2464_09_B41_ID01_01 Tag-Bowling.wav.txt", 
   "AUD_2464_09_B41_ID02_01 Coin Bowling.wav.txt",
   "AUD_2464_09_B41_ID01_02 Swords.wav.txt", 
-  "photo.txt"
+  "photo.txt",
+  "S.572.21B_Studio_IV_Interpreter_final_1_of_1.rom.txt",
 };
 
 
@@ -410,6 +413,8 @@ void systemReset() {
     console = FRED2;
   } else if (gameFileName[gameSelected].toLowerCase().endsWith(".cus")) {
     console = CUSTOM;
+  } else if (gameFileName[gameSelected].startsWith("S.572.21B_Studio_IV_Interpreter")) {
+    console = STUDIO4;
   } else {
     if (gameSelected >= 0 && gameSelected <= 10)
       console = STUDIO2;
@@ -436,9 +441,14 @@ void systemReset() {
     // Arcade and FRED Game development boards
     RAM = 0x0800;
     VIDEO_RAM = 0x0900;
+  } else if (console == STUDIO4) {
+    RAM = 0x2000;
+    RAM_SIZE = 0x1B00;
+    DISPLAY_SIZE = 0x400;
+    VIDEO_RAM = 0x2000;  // Note Studio 4 interpreter does not fix the location of video RAM
   } else if (console == CUSTOM) {
     // experimental for alternate versions of Joe Weisbecker development boards
-    RAM = 0x0800;
+    RAM = 0x2700;
     VIDEO_RAM = 0x0900;
   }
 
@@ -462,7 +472,13 @@ void systemReset() {
   if (READ(0) == 0) {
     R[0] = 1;  // skip over IDL instruction, found a RCA FRED COSMAC 1801 Game System
   }
-
+  // debug
+  if (console == STUDIO4) {
+    for (int i=0; i<256; i++) {
+      wpage[i] = 0;
+      rpage[i] = 0;
+    }
+  } 
 }
 
 public boolean isAndroid() {
