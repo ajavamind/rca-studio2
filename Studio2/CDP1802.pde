@@ -405,7 +405,7 @@ private final static void UPDATEIO(int portID, int data) {
 
 private final static int INPUTIO(int portID) {
   int retVal = 0xFF;  // data bus has pull up resistors for logic 1 value
-  println("INP "+ hex(portID));
+  //println("INP "+ hex(portID));
   switch (portID)
   {
   case 1:
@@ -493,6 +493,9 @@ void CPU_Reset()
   cycles = STATE_1_CYCLES;                                            // Run this many cycles.
   screenEnabled = false;
 
+  for (int i=0; i<studio2_memory.length; i++)
+    studio2_memory[i] = 255;
+    
   // PC Version copy ROM code into 4k space.
   if (console == STUDIO2) {
     for (int i = 0; i < 2048; i++) studio2_memory[i] = studio2[i];
