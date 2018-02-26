@@ -8,12 +8,14 @@
 ;
 ; Display memory x2000 to x23FF
 ; RAM x2700
+; Color table:  ??
 ; RAM x2800 to x2BFF
 
 ; Cartridge memory
 ;   0x0800
 ;   0x1000
-
+;
+; Assumed register usage based on CHIP8 ??
 ; R0 DMA pointer
 ; R1 Interrupt Routine program counter
 ; R2 Stack pointer
@@ -22,7 +24,7 @@
 ; R5 chip8 instruction pointer
 ; R6 VX pointer
 ; R7 VY pointer
-; R8 Timers R8.1 timer  R8.0 tone
+; R8 
 ; R9 Random number
 ; RA I pointer
 ; RB Display page pointer
@@ -31,6 +33,15 @@
 ; RE
 ; RF
 ;
+; Variables
+;   0x27F2  Display buffer address pointer
+;   0x27F4
+;   0x27F6
+;   0x27F8
+;   0x27FA
+;   0x27FC
+;   0x27FE
+;
 ; Initialize registers
 0000 90     GHI R0
 0001 B4     PHI R4
@@ -38,18 +49,18 @@
 0003 F816   LDI 0x16
 0005 A4     PLO R4    ; R4 = 0x0016
 0006 F84F   LDI 0x4F
-0008 A1     PLO R1    ; R1 = 0x004F
+0008 A1     PLO R1    ; R1 = 0x004F interrupt entry point
 0009 F827   LDI 0x27
 000B B2     PHI R2
 000C F8BF   LDI 0xBF
-000E A2     PLO R2    ; R2 = 0x27BF
+000E A2     PLO R2    ; R2 = 0x27BF initial stack pointer
 000F F802   LDI 0x02
 0011 B5     PHI R5
 0012 F8DC   LDI 0xDC
 0014 A5     PLO R5    ; R5 = 0x02DC
 0015 D4     SEP R4
 ;
-Loop: 
+Decode: 
 0016 F827   LDI 0x27
 0018 B6     PHI R6
 0019 B7     PHI R7
@@ -88,11 +99,14 @@ Loop:
 0041 0C     LDN RC
 0042 A3     PLO R3
 0043 D3     SEP R3
-0044 3016   BR 0x16    ; jump to loop
+0044 3016   BR 0x16    ; jump to Decode
 ;
 0046 00     
-;
-0047 7A     REQ
+
+;  Interrupt routine 
+; exit:
+0047 7A     REQ     ; turn off sound?
+; exit2:
 0048 F8F9   LDI 0xF9
 004A A8     PLO R8
 004B D8     SEP R8
@@ -113,13 +127,13 @@ Loop:
 005A 48     LDA R8
 005B B0     PHI R0
 005C E1     SEX R1
-005D 48     LDA R8
-005E A0     PLO R0   ; DMA R0 = 
-; DMA begins here
+005D 48     LDA R8    ; R8 = 0x27F4
+005E A0     PLO R0   ; DMA R0 = 0x2000
+; DMA begins here after 29 machine instruction cycles
 005F 48     LDA R8   ; R8 = 0x27F4
 0060 FA40   ANI 0x40
 0062 BA     PHI RA
-0063 48     LDA R8
+0063 48     LDA R8   ; R8 = 0x27F6
 0064 AA     PLO RA   ; RA = 
 0065 19     INC R9
 0066 E1     SEX R1
@@ -135,7 +149,7 @@ loop2:
 006E 2A     DEC RA
 006F 65     OUT 5
 0070 00     
-0071 20     DEC R0
+0071 20     DEC R0    ; adjust DMA pointer page
 0072 8B     GLO RB
 0073 A0     PLO R0
 0074 9A     GHI RA
@@ -143,7 +157,7 @@ loop2:
 ;
 0077 65     OUT 5
 0078 00     
-0079 20     DEC R0
+0079 20     DEC R0    ; adjust DMA pointer page
 007A 8B     GLO RB
 007B A0     PLO R0
 007C E1     SEX R1
@@ -159,25 +173,27 @@ what:
 0085 AB     PLO RB
 0086 F8EF   LDI 0xEF
 0088 A8     PLO R8
+aloop:
 0089 08     LDN R8
 008A AA     PLO RA
-008B 328E   BZ 0x8E
+008B 328E   BZ 0x8E   ; jump next
 008D 2A     DEC RA
+next:
 008E 8A     GLO RA
 008F 58     STR R8
 0090 28     DEC R8
 0091 2B     DEC RB
 0092 8B     GLO RB
-0093 3A89   BNZ 0x89
+0093 3A89   BNZ 0x89  ; jump if not zero to aloop
 0095 E8     SEX R8
 0096 08     LDN R8
 0097 61     OUT 1
 0098 32
 0099 47     LDA R7
 009A 08     LDN R8
-009B 3247   BZ 0x47
-009D 7B     SEQ
-009E 3048   BR 0x48
+009B 3247   BZ 0x47   ; jump if zero to exit
+009D 7B     SEQ       ; turn on sound?
+009E 3048   BR 0x48   ; jump to interrupt exit2
 
 00A0 0B     LDN RB
 00A1 3E3E   BN3 0x3E
@@ -925,6 +941,7 @@ what:
 040B F4     ADD
 040C 56     STR R6
 040D D4     SEP R4
+;
 040E F8F6   LDI 0xF6
 0410 A7     PLO R7
 0411 8F     GLO RF
@@ -935,6 +952,7 @@ what:
 0416 06     LDN R6
 0417 57     STR R7
 0418 D4     SEP R4
+;
 0419 F8F6   LDI 0xF6
 041B A6     PLO R6
 041C 8F     GLO RF
@@ -943,6 +961,7 @@ what:
 0420 8F     GLO RF
 0421 A5     PLO R5
 0422 D4     SEP R4
+;
 0423 00     IDL
 0424 63     OUT 3
 0425 00     IDL

@@ -493,8 +493,8 @@ void CPU_Reset()
   cycles = STATE_1_CYCLES;                                            // Run this many cycles.
   screenEnabled = false;
 
-  for (int i=0; i<studio2_memory.length; i++)
-    studio2_memory[i] = 255;
+  //for (int i=0; i<studio2_memory.length; i++)
+  //  studio2_memory[i] = 255;
     
   // PC Version copy ROM code into 4k space.
   if (console == STUDIO2) {
@@ -1594,10 +1594,6 @@ int CPU_Execute()
         cycles -= 8;
         instructionCycles += 8;
       }
-      betweenDMAcycles = CYCLES_BETWEEN_DMA;  // this starts first DMA emulation
-      R[0] = (R[0] + 8) & 0xFFFF;  // first DMA
-      cycles -= 8;
-      instructionCycles += 8;
       SYSTEM_Command(HWC_FRAMESYNC, 0);                                        // Synchronise.
       if (toneState != 0) {
         tone(true);

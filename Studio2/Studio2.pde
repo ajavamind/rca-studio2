@@ -397,6 +397,10 @@ void systemReset() {
   setFreq(0);
   dmaCount = 0;
   betweenDMAcycles = 0;
+  DISPLAY_SIZE = 256;
+  RAM = INITIAL_RAM; // Studio 2 and 3
+  RAM_SIZE = 0x200; // Working and Video display RAM
+  VIDEO_RAM = INITIAL_VIDEO_RAM;  // Studio 2 and 3 starting location
 
   if (gameFileName[gameSelected].toLowerCase().endsWith(".ch8")) {
     console = VIP;
