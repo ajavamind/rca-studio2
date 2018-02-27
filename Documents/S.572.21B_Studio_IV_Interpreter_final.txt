@@ -21,7 +21,7 @@
 ; R2 Stack pointer
 ; R3 interpreter program counter
 ; R4 call routine program counter
-; R5 chip8 instruction pointer
+; R5 pseudo code instruction pointer
 ; R6 VX pointer
 ; R7 VY pointer
 ; R8 
@@ -33,7 +33,11 @@
 ; RE
 ; RF
 ;
-; Variables
+; Program Variables
+;   0x27E0 - 27EF
+;
+; Interpreter variables
+;   0x27F0
 ;   0x27F2  Display buffer address pointer
 ;   0x27F4
 ;   0x27F6
@@ -57,52 +61,59 @@
 000F F802   LDI 0x02
 0011 B5     PHI R5
 0012 F8DC   LDI 0xDC
-0014 A5     PLO R5    ; R5 = 0x02DC
+0014 A5     PLO R5    ; R5 = 0x02DC startup pseudo code location
 0015 D4     SEP R4
 ;
-Decode: 
+;-----------------------------------------------------------
+; Pseudo code instruction decoder
+; P = 4 on entry R4 = 0x0016
+; R5 is pseudo code instruction counter
+;   pseudo code XYIJ
+Decode:   
 0016 F827   LDI 0x27
-0018 B6     PHI R6
-0019 B7     PHI R7
-001A E2     SEX R2
+0018 B6     PHI R6    ; R6 points to RAM page
+0019 B7     PHI R7    ; R7 points to RAM page
+001A E2     SEX R2    ; X=2
 001B F8F6   LDI 0xF6
 001D A6     PLO R6    ; R6 = 0x27F6
 001E 46     LDA R6
 001F BE     PHI RE
 0020 06     LDN R6
-0021 AE     PLO RE
+0021 AE     PLO RE    ; RE = contents of x27F6 either x800 or x1000
 0022 94     GHI R4
-0023 BC     PHI RC
-0024 45     LDA R5
-0025 BF     PHI RF
+0023 BC     PHI RC    ; RC.1 = 0
+0024 45     LDA R5    ; pseudo op code MSB
+0025 BF     PHI RF    ; RF.1 = op code MBS XY
 0026 F6     SHR
 0027 F6     SHR
 0028 F6     SHR
-0029 F6     SHR
+0029 F6     SHR       ; isolate upper nibble of byte
 002A F9D0   ORI 0xD0
-002C AC     PLO RC
+002C AC     PLO RC    ; RC = x00DX
 002D 9F     GHI RF
 002E FA0F   ANI 0x0F
-0030 BF     PHI RF
+0030 BF     PHI RF    ; RF.1 = 0Y
 0031 F9E0   ORI 0xE0
-0033 A6     PLO R6
-0034 45     LDA R5
-0035 AF     PLO RF
+0033 A6     PLO R6    ; R6 =x27EY
+;
+0034 45     LDA R5    ; pseudo op code LSB IJ
+0035 AF     PLO RF    ; RF = 0YIJ
 0036 FA0F   ANI 0x0F
-0038 F9E0   ORI 0xE0
-003A A7     PLO R7
-003B 4C     LDA RC
-003C B3     PHI R3
+0038 F9E0   ORI 0xE0  ; table at 00EJ
+003A A7     PLO R7    ; R7 =0x27EJ
+003B 4C     LDA RC    ; D = MSB, RC = x00DX + 1
+003C B3     PHI R3    ; set MSB of routine to call
 003D 8C     GLO RC
-003E FC0F   ADI 0x0F
-0040 AC     PLO RC
+003E FC0F   ADI 0x0F  ; LSB page
+0040 AC     PLO RC     ; RC = 0x00EX
 0041 0C     LDN RC
-0042 A3     PLO R3
-0043 D3     SEP R3
+0042 A3     PLO R3     ; set LSB of routine to call
+0043 D3     SEP R3     ; call routine at R3
 0044 3016   BR 0x16    ; jump to Decode
+;------------------------------------------------------------
 ;
 0046 00     
-
+;
 ;  Interrupt routine 
 ; exit:
 0047 7A     REQ     ; turn off sound?
@@ -194,7 +205,8 @@ next:
 009B 3247   BZ 0x47   ; jump if zero to exit
 009D 7B     SEQ       ; turn on sound?
 009E 3048   BR 0x48   ; jump to interrupt exit2
-
+; ----------------------------------------------------------------------
+;
 00A0 0B     LDN RB
 00A1 3E3E   BN3 0x3E
 00A3 3E3E   BN3 0x3E
@@ -237,6 +249,8 @@ next:
 00CD A0     PLO R0
 00CE 5A     STR RA
 00CF 62     OUT 2
+; --------------------------------------------------------------
+; opcode X---
 ; Lookup table pseudo opcode page - MSB
 00D0 02
 00D1 02     
@@ -254,7 +268,7 @@ next:
 00DD 02     
 00DE 02     
 00DF 02     
-; Lookup table pseudo opcode - LSB
+; Lookup table pseudo opcode page - LSB
 00E0 93     
 00E1 93     
 00E2 93     
@@ -272,9 +286,9 @@ next:
 00EE D7     
 00EF 9E     
 ;;
-00F0 64     
-00F1 0A     
-00F2 01     
+00F0 64     ; 100
+00F1 0A     ; 10
+00F2 01     ; 1
 ;
 00F3 D3     SEP R3
 00F4 22     DEC R2
@@ -591,6 +605,8 @@ next:
 026F 12     INC R2
 0270 D4     SEP R4
 0271 00     IDL
+
+;
 0272 19     INC R9
 0273 89     GLO R9
 0274 AE     PLO RE
@@ -622,6 +638,13 @@ next:
 028F 06     LDN R6
 0290 3A8C   BNZ 0x8C
 0292 D4     SEP R4
+;
+;--------------------------------------------------
+; 0---
+; 1---
+; 2---
+; 3---
+; P = 3
 0293 F8F6   LDI 0xF6
 0295 A6     PLO R6
 0296 25     DEC R5
@@ -631,10 +654,13 @@ next:
 029A 16     INC R6
 029B 45     LDA R5
 029C 56     STR R6
-029D D4     SEP R4
+029D D4     SEP R4   ; return
+;
+; p = 3
 029E 8F     GLO RF
 029F 56     STR R6
-02A0 D4     SEP R4
+02A0 D4     SEP R4   ; return
+;
 02A1 00     IDL
 02A2 F8EA   LDI 0xEA
 02A4 A6     PLO R6
@@ -674,24 +700,26 @@ next:
 02CE 94     GHI R4
 02CF AD     PLO RD
 02D0 30AD   BR 0xAD
+;
 02D2 8F     GLO RF
 02D3 A7     PLO R7
 02D4 06     LDN R6
 02D5 57     STR R7
 02D6 D4     SEP R4
+;
 02D7 8F     GLO RF
 02D8 A7     PLO R7
 02D9 07     LDN R7
 02DA 56     STR R6
 02DB D4     SEP R4
 ;;-----------------------------------
-; chip 8 code??
+; pseudo code program on startup
+;
 02DC FA00   
 02DE FC7E   
 02E0 FD10   
 02E2 F000     
-02E4 F1     OR
-02E5 D3     SEP R3
+02E4 F1D3
 02E6 F2     AND
 02E7 20     DEC R0
 02E8 F3     XOR
@@ -711,11 +739,15 @@ next:
 02F7 00     IDL
 02F8 F6     SHR
 02F9 00     IDL
+;
 02FA F900   ORI 0x00
 02FC 04     LDN R4
 02FD F0     LDX
 02FE 4B     LDA RB
 02FF BB     PHI RB
+;
+;
+
 0300 94     GHI R4
 0301 BD     PHI RD
 0302 F8F4   LDI 0xF4
@@ -735,7 +767,7 @@ next:
 0312 DD     SEP RD
 0313 3A10   BNZ 0x10
 0315 D4     SEP R4
-0316 0E     LDN RE
+0316 0E     LDN RE   ; loads either 0x800 or 0x1000
 0317 56     STR R6
 0318 DD     SEP RD
 0319 3A16   BNZ 0x16
@@ -1348,16 +1380,17 @@ next:
 05E3 00     IDL
 05E4 55     STR R5
 05E5 D5     SEP R5
-05E6 10     INC R0
-05E7 02     LDN R2
-05E8 A5     PLO R5
-05E9 AA     PLO RA
-05EA 08     LDN R8
-05EB 00     IDL
-05EC 55     STR R5
-05ED D5     SEP R5
-05EE 08     LDN R8
-05EF 02     LDN R2
+
+05E6 10     
+05E7 02     
+05E8 A5     
+05E9 AA    
+05EA 08     
+05EB 00     
+05EC 55     
+05ED D5     
+05EE 08     
+05EF 02     
 05F0 A5     PLO R5
 05F1 AA     PLO RA
 05F2 65     OUT 5
