@@ -134,9 +134,32 @@ Studio III Pinball Game Screenshot
 ### Studio IV Console
 
 The Studio IV game console was in the planning stages, in 1977, but was never built. 
-There is a Studio IV interpreter cassette tape from Joe Weisbecker in the Sarnoff Collection at the College of New Jersey.
+There is a "Studio IV Interpreter Final version 1/1/1978" cassette tape written by Joe Weisbecker.
 
-http://embark.tcnj.edu/OBJ2416?sid=63&x=661
+Source:
+  The Sarnoff Collection, The College of New Jersey
+  Weisbecker Collection
+  Accession S.572.21 cassette tape, no case 
+  Side B labeled Studio IV lang. -- 8P/00; V3 final 1/1/78
+  Read into 0000-07FF
+
+After disassembling the Studio IV Interpreter code and looking at the code triggered a memory of Joe Weisbecker
+demonstrating his new interpreter, long forgotten by me.
+The new interpreter is capable of double buffering since the display screen memory address pointer is stored in RAM, not 
+fixed in ROM code, as it was for the Studio II and III interpreters. I believe the size of the display is set 
+from RAM memory also.
+
+Display memory starts at x2000 to x23FF, allowing a maximum screen resolution of 128h x 64w pixels.
+Double buffering two 64 x 64 displays is possible.
+There is a four bit color table from x2800 to x2BFF where the low order 4 bits are written with values
+0 to 7 in the screen saver mode. This color architecture scheme is similar to the Studio III.
+There is a page of RAM at location x2700 for the stack and interpreter/game program variables.
+Based on memory pages read during interpreter execution, there are plug-in game cartridge locations available at x0800 and x1000.
+
+Based on a first analysis, the interpreter pseudo code looks like a new design, neither Studio II nor CHIP8. 
+I was able to emulate this code. When no cartridges are plugged into the interpreter runs a screen saver display update.
+
+![Screenshot of Studio IV Screen Saver](Studio2/screenshot/studio4_screensaver_1080.png)
 
 ### COSMAC VIP Computer
 
@@ -145,7 +168,8 @@ Joe Weisbecker designed the system and wrote a CHIP8 interpreter a simpler strea
 Later he expanded the interpreter, naming it CHIP8X to handle adapter cards (sound, color video, etc.) for the VIP board.
 
 Since the emulator implements the RCA CDP1802 microcomputer instruction set directly, it will run all the interpreters written for Studio II/III or VIP boards.
-The VIP has many major design similarities to the Studio III.
+The VIP has many major design similarities to the Studio III. 
+I believe the VIP board was used for development of the Studio IV interpreter.
 
 ## Running the Emulator
 
@@ -333,6 +357,7 @@ Due to its operating speed, low resolution, and keyboard input, in my opinion, t
 
 | Studio IV Color Game | Author | Notes |
 | --------- | ------ | ----- |
+| Studio IV Interpreter Screen Saver | Joseph Weisbecker |  |
 | Match Game | Andrew Modla | Planned enhanced version, not implemented |
 | Helicopter Gunship | Andrew Modla | Planned, not implemented |
 
