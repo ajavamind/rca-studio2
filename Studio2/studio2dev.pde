@@ -105,6 +105,8 @@ void checkAllKeys()
         //  }
         //  // Come out of IDL for Interrupt.
         //  INTERRUPT();  // if IE != 0 generate an interrupt.
+        } else if (key == 'z' || key == 'Z') {
+          debugMem();
         } else if (key == 'd' || key == 'D') {
           debugInfo();
         } else if (key == 'm' || key == 'M') {
@@ -128,6 +130,13 @@ void checkAllKeys()
   }
 }
 
+void debugMem() {
+  for (int i=0; i<16; i=i+2) {
+    print(hexAddr(i+0x27F0) + " " + hexData(studio2_memory[i+0x27F0]) );
+    println(hexData(studio2_memory[i+1+0x27F0]) + " ");
+  }
+}
+
 void debugInfo() {
   println("screenEnabled="+screenEnabled);
   println("P="+ hexData(P) +" X="+ hexData(X) + " R[X]="+hex(R[X]) + " IE=" +IE + " Q="+ Q +" state="+state + " cycles="+cycles + " coin="+coin);
@@ -135,7 +144,7 @@ void debugInfo() {
   println(" R[4]="+hex(R[4])+" R[5]="+hex(R[5]) +" R[6]="+hex(R[6]) +" R[7]="+hex(R[7]));
   println(" R[8]="+hex(R[8])+" R[9]="+hex(R[9]) +" R[10]="+hex(R[10]) +" R[11]="+hex(R[11]));
   println(" R[12]="+hex(R[12])+" R[13]="+hex(R[13]) +" R[14]="+hex(R[14]) +" R[15]="+hex(R[15]));
-  //println(" screenMemory="+hex(screenMemory) );
+  println(" screenMemory="+hex(screenMemory) );
 }
 
 // *****************************************************************************************************************
@@ -260,6 +269,10 @@ void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int d
       if (console == STUDIO3 || (console == VIP && interpreter == CHIP8X)) {
         int colorIndex = studio2_memory[COLOR_MAP + x + 8*(y/4)] & 0x0007;
         fill(colorMap[colorIndex]);
+      }
+      else if (console == STUDIO4) {
+        int colorIndex = studio2_memory[COLOR_MAP + x + 8*(y/4)] & 0x0007;
+        fill(colorMap[colorIndex]);  
       }
       while (pixByte != 0)                                          // if something to render.
       {

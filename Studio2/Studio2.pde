@@ -102,7 +102,7 @@ color[] colorMap = {BLACK, RED, BLUE, VIOLET, GREEN, YELLOW, AQUA, WHITE};
 
 private final static int INITIAL_COLOR_MAP = 0x0B00;
 private static int COLOR_MAP = INITIAL_COLOR_MAP;
-private final static int COLOR_MAP_SIZE = 0x40;
+private static int COLOR_MAP_SIZE = 0x40;
 private static int INITIAL_RAM = 0x800; // Studio 2 and 3
 private static int RAM = INITIAL_RAM; // Studio 2 and 3
 private static int RAM_SIZE = 0x200; // Working and Video display RAM
@@ -182,7 +182,7 @@ String[] gameFileName = {
   ////////////////////////////////
   // Test area
 /* 40 */ "photo.vip",
-/*    */ "S.572.21B_Studio_IV_Interpreter_final_1_of_1.rom",
+/*    */ "S.572.21B_Studio_IV_Interpreter_final_1_of_1.rom",  // "S.572.21B_Studio_IV_Interpreter_1_of_2.rom", //
 /* 40 */ //"S.572.2 VIP special-1_of_5.wav.vip",
 /* 41 */ ///"S.572_16_of_16.wav.raw.vip",
 };
@@ -401,6 +401,8 @@ void systemReset() {
   RAM = INITIAL_RAM; // Studio 2 and 3
   RAM_SIZE = 0x200; // Working and Video display RAM
   VIDEO_RAM = INITIAL_VIDEO_RAM;  // Studio 2 and 3 starting location
+  COLOR_MAP = INITIAL_COLOR_MAP;
+  COLOR_MAP_SIZE = 0x40;
 
   if (gameFileName[gameSelected].toLowerCase().endsWith(".ch8")) {
     console = VIP;
@@ -450,6 +452,7 @@ void systemReset() {
     RAM_SIZE = 0x1B00;
     DISPLAY_SIZE = 0x400;
     VIDEO_RAM = 0x2000;  // Note Studio 4 interpreter does not fix the location of video RAM
+    COLOR_MAP = 0x2800;
   } else if (console == CUSTOM) {
     // experimental for alternate versions of Joe Weisbecker development boards
     RAM = 0x2700;

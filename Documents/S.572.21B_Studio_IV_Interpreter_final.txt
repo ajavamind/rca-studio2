@@ -8,8 +8,8 @@
 ;
 ; Display memory x2000 to x23FF
 ; RAM x2700
-; Color table:  ??
-; RAM x2800 to x2BFF
+; Color table:
+; RAM x2800 to x2BFF low order 4 bits written with values 0 to 7 for test code
 
 ; Cartridge memory
 ;   0x0800
@@ -1006,6 +1006,7 @@ next:
 044D 9E     GHI RE
 044E 52     STR R2
 044F D4     SEP R4
+;
 0450 F8F6   LDI 0xF6
 0452 A6     PLO R6
 0453 42     LDA R2
@@ -1014,7 +1015,9 @@ next:
 0456 42     LDA R2
 0457 56     STR R6
 0458 D4     SEP R4
-0459 00     IDL
+;
+0459 00     
+;
 045A F8F4   LDI 0xF4
 045C A6     PLO R6
 045D E6     SEX R6
@@ -1022,13 +1025,15 @@ next:
 045F 56     STR R6
 0460 64     OUT 4
 0461 D4     SEP R4
+;
 0462 F8F4   LDI 0xF4
 0464 A6     PLO R6
 0465 E6     SEX R6
 0466 8F     GLO RF
 0467 56     STR R6
-0468 64     OUT 4
+0468 64     OUT 4   ;  ?enable video display?
 0469 D4     SEP R4
+;
 046A F810   LDI 0x10
 046C BF     PHI RF
 046D 22     DEC R2

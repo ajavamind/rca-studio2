@@ -342,7 +342,7 @@ private final static int READEFLAG(int flag) {
 
 private final static void UPDATEIO(int portID, int data) { 
   //if (portID != 5 && portID !=0 && portID != 2)
-  //  println("AT " + hex(previous) +" OUT "+ hex(portID) + " "+ hex(data));
+  //println("AT " + hex(previous) +" OUT "+ hex(portID) + " "+ hex(data));
   switch (portID)
   {
     //  set Q
@@ -379,7 +379,11 @@ private final static void UPDATEIO(int portID, int data) {
     }
     break;
   case 4:
-    if (console != ARCADE && console != FRED2) {
+    //println("AT " + hex(previous) +" OUT "+ portID + " "+ hex(data));
+    if (console == STUDIO4) {
+      screenEnabled = true;
+    }
+    else if (console != ARCADE && console != FRED2) {
       // Studio III programmable sound generator
       setFreq(data);
     }
@@ -1633,6 +1637,8 @@ CPU1802STATE CPU_ReadState(CPU1802STATE s)
 static int CPU_GetScreenMemoryAddress()
 {
   return (screenEnabled) ? screenMemory : -1;
+  //return screenMemory;
+  //return 0x2800;
 }
 
 static int CPU_GetScreenSize()
