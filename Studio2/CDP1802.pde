@@ -116,7 +116,16 @@ private final static int READ(int address)
     return 0xFF;
   }
 // debug
-  rpage[address/256] =1;
+  //rpage[address/256] =1;
+  //if ((address/256)  == 8 || (address/256) == 16) {
+  //  println("Read at "+ hex(R[P]-1) + " from memory "+hex(address) );
+  //  println("P="+ hex(P) +" X="+ hex(X) + " R[X]="+hex(R[X]) + " IE=" +IE + " Q="+ Q +" state="+state);
+  //  println(" R[0]="+hex(R[0])+" R[1]="+hex(R[1]) +" R[2]="+hex(R[2]) +" R[3]="+hex(R[3]));
+  //  println(" R[4]="+hex(R[4])+" R[5]="+hex(R[5]) +" R[6]="+hex(R[6]) +" R[7]="+hex(R[7]));
+  //  println(" R[8]="+hex(R[8])+" R[9]="+hex(R[9]) +" R[10]="+hex(R[10]) +" R[11]="+hex(R[11]));
+  //  println(" R[12]="+hex(R[12])+" R[13]="+hex(R[13]) +" R[14]="+hex(R[14]) +" R[15]="+hex(R[15]));
+  //  println();
+  //}
 // end debug
 
   // Studio 2 test cartridge is hardware specific for Studio 2 console

@@ -182,9 +182,14 @@ String[] gameFileName = {
   ////////////////////////////////
   // Test area
 /* 40 */ "photo.vip",
-/*    */ "S.572.21B_Studio_IV_Interpreter_final_1_of_1.rom",  // "S.572.21B_Studio_IV_Interpreter_1_of_2.rom", //
-/* 40 */ //"S.572.2 VIP special-1_of_5.wav.vip",
-/* 41 */ ///"S.572_16_of_16.wav.raw.vip",
+/* 41 */ "S.572.21B_Studio_IV_Interpreter_final_1_of_1.rom", 
+/* 42 */
+//"S.572.2B_4.vip"
+//"S.472.53A_FRED2_DEMO_1_of_2.fd2",
+
+ //  "S.572.21B_Studio_IV_Interpreter_1_of_2.rom", 
+/*    */ //"S.572.2 VIP special-1_of_5.wav.vip",
+/*    */ ///"S.572_16_of_16.wav.raw.vip",
 };
 
 String[] gameTitle = {
@@ -234,6 +239,7 @@ String[] gameTitle = {
   "RCA Coin Arcade Swords", 
   "4096 Picture",
   "Studio IV Interpreter",
+ // "FRED II Demo",
 };
 
 String[] gameInfoFileName = {
@@ -288,6 +294,7 @@ String[] gameInfoFileName = {
   "AUD_2464_09_B41_ID01_02 Swords.wav.txt", 
   "photo.txt",
   "S.572.21B_Studio_IV_Interpreter_final_1_of_1.rom.txt",
+//  "S.472.53A_FRED2_DEMO_1_of_2.fd2.txt",
 };
 
 
@@ -479,13 +486,23 @@ void systemReset() {
   if (READ(0) == 0) {
     R[0] = 1;  // skip over IDL instruction, found a RCA FRED COSMAC 1801 Game System
   }
-  // debug
+  // debug --------------------------------
   if (console == STUDIO4) {
     for (int i=0; i<256; i++) {
       wpage[i] = 0;
       rpage[i] = 0;
     }
+  //loadGameBinary(gameFileName[7]);
+  //studio2_memory[0x1000] = 0x08;
+  //studio2_memory[0x1001] = 0x02;
+  //studio2_memory[0x1002] = 0x30;
+  //studio2_memory[0x1003] = 0x02;
+  //studio2_memory[0x800] = 0x08;
+  //studio2_memory[0x801] = 0x02;
+  //studio2_memory[0x802] = 0x30;
+  //studio2_memory[0x803] = 0x02;
   } 
+  // end debug ----------------------------
 }
 
 public boolean isAndroid() {

@@ -33,14 +33,14 @@
 ; RE
 ; RF
 ;
-; Program Variables
+; Program Variables V0 to VF
 ;   0x27E0 - 27EF
 ;
 ; Interpreter variables
 ;   0x27F0
 ;   0x27F2  Display buffer address pointer
 ;   0x27F4
-;   0x27F6
+;   0x27F6  I Pointer to memory x0000 to x3FFF
 ;   0x27F8
 ;   0x27FA
 ;   0x27FC
@@ -68,7 +68,8 @@
 ; Pseudo code instruction decoder
 ; P = 4 on entry R4 = 0x0016
 ; R5 is pseudo code instruction counter
-;   pseudo code XYIJ
+; pseudo code instruction format:  XYIJ
+;
 Decode:   
 0016 F827   LDI 0x27
 0018 B6     PHI R6    ; R6 points to RAM page
@@ -100,6 +101,7 @@ Decode:
 0035 AF     PLO RF    ; RF = 0YIJ
 0036 FA0F   ANI 0x0F
 0038 F9E0   ORI 0xE0  ; table at 00EJ
+;
 003A A7     PLO R7    ; R7 =0x27EJ
 003B 4C     LDA RC    ; D = MSB, RC = x00DX + 1
 003C B3     PHI R3    ; set MSB of routine to call
@@ -108,8 +110,20 @@ Decode:
 0040 AC     PLO RC     ; RC = 0x00EX
 0041 0C     LDN RC
 0042 A3     PLO R3     ; set LSB of routine to call
+;
+; prior to call the following registers contain:
+; RF.1  0Y
+; RF.0  IJ
+; R6 points to Y variable V0 to VF starting at x27E0
+; R6.1  RAM page x27--
+; R6.0
+; R7 points to J variable V0 to VF starting at x27E0
+; R7.1  RAM page x27--
+; R7.0
+; RE = contents of I memory pointer
+;
 0043 D3     SEP R3     ; call routine at R3
-0044 3016   BR 0x16    ; jump to Decode
+0044 3016   BR 0x16    ; jump to Decode for next instruction
 ;------------------------------------------------------------
 ;
 0046 00     
@@ -303,7 +317,10 @@ next:
 00FD 30F3   BR 0xF3
 00FF 00     
 ;---------------------------------------------------
-0100 8F     GLO RF
+;
+; 4XXX pseudo code instruction
+;
+0100 8F     GLO RF  ; IJ
 0101 F6     SHR
 0102 F6     SHR
 0103 F6     SHR
@@ -352,10 +369,16 @@ next:
 0137 F1     OR
 0138 56     STR R6
 0139 D4     SEP R4
+;
+;
+;
 013A 8F     GLO RF
 013B F4     ADD
 013C 56     STR R6
 013D D4     SEP R4
+;
+;
+;
 013E 22     DEC R2
 013F F8D3   LDI 0xD3
 0141 52     STR R2
@@ -386,6 +409,7 @@ next:
 015E 8F     GLO RF
 015F 3A62   BNZ 0x62
 0161 D4     SEP R4
+;
 0162 06     LDN R6
 0163 FE     SHL
 0164 56     STR R6
@@ -406,6 +430,7 @@ next:
 0176 8F     GLO RF
 0177 3A7A   BNZ 0x7A
 0179 D4     SEP R4
+;
 017A 06     LDN R6
 017B F6     SHR
 017C 56     STR R6
@@ -414,12 +439,14 @@ next:
 017F 57     STR R7
 0180 2F     DEC RF
 0181 3076   BR 0x76
+;
 0183 9E     GHI RE
 0184 B5     PHI R5
 0185 8E     GLO RE
 0186 A5     PLO R5
 0187 D4     SEP R4
 0188 3088   BR 0x88
+;
 018A 06     LDN R6
 018B F6     SHR
 018C F6     SHR
@@ -485,6 +512,9 @@ next:
 01DA 8F     GLO RF
 01DB 57     STR R7
 01DC D4     SEP R4
+;
+; 7XXX pseudo code instruction
+;
 01DD E6     SEX R6
 01DE 303A   BR 0x3A
 01E0 E2     SEX R2
@@ -605,7 +635,9 @@ next:
 026F 12     INC R2
 0270 D4     SEP R4
 0271 00     IDL
-
+;
+; CXKK pseudo code instruction
+;   VX = random byte masked by KK
 ;
 0272 19     INC R9
 0273 89     GLO R9
@@ -630,21 +662,31 @@ next:
 0286 F2     AND
 0287 56     STR R6
 0288 D4     SEP R4
+;
+; 8XMM pseudo code instruction
+; jump if variable VX is zero to current page with offset MM
+;
 0289 06     LDN R6
 028A 3A8E   BNZ 0x8E
 028C 8F     GLO RF
 028D A5     PLO R5
 028E D4     SEP R4
+;
+; 9XMM pseudo code instruction
+; jump if variable VX is not zero to current page with offset MM
+;
 028F 06     LDN R6
 0290 3A8C   BNZ 0x8C
 0292 D4     SEP R4
 ;
 ;--------------------------------------------------
-; 0---
-; 1---
-; 2---
-; 3---
-; P = 3
+; pseudo code instructions
+; 0XXX
+; 1XXX
+; 2XXX
+; 3XXX
+; Loads memory pointer x27F6 with address 0000 to 3FFF
+; P = 3 on entry
 0293 F8F6   LDI 0xF6
 0295 A6     PLO R6
 0296 25     DEC R5
@@ -655,6 +697,9 @@ next:
 029B 45     LDA R5
 029C 56     STR R6
 029D D4     SEP R4   ; return
+;
+; FXKK pseudo code instruction
+;  VX = KK
 ;
 ; p = 3
 029E 8F     GLO RF
@@ -701,14 +746,20 @@ next:
 02CF AD     PLO RD
 02D0 30AD   BR 0xAD
 ;
+; DXMM pseudo code instruction
+;   store VX in RAM at MM
+;
 02D2 8F     GLO RF
-02D3 A7     PLO R7
+02D3 A7     PLO R7  ; R7 = x27MM
 02D4 06     LDN R6
 02D5 57     STR R7
 02D6 D4     SEP R4
 ;
+; EXMM pseudo code instruction
+;   load VX from RAM at MM
+;
 02D7 8F     GLO RF
-02D8 A7     PLO R7
+02D8 A7     PLO R7  ; R7 = x27MM
 02D9 07     LDN R7
 02DA 56     STR R6
 02DB D4     SEP R4
@@ -720,25 +771,16 @@ next:
 02E0 FD10   
 02E2 F000     
 02E4 F1D3
-02E6 F2     AND
-02E7 20     DEC R0
-02E8 F3     XOR
-02E9 00     IDL
-02EA F4     ADD
-02EB 00     IDL
-02EC F5     SD
-02ED 40     LDA R0
-02EE 27     DEC R7
-02EF F0     LDX
-02F0 50     STR R0
-02F1 C5     LSNQ
-02F2 F0     LDX
-02F3 D1     SEP R1
-02F4 D0     SEP R0
-02F5 F9FF   ORI 0xFF
-02F7 00     IDL
-02F8 F6     SHR
-02F9 00     IDL
+02E6 F220 
+02E8 F300 
+02EA F400 
+02EC F540 
+02EE 27F0 
+02F0 50C5 
+02F2 F0D1
+02F4 D0F9
+02F6 FF00    
+02F8 F600  
 ;
 02FA F900   ORI 0x00
 02FC 04     LDN R4
@@ -746,13 +788,13 @@ next:
 02FE 4B     LDA RB
 02FF BB     PHI RB
 ;
+; 5XXX pseudo instruction
 ;
-
 0300 94     GHI R4
 0301 BD     PHI RD
 0302 F8F4   LDI 0xF4
-0304 AD     PLO RD
-0305 8F     GLO RF
+0304 AD     PLO RD  ; RD = x03F4
+0305 8F     GLO RF  ; IJ
 0306 F6     SHR
 0307 F6     SHR
 0308 F6     SHR
@@ -764,14 +806,18 @@ next:
 030F A3     PLO R3
 0310 06     LDN R6
 0311 5E     STR RE
-0312 DD     SEP RD
+0312 DD     SEP RD  ; call at x03F4
+;
 0313 3A10   BNZ 0x10
 0315 D4     SEP R4
-0316 0E     LDN RE   ; loads either 0x800 or 0x1000
+;
+0316 0E     LDN RE   ; reads from I pointer memory either 0x800 or 0x1000
 0317 56     STR R6
 0318 DD     SEP RD
+;
 0319 3A16   BNZ 0x16
 031B D4     SEP R4
+;
 031C 0E     LDN RE
 031D AF     PLO RF
 031E 06     LDN R6
@@ -792,11 +838,15 @@ next:
 032E 07     LDN R7
 032F F3     XOR
 0330 3A36   BNZ 0x36
+; 
+; set pseudo program counter R5 to Value in RE, I memory pointer
+;
 0332 9E     GHI RE
 0333 B5     PHI R5
 0334 8E     GLO RE
 0335 A5     PLO R5
-0336 D4     SEP R4
+0336 D4     SEP R4  ; return
+;
 0337 07     LDN R7
 0338 F3     XOR
 0339 3A32   BNZ 0x32
@@ -825,19 +875,23 @@ next:
 0359 AC     PLO RC
 035A DC     SEP RC
 035B 3332   BDF 0x32
-035D D4     SEP R4
+035D D4     SEP R4   ; return
+;
 035E 00     IDL
 035F 00     IDL
+;
 0360 F803   LDI 0x03
 0362 BC     PHI RC
 0363 F867   LDI 0x67
-0365 AC     PLO RC
-0366 DC     SEP RC
-0367 9E     GHI RE
+0365 AC     PLO RC    ; RC = x0367
+0366 DC     SEP RC    ; jump to RC
+;
+0367 9E     GHI RE   ; jump to I pointer (RE)
 0368 B3     PHI R3
 0369 8E     GLO RE
 036A A3     PLO R3
 036B D3     SEP R3
+;
 036C 07     LDN R7
 036D 3070   BR 0x70
 036F 8F     GLO RF
@@ -941,17 +995,28 @@ next:
 03E8 D4     SEP R4
 03E9 00     IDL
 03EA 00     IDL
+;
+; AXMM pseudo code instruction
+;   skip next pseudo instruction if VX XOR MM is zero
+;
 03EB E6     SEX R6
 03EC 8F     GLO RF
 03ED F3     XOR
 03EE 3232   BZ 0x32
 03F0 D4     SEP R4
+;
+; BXMM pseudo code  instruction
+;   skip next pseudo instruction if VX XOR MM is not zero
+;
 03F1 E6     SEX R6
 03F2 8F     GLO RF
 03F3 F3     XOR
 03F4 3A32   BNZ 0x32
 03F6 D4     SEP R4
-03F7 00     IDL
+03F7 00
+;
+;
+;
 03F8 47     LDA R7
 03F9 BE     PHI RE
 03FA 07     LDN R7
@@ -960,7 +1025,9 @@ next:
 03FD 56     STR R6
 03FE D4     SEP R4
 03FF 00     IDL
-
+;
+; 6XXX pseudo code instruction
+;
 0400 9F     GHI RF
 0401 F9C0   ORI 0xC0
 0403 AC     PLO RC
@@ -1063,7 +1130,7 @@ next:
 0465 E6     SEX R6
 0466 8F     GLO RF
 0467 56     STR R6
-0468 64     OUT 4   ;  ?enable video display?
+0468 64     OUT 4   ; enable video display?
 0469 D4     SEP R4
 ;
 046A F810   LDI 0x10
@@ -1195,6 +1262,7 @@ next:
 04FD BB     PHI RB
 04FE 00     IDL
 04FF 00     IDL
+;
 0500 A7     PLO R7
 0501 3944   BNQ 0x44
 0503 AB     PLO RB
@@ -1845,6 +1913,7 @@ next:
 07ED 0F     LDN RF
 07EE 01     LDN R1
 07EF 0F     LDN RF
+;
 07F0 0F     LDN RF
 07F1 00     IDL
 07F2 00     IDL
