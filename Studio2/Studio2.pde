@@ -28,7 +28,7 @@
 /**
  * RCA Studio II and Studio III Video Game Console Emulator
  *
- * Ported to Java/Processing by Andrew Modla
+ * 1802 emulation code ported to Java/Processing by Andrew Modla
  * from code written in C by Paul Scott Robson.
  *
  * https://github.com/paulscottrobson/studio2-games
@@ -43,7 +43,8 @@
  *
  * Added Android platform support.
  */
-
+ 
+static final boolean DEBUG = false;
 private static boolean test = false;  // run test components
 private static boolean sound = true; // control sound on/off
 private static boolean android = false;

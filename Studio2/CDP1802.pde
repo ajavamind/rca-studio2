@@ -134,7 +134,7 @@ private final static int READ(int address)
   if (console == STUDIO2 && cartridgeMode == TEST) {
     // account for hardware memory mirroring
     if (address >= 0x8000) {
-      println("READ address " + hex(address));
+      if (DEBUG) println("READ address " + hex(address));
       return (studio2_memory[RAM | (address & 0x01FF)] & 0xFF);
     } else if (address >= 0x4000) {
       //println("READ address " + hex(address));
@@ -174,17 +174,17 @@ private final static void WRITE(int address, int data)
     // account for hardware memory mirroring) 
     if (address >= 0x8000) {
       studio2_memory[(address & 0x01FF) | RAM ] = data & 0xFF;
-      println("write memory "+hex(address) + " " + hex(data));
+      if (DEBUG) println("write memory "+hex(address) + " " + hex(data));
     } else if (address >= 0x2000) {
       studio2_memory[(address & 0x01FF) | RAM ] = data & 0xFF;
-      println("write memory "+hex(address) + " " + hex(data));
+      if (DEBUG) println("write memory "+hex(address) + " " + hex(data));
     } else if (address >= 0x0A00) {
       studio2_memory[(address & 0x01FF) | RAM ] = data & 0xFF;
-      println("write memory "+hex(address) + " " + hex(data));
+      if (DEBUG) println("write memory "+hex(address) + " " + hex(data));
     } else if (address >= 0x0800) {
       studio2_memory[(address & 0x01FF) | RAM ] = data & 0xFF;
     } else {
-      println("write to ROM "+hex(address));
+      if (DEBUG) println("write to ROM "+hex(address));
     }
     return;
   }
@@ -203,7 +203,7 @@ private final static void WRITE(int address, int data)
   } else if (console == VIP || console == CUSTOM || console == ARCADE || console == FRED2) {
     studio2_memory[address] = data & 0xFF;
   } else {
-    println("Attempt at "+ hex(R[P]-1) + " to write ROM memory "+hex(address) + " "+ hex(data));
+    if (DEBUG) println("Attempt at "+ hex(R[P]-1) + " to write ROM memory "+hex(address) + " "+ hex(data));
   }
 
   // debug
