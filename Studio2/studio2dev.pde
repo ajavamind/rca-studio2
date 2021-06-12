@@ -32,10 +32,6 @@
  *
  */
 
-static volatile int toneState = 0;                           // Tone currently on/off
-static volatile int toneTimer;                               // No of syncs tone has been on.
-static int BEEP_FREQUENCY  = 625; // Studio 2 default
-
 int saveCounter = 0; // save screen filename counter
 
 // *****************************************************************************************************************
@@ -313,7 +309,7 @@ void displayInfo(int screenWidth, int screenHeight, String[] text, int offset)
   // Erase screen display
   fill(128);
   rect(0, 0, drawWidth, drawHeight);
-  setTextSize(FONT_SIZE/2); //<>// //<>//
+  setTextSize(FONT_SIZE/2); //<>//
   fill(BLACK);
   textAlign(LEFT, BASELINE);
   //println("offset="+offset + " end="+end);

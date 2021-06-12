@@ -21,72 +21,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-//
-// http://www.beadsproject.net/ Sound for Java and Processing
-// Add this library to Processing SDK
-// Processing SDK -> sketch -> Import Library -> Beads  (a library for real-time sound for Processing)
-import beads.*;
 
-// Processing SDK -> sketch -> Import Library -> Cassette  (Android library for real-time sound for Processing)
-//import cassette.audiofiles.*;
-
-//import processing.sound.*;
+import processing.sound.*;
 
 /////////////////////////////////
-AudioContext ac;
-WavePlayer[] wp;
-volatile Gain gain;
+
 volatile static int iFreq = 0;
 volatile static int prevFreq = 0;
-static int freq = BEEP_FREQUENCY;
-static float GAIN = 0.1;
+static volatile int toneState = 0;                           // Tone currently on/off
+static volatile int toneTimer;                               // No of syncs tone has been on.
+static float BEEP_FREQUENCY  = 625.0; // Studio 2 default
+static float freq;
+static float GAIN = 0.5;
 /////////////////////////////////
 
-static PlaySound player;
+static SqrOsc player;
 
 /////////////////////////////////
 
 void initSound() {
   if (sound) {
-    if (android) {
-      player = new PlaySound();
-      player.genTone(BEEP_FREQUENCY);
-    } else {
-      ac = new AudioContext();
-      wp = new WavePlayer[256];
-      wp[0] = new WavePlayer(ac, BEEP_FREQUENCY, Buffer.SQUARE);
-      for (int i=1; i<256; i++) {
-        wp[i] = new WavePlayer(ac, float(27965/i), Buffer.SQUARE);
-      }
-      gain = new Gain(ac, 1, GAIN);
-      gain.addInput(wp[0]);
-      ac.out.addInput(gain);
-      ac.start();
-    }
+      player = new SqrOsc(this);
+      player.freq(BEEP_FREQUENCY);
+      player.amp(GAIN);
   }
 }
 
 void tone(boolean state) {
   if (sound) {
-    if (android) {
       if (state) {
-        player.playSound(true);
+        player.play();
       } else {
-        player.playSound(false);
+        player.stop();
       }
-    } else {
-      if (state) {
-        if (iFreq != prevFreq) {
-          gain.removeAllConnections((UGen)gain.getConnectedInputs().toArray()[0]);
-          gain.addInput(wp[iFreq]);
-        }
-        gain.setGain(GAIN);
-      } else {
-        // tone off
-        gain.setGain(0);
-      }
-      gain.update();
-    }
   }
 }
 
@@ -94,13 +61,11 @@ static void setFreq(int val) {
   prevFreq = iFreq;
   iFreq = val;
   if (val != 0) {
-    freq = 27965/val;
+    freq = (float) (27965/val);
     //print(" freq="+freq + " "+val+" ");
   } else {
     freq = BEEP_FREQUENCY;
     //print(" freq="+BEEP_FREQUENCY + " 0 ");
   }
-  if (android) {
-    player.genTone(freq);
-  }
+    player.freq(freq);
 }

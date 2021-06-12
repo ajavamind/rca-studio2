@@ -122,7 +122,7 @@ volatile int gameSelected = 0; // Studio II Demo Cartridge
 
 // Game cartridge and information files are in the Processing "data" folder
 String[] gameFileName = {
-/* 0 */  "RCA_demo.st2", // Studio 2 demo cartridge
+/* 0 */ "RCA_demo.st2", // Studio 2 demo cartridge
   // Studio 2 Resident Games
 /* 1 */  "studio2.rom", // Studio 2 internal game ROM with Studio II interpreter
   // Studio 2 game cartridges
@@ -184,12 +184,14 @@ String[] gameFileName = {
 /* 40 */ "photo.vip",
 /* 41 */ "S.572.21B_Studio_IV_Interpreter_final_1_of_1.rom", 
 /* 42 */
+//"AUD_2464_09_B41_ID02_02 Coin Bowling X2 10 Frames.wav.arc", 
+//"Coin Bowling.wav.raw.arc", 
+//"mines.wav.raw.arc",
 //"S.572.2B_4.vip"
 //"S.472.53A_FRED2_DEMO_1_of_2.fd2",
-
- //  "S.572.21B_Studio_IV_Interpreter_1_of_2.rom", 
-/*    */ //"S.572.2 VIP special-1_of_5.wav.vip",
-/*    */ ///"S.572_16_of_16.wav.raw.vip",
+//"S.572.21B_Studio_IV_Interpreter_1_of_2.rom", 
+//"S.572.2 VIP special-1_of_5.wav.vip",
+//"S.572_16_of_16.wav.raw.vip",
 };
 
 String[] gameTitle = {
@@ -239,6 +241,7 @@ String[] gameTitle = {
   "RCA Coin Arcade Swords", 
   "4096 Picture",
   "Studio IV Interpreter",
+//  "Coin Bowling X2",
  // "FRED II Demo",
 };
 
@@ -294,6 +297,7 @@ String[] gameInfoFileName = {
   "AUD_2464_09_B41_ID01_02 Swords.wav.txt", 
   "photo.txt",
   "S.572.21B_Studio_IV_Interpreter_final_1_of_1.rom.txt",
+//  "CoinBowlingX2.txt"
 //  "S.472.53A_FRED2_DEMO_1_of_2.fd2.txt",
 };
 
@@ -456,7 +460,7 @@ void systemReset() {
     VIDEO_RAM = 0x0900;
   } else if (console == STUDIO4) {
     RAM = 0x2000;
-    RAM_SIZE = 0x1B00;
+    RAM_SIZE = 0x1C00;
     DISPLAY_SIZE = 0x400;
     VIDEO_RAM = 0x2000;  // Note Studio 4 interpreter does not fix the location of video RAM
     COLOR_MAP = 0x2800;
@@ -487,11 +491,11 @@ void systemReset() {
     R[0] = 1;  // skip over IDL instruction, found a RCA FRED COSMAC 1801 Game System
   }
   // debug --------------------------------
-  if (console == STUDIO4) {
-    for (int i=0; i<256; i++) {
-      wpage[i] = 0;
-      rpage[i] = 0;
-    }
+  //if (console == STUDIO4) {
+  //  for (int i=0; i<256; i++) {
+  //    wpage[i] = 0;
+  //    rpage[i] = 0;
+  //  }
   //loadGameBinary(gameFileName[7]);
   //studio2_memory[0x1000] = 0x08;
   //studio2_memory[0x1001] = 0x02;
@@ -501,7 +505,7 @@ void systemReset() {
   //studio2_memory[0x801] = 0x02;
   //studio2_memory[0x802] = 0x30;
   //studio2_memory[0x803] = 0x02;
-  } 
+  //} 
   // end debug ----------------------------
 }
 

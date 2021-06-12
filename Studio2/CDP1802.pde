@@ -1,4 +1,4 @@
-// //<>// //<>//
+// //<>//
 // Note: this license does not apply to  the Studio 2 ROM or game images, nor the RCA Databooks and Datasheets. 
 // The License applies to the new work only.
 

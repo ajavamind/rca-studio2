@@ -82,7 +82,7 @@ int CPU1800_Execute()
   cycles -= 2;                                              // 2 x 8 clock Cycles - Fetch and Execute.
   instructionCycles += 2;  // debug
 
-  switch(opCode)                                            // Execute dependent on the Operation Code //<>// //<>//
+  switch(opCode)                                            // Execute dependent on the Operation Code //<>//
   {
   case 0x00: /* "idl" */
   case 0x01:
