@@ -133,8 +133,10 @@ Studio III Pinball Game Screenshot
 
 ### Studio IV Console
 
-The Studio IV game console was in the planning stages, in 1977, but was never built. 
-There is a "Studio IV Interpreter Final version 1/1/1978" cassette tape written by Joe Weisbecker.
+The Studio IV game console was in the planning stages, in 1977, but was never manufactured. 
+Joe Weisbecker demonstrated the Studio IV to us in January 1978. He used a modified VIP board built by Bill (BJ) Call.
+There is a "Studio IV Interpreter Final version 1/1/1978" cassette tape written by Joe Weisbecker. 
+I reversed engineered documentation at placed in the Documents folder file S.572.21B_Studio_IV_Interpreter_final.txt
 
 Source:
   The Sarnoff Collection, The College of New Jersey
@@ -152,14 +154,14 @@ from RAM memory also.
 Display memory starts at x2000 to x23FF, allowing a maximum screen resolution of 128h x 64w pixels.
 Double buffering two 64 x 64 displays is possible.
 There is a four bit color table from x2800 to x2BFF where the low order 4 bits are written with values
-0 to 7 in the screen saver mode. This color architecture scheme is similar to the Studio III.
+0 to 15 in the screen saver mode. Only 8 colors are used (0-7) by the screen saver. This color architecture scheme is 16x16 map, and the Studio III uses a 8x8 map.
 There is a page of RAM at location x2700 for the stack and interpreter/game program variables.
 Based on memory pages read during interpreter execution, there are plug-in game cartridge locations available at x0800 and x1000.
 
 Based on a first analysis, the interpreter pseudo code looks like a new design, neither Studio II nor CHIP8. 
-I was able to emulate this code. When no cartridges are plugged into the interpreter runs a screen saver display update.
+I was able to emulate this code. When no cartridges are plugged into device, the interpreter runs a screen saver display update.
 
-![Screenshot of Studio IV Screen Saver](Studio2/screenshot/studio4_screensaver_1080.png)
+![Screenshot of Studio IV Screen Saver](Studio2/screenshot/studio4_screensaver.png)
 
 ### COSMAC VIP Computer
 
@@ -226,7 +228,7 @@ http://www.emma02.hobby-site.com/studio.html
 
 https://github.com/etxmato/emma_02
 
-Many thanks to Marcel van Tongeren for his contributions on the Emma 02 site.
+Many thanks to Marcel van Tongeren for his contributions on the [Emma 02](https://www.emma02.hobby-site.com/) site for the many variations of the COSMAC computers.
 
 I thought the Studio III resident game ROM, with the color Blackjack game that I wrote, was lost, but I discovered it was preserved
 at the EMMA 02 site under the [Victory MPT-02](http://www.emma02.hobby-site.com/victory.html) videogame console made by Soundic.

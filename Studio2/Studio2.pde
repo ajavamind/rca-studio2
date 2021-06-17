@@ -99,7 +99,10 @@ color GREEN = color(0, 255, 0);
 color YELLOW = color(255, 255, 0);
 color AQUA = color(0, 255, 255);
 static color WHITE = 0xFFFFFFFF;  // color(255, 255, 255);
-color[] colorMap = {BLACK, RED, BLUE, VIOLET, GREEN, YELLOW, AQUA, WHITE};
+color[] colorMap8 = {BLACK, RED, BLUE, VIOLET, GREEN, YELLOW, AQUA, WHITE};
+color[] colorMap16 = {BLACK, RED, BLUE, VIOLET, GREEN, YELLOW, AQUA, WHITE, 
+  // colors actually used from 8 to 15 are not documented
+  BLACK, RED, BLUE, VIOLET, GREEN, YELLOW, AQUA, WHITE};
 
 private final static int INITIAL_COLOR_MAP = 0x0B00;
 private static int COLOR_MAP = INITIAL_COLOR_MAP;
@@ -312,10 +315,10 @@ String[] gameInfoFileName = {
  */
 void settings() {
   android = isAndroid();
+  //println("displayWidth="+displayWidth + " displayHeight="+displayHeight);
   if (android) {
     fullScreen();
   } else {
-    //println("displayWidth="+displayWidth + " displayHeight="+displayHeight);
     if (displayWidth > displayHeight) {
       size(2*displayHeight/3, displayHeight);
     }

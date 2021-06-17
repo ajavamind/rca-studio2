@@ -265,11 +265,13 @@ void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int d
       if (console == STUDIO3 || (console == VIP && interpreter == CHIP8X)) {
         // 8x8 color map
         int colorIndex = studio2_memory[COLOR_MAP + x + COLOR_MAP_DIMENSION*(y/4)] & 0x0007;
-        fill(colorMap[colorIndex]);
+        fill(colorMap8[colorIndex]);
       }
       else if (console == STUDIO4) {  // 16x16 color map
-        int colorIndex = studio2_memory[COLOR_MAP + x + COLOR_MAP_DIMENSION*(y/4)] & 0x0007;
-        fill(colorMap[colorIndex]);  
+        int colorIndex = studio2_memory[COLOR_MAP + x + COLOR_MAP_DIMENSION*(y/4)] & 0x000F;
+        fill(colorMap16[colorIndex]);  
+        // debug line below shows studio4 interpreter screen saver code never uses colors 8-14)
+        //if (colorIndex >=8) println("color "+colorIndex);
       }
       while (pixByte != 0)                                          // if something to render.
       {
