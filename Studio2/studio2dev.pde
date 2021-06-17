@@ -263,11 +263,12 @@ void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int d
       offset++;
       rx = xc + x * xs * 8;                                         // Calculate horizontal coordinate
       if (console == STUDIO3 || (console == VIP && interpreter == CHIP8X)) {
-        int colorIndex = studio2_memory[COLOR_MAP + x + 8*(y/4)] & 0x0007;
+        // 8x8 color map
+        int colorIndex = studio2_memory[COLOR_MAP + x + COLOR_MAP_DIMENSION*(y/4)] & 0x0007;
         fill(colorMap[colorIndex]);
       }
-      else if (console == STUDIO4) {
-        int colorIndex = studio2_memory[COLOR_MAP + x + 8*(y/4)] & 0x0007;
+      else if (console == STUDIO4) {  // 16x16 color map
+        int colorIndex = studio2_memory[COLOR_MAP + x + COLOR_MAP_DIMENSION*(y/4)] & 0x0007;
         fill(colorMap[colorIndex]);  
       }
       while (pixByte != 0)                                          // if something to render.

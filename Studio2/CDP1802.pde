@@ -531,7 +531,7 @@ void CPU_Reset()
   }
 
   // set color map
-  if (console == STUDIO3) {
+  if (console == STUDIO3 || console == STUDIO4) {
     for (int i = 0; i<COLOR_MAP_SIZE; i++) {
       studio2_memory[COLOR_MAP+i] = WHITE;
     }
