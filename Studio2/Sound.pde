@@ -40,20 +40,18 @@ static SqrOsc player;
 /////////////////////////////////
 
 void initSound() {
-  if (sound) {
-      player = new SqrOsc(this);
-      player.freq(BEEP_FREQUENCY);
-      player.amp(GAIN);
-  }
+  player = new SqrOsc(this);
+  player.freq(BEEP_FREQUENCY);
+  player.amp(GAIN);
 }
 
 void tone(boolean state) {
-  if (sound) {
-      if (state) {
-        player.play();
-      } else {
-        player.stop();
-      }
+  if (soundOn) {
+    if (state) {
+      player.play();
+    } else {
+      player.stop();
+    }
   }
 }
 
@@ -67,5 +65,5 @@ static void setFreq(int val) {
     freq = BEEP_FREQUENCY;
     //print(" freq="+BEEP_FREQUENCY + " 0 ");
   }
-    player.freq(freq);
+  player.freq(freq);
 }

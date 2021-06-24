@@ -9,3 +9,5 @@ Weisbecker Collection
 Accession S.572.21 cassette tape, no case 
 Side B labeled Studio IV lang. -- 8P/00; V3 final 1/1/78
 Read into 0000-07FF
+
+Enters a screen saver display mode when no game in memory.

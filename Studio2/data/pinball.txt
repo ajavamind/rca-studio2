@@ -1,0 +1,39 @@
+Pinball simulates the action of real pinball machines.
+The object of the game is to keep your ball in play and
+score as many points as you can by ball contact with
+point bumpers.  The point value of bumpers changes 
+randomly when hit.  Points range from 2 to 9.
+A score greater than 999 stops the game.
+
+Pinball can be played by one or two persons.  
+Players take turns scoring points and control flippers
+on their own keyboard throughout the game.  A player can
+change the ball direction by shoving the cabinet with key 0.
+However, overuse of this feature will result in a "TILT".
+
+1. Select the one-player game with key 1.
+   Select the two-player game with key 2.
+2. In the two-player game, players alternate turns.  
+   PLayers get five balls.  The number of balls remaining 
+   is shown at the right or left of the players score.  
+   Your turn to put a ball in play is shown by a flashing
+   digit (balls remaining) on your side of the TV screen.
+3. To put ball in play, press key 1.
+4. Press key 4 to control the left flipper and 
+   key 6 to control the right flipper.
+5. You can press key 0 to reverse the direction of the ball.
+   This feature is handy for saving a ball 
+   (outside the flipper range) that will go out of
+   bounds.  
+   This feature simulates physically pushing on a 
+   PINBALL game cabinet. 
+   Pressing key 0 causes the ball to move at high speed.
+   While the ball travesl high speed, key 0 has no effect.
+6. If you overuse key 0, you will cause a "TILT" and 
+   the game will stop.
+   If the two-player option was selected and 
+   the other player has balls left,
+   press key 1 to put a new ball in play.
+7. The game is over when either player scores more than
+   999 points, when both players have "TILT", 
+   or when both use all their balls.

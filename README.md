@@ -127,7 +127,7 @@ My Studio 3 emulation supports color graphics and programmable sound for Studio 
 that use color and programmable sound generation. 
 I was able to add color and sound emulation when I found an archived **Programming Manual for Studio III**, written in September 1977, detailing the color and sound functions. I made some contributions to that document when it was written. 
 
-Studio III Pinball Game Screenshot
+Studio III Pinball Game Screenshot.
 
 ![Screenshot of Studio III Pinball Game](Studio2/screenshot/pinball.png)
 
@@ -159,7 +159,7 @@ There is a page of RAM at location x2700 for the stack and interpreter/game prog
 Based on memory pages read during interpreter execution, there are plug-in game cartridge locations available at x0800 and x1000.
 
 Based on a first analysis, the interpreter pseudo code looks like a new design, neither Studio II nor CHIP8. 
-I was able to emulate this code. When no cartridges are plugged into device, the interpreter runs a screen saver display update.
+I was able to emulate this code. When no cartridges are plugged into the device, the interpreter runs a screen saver display update.
 
 ![Screenshot of Studio IV Screen Saver](Studio2/screenshot/studio4_screensaver.png)
 
@@ -171,7 +171,7 @@ Later he expanded the interpreter, naming it CHIP8X to handle adapter cards (sou
 
 Since the emulator implements the RCA CDP1802 microcomputer instruction set directly, it will run all the interpreters written for Studio II/III or VIP boards.
 The VIP has many major design similarities to the Studio III. 
-I believe the VIP board was used for development of the Studio IV interpreter.
+A modified VIP board was used for development of the Studio IV interpreter.
 
 ## Running the Emulator
 
@@ -183,10 +183,9 @@ From the Processing web page:
 https://processing.org/
 
 I chose Processing/Java so that the code can be ported or generated for Windows, Apple iOS, Linux, Android, and Web JavaScript.
-I used the Beads sound library for sound generation with the Processing SDK.
-In the Processing SDK menu add this library: Sketch -> Import Library -> Beads  (a library for real-time sound for Processing)
+I used the Processing sound library for sound generation with the Processing SDK.
 
-Screenshot Android app generated from Processing running on a Samsung S8 phone. Sound for Android ues a different library.
+Below is Screenshot of an Android app generated from Processing running on a Samsung S8 phone.
 
 ![Screenshot of Studio III Pinball Game](Studio2/screenshot/pinballSamsungS8.png)
 
@@ -379,7 +378,7 @@ Additional Notes:
 3. The Blackjack game conversion to Studio III resident game added color and two digit bet amounts.
 There is also a VIP CHIP8 version of Blackjack in color.
 4. I was not sure I did MathFun until I discovered an old memo page (from 1977) in my resume folder. It lists all the games I wrote for Studio II and III. I forgot I did this one, confusing it with Fun With Numbers, that Phil Baltzer did.
-5. Pinball is the 5th Studio game I wrote in Spring 1977. This may be the first software game program that simulated pinball game machine operations.
+5. Pinball is the 5th Studio game I wrote in Spring 1977. It may be the first software game program that simulated pinball game machine operations.
 There is also a VIP CHIP8 version of Pinball.
 6. There is also a COSMAC VIP CHIP8 version of Bingo.
 
@@ -395,6 +394,8 @@ http://bitsavers.org/components/rca/cosmac/ (Programming_Manual_for_STUDIO_III_S
 6. VP-710_RCA_COSMAC_VIP_Game_Manual_Dec78.pdf From http://bitsavers.org/components/rca/cosmac/
 (VP-710_RCA_COSMAC_VIP_Game_Manual_Dec78.pdf)
 7. RCA COSMAC Game Manual II (VP-720), 8-1980, RCA Microcomputer Products, New Holland Avenue, Lancaster, PA 17604. (Andrew Modla collection)
+8. Pinball Game Documentation written by Andrew Modla. I documented the Pinball game code as example code for programmers writing Studio 3 console games. (from the Weisbecker archives at the Hagley Library)
+
 
 Video display chip CDP1861 documentation can be found here along with other hardware data specification sheets:
 http://www.cosmacelf.com/publications/data-sheets/  cdp1861.pdf

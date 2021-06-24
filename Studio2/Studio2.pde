@@ -4,7 +4,7 @@
 
 // MIT License
 //
-// Copyright (c) 2017-2018 Andrew Modla
+// Copyright (c) 2017-2021 Andrew Modla
 // portions Copyright (c) 2016 paulscottrobson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -46,7 +46,7 @@
  
 static final boolean DEBUG = false;
 private static boolean test = false;  // run test components
-private static boolean sound = true; // control sound on/off
+private static boolean soundOn = true; // control sound on/off
 private static boolean android = false;
 private static boolean screenSave = false;
 private static boolean doReset = false;
@@ -148,7 +148,7 @@ String[] gameFileName = {
   // Unlike the Studio II the Victory came with 2 detachable controllers. 
   // The victory.rom expects PAL video with 192 visible lines
   // The victoryntsc.rom is a modification for NTSC video with 128 visible lines
-  // Modified as follows: byte 0x40 changed from 0x2D to 0x33 in the interrupt routine
+  // Modified as follows: byte at address 0x40 changed from 0x2D to 0x33 in the interrupt routine
 /* 12 */  "victoryntsc.rom", // Victory is a Studio 3 internal resident game ROM
   // Studio 3 game cartridges
 /* 13 */  "mathfun.st2", 
