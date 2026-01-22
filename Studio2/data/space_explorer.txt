@@ -1,0 +1,6 @@
+The timer value is on the top left and score on right.
+The B pad has 8 direction keys to align the center cursor over a dot.
+Use the B pad center 5 to lock on target.
+Fire at the target with A pad 0 key. 
+The idea is to eliminate all 9 dots before the timer expires.
+Hitting a target eventually reduces the score, with the objective being low score.

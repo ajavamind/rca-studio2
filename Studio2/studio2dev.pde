@@ -58,11 +58,22 @@ void clearAllKeys() {
  * Decode keys for console play
  * Debug keys for displaying frame rate, system reset, and screen save, etc.
  */
+
+int KEYCODE_ESCAPE = 27;
+
+// keys for Android TV remote
+int KEYCODE_PROG_RED = 183;
+int KEYCODE_PROG_GREEN = 184;
+int KEYCODE_PROG_YELLOW = 185;
+int KEYCODE_PROG_BLUE = 186;
+int KEYCODE_BACK = 4;
+
 void checkAllKeys() 
 {
   int x;
   if (keyPressed) {
     // A keyboard: 0-9 keys 
+
     x = keyCode-48;
     if (x <=9 && x >=0) {
       isPressedA[x] = 1;
@@ -80,27 +91,31 @@ void checkAllKeys()
         if (key == 'f' || key == 'F') {
           println("frameRate="+frameRate);
         } 
+        // exit
+        else if (key == 'q' || key == 'Q' || keyCode == KEYCODE_ESCAPE || keyCode == KEYCODE_BACK) {
+         // getActivity().finish();  // uncomment for Android only
+        }
         // System reset
-        else if (key == 'r' || key == 'R') {
+        else if (key == 'r' || key == 'R' || keyCode == KEYCODE_PROG_RED) {
           println("System Reset");
           systemReset();
         }
         // save screen shot
         else if (key == 's' || key == 'S') {
           screenSave = true;
-        } else if (key == 'c' || key == 'C') {
+        } else if (key == 'c' || key == 'C' || keyCode == KEYCODE_PROG_BLUE) {
           // Insert Coin for Arcade Game
           println("Coin");
           coin = true;
         } else if (key == ' ') { 
           step = true;  // not implemented
-        //} else if (key == 't' || key == 'T') {  // test interrupt
-        //  if (READ(R[P]) == 0) {
-        //    R[P]++;        
-        //    R[P] &= 0xFFFF;
-        //  }
-        //  // Come out of IDL for Interrupt.
-        //  INTERRUPT();  // if IE != 0 generate an interrupt.
+          //} else if (key == 't' || key == 'T') {  // test interrupt
+          //  if (READ(R[P]) == 0) {
+          //    R[P]++;        
+          //    R[P] &= 0xFFFF;
+          //  }
+          //  // Come out of IDL for Interrupt.
+          //  INTERRUPT();  // if IE != 0 generate an interrupt.
         } else if (key == 'z' || key == 'Z') {
           debugMem();
         } else if (key == 'd' || key == 'D') {
@@ -114,7 +129,7 @@ void checkAllKeys()
           }
         } else if (key == 'v' || key == 'V') {
           screenEnabled = true;
-        } else if(key == 'p' || key == 'P') { // parameter on/off
+        } else if (key == 'p' || key == 'P') { // parameter on/off
           if (COIN_ARCADE_PARAMETER_SWITCH == 0)
             COIN_ARCADE_PARAMETER_SWITCH = 8;
           else
@@ -225,7 +240,7 @@ void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int d
     pages = 1;
   int mask = displaySize-1;
   int displayHeight = pages * VIDEO_SCREEN_HEIGHT;
-  
+
   drawWidth = screenWidth - screenWidth/16;
   drawHeight = screenHeight - screenHeight/8;
   xs = drawWidth / (VIDEO_SCREEN_WIDTH + 2);  // pixel width
@@ -247,7 +262,7 @@ void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int d
   if (isDebugMode)
     stroke(color(255, 0, 0));  // debug outline
   else 
-    noStroke();
+  noStroke();
 
   fill(fgr);
   rw = xs;
@@ -266,8 +281,7 @@ void displayScreen(boolean isDebugMode, int screenWidth, int screenHeight, int d
         // 8x8 color map
         int colorIndex = studio2_memory[COLOR_MAP + x + COLOR_MAP_DIMENSION*(y/4)] & 0x0007;
         fill(colorMap8[colorIndex]);
-      }
-      else if (console == STUDIO4) {  // 16x16 color map
+      } else if (console == STUDIO4) {  // 16x16 color map
         int colorIndex = studio2_memory[COLOR_MAP + x + COLOR_MAP_DIMENSION*(y/4)] & 0x000F;
         fill(colorMap16[colorIndex]);  
         // debug line below shows studio4 interpreter screen saver code never uses colors 8-14)
@@ -294,10 +308,7 @@ void displayInfo(int screenWidth, int screenHeight, String[] text, int offset)
   int x, y;
   int drawWidth;
   int drawHeight;
-  
-  if (text.length == 0)
-    return;
-    
+
   int end = TEXT_PAGE_SIZE;
 
   if (offset >= TEXT_PAGE_SIZE)
@@ -308,11 +319,11 @@ void displayInfo(int screenWidth, int screenHeight, String[] text, int offset)
   drawHeight = screenHeight - screenHeight/8;
   x = 10;
   y = 50;
-  
+
   // Erase screen display
   fill(128);
   rect(0, 0, drawWidth, drawHeight);
-  setTextSize(FONT_SIZE/2); //<>//
+  setTextSize(FONT_SIZE/2);
   fill(BLACK);
   textAlign(LEFT, BASELINE);
   //println("offset="+offset + " end="+end);
@@ -320,7 +331,6 @@ void displayInfo(int screenWidth, int screenHeight, String[] text, int offset)
     text(text[i], x, y );
     y += 50;
   }
-  
 }
 
 /**
@@ -332,7 +342,7 @@ void loadGameBinary(String fileName)
   println("Filename: "+fileName);
   int address;
   byte[] data = loadBytes(fileName);
-  
+
   // Decode file type to process contents of file
   if (fileName.toLowerCase().endsWith(".st2")) { // Studio 2 Cartridge file
     String header="";
@@ -433,7 +443,7 @@ void loadGameBinary(String fileName)
     address = 0x0000;
     for (int i=0; i<data.length; i++) {
       //if (!((address >= RAM && address < (RAM+RAM_SIZE)))) {
-        studio2_memory[address] = data[i] & 0xFF;
+      studio2_memory[address] = data[i] & 0xFF;
       //}
       address++;
     }

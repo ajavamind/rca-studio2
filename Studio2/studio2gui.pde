@@ -77,7 +77,8 @@ class Key {
     fill(white);
 
     textAlign(CENTER, CENTER);
-    text(cap, x, y, w, h );
+    text(cap, x, y, w, h+h/32);  // offset to see in Processing 4.0 alpha 5
+    //text(cap, x, y, w, h);
   }
 
   public boolean isPressed(int mx, int my) {
@@ -142,8 +143,9 @@ class Keyboard {
   public Keyboard() {
   }
 
-  public Keyboard(int numKeys, String label, int x, int y, int keyw, int keyh, int hSpacing, int vSpacing ) {
+  public Keyboard(int numKeys, String label, int x, int y, int keyw, int keyh, int hSpacing, int vSpacing, int fontSize ) {
     list = new Key[numKeys];
+    this.fontSize = fontSize;
     this.x = x;
     this.y = y;
     this.label = label;
@@ -242,16 +244,16 @@ private void drawSetup() {
 
   int vertOffset = height/3  +2*KEY_VSPACING;
   if (console == STUDIO2 || console == STUDIO3 || console == STUDIO4) {
-    aKeyboard = new Keyboard(10, "A", 3*KEY_HSPACING, vertOffset + KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING);
-    bKeyboard = new Keyboard(10, "B", width/2+KEY_HSPACING, vertOffset+ KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING);
+    aKeyboard = new Keyboard(10, "A", 3*KEY_HSPACING, vertOffset + KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING, FONT_SIZE);
+    bKeyboard = new Keyboard(10, "B", width/2+KEY_HSPACING, vertOffset+ KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING, FONT_SIZE);
   } else if (console == ARCADE || console == FRED2) {
-    aKeyboard = new Keyboard(5, "A", 3*KEY_HSPACING, vertOffset + KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING);
-    bKeyboard = new Keyboard(5, "B", width/2+KEY_HSPACING, vertOffset+ KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING);
+    aKeyboard = new Keyboard(5, "A", 3*KEY_HSPACING, vertOffset + KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING, FONT_SIZE);
+    bKeyboard = new Keyboard(5, "B", width/2+KEY_HSPACING, vertOffset+ KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING, FONT_SIZE);
   } else if (console == CUSTOM) {
-    aKeyboard = new Keyboard(5, "A", 3*KEY_HSPACING, vertOffset + KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING);
-    bKeyboard = new Keyboard(5, "B", width/2+KEY_HSPACING, vertOffset+ KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING);
+    aKeyboard = new Keyboard(5, "A", 3*KEY_HSPACING, vertOffset + KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING, FONT_SIZE);
+    bKeyboard = new Keyboard(5, "B", width/2+KEY_HSPACING, vertOffset+ KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING, FONT_SIZE);
   } else {
-    aKeyboard = new Keyboard(16, "VIP", 11*KEY_HSPACING, vertOffset + KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING);
+    aKeyboard = new Keyboard(16, "VIP", 11*KEY_HSPACING, vertOffset + KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING, FONT_SIZE);
     bKeyboard = null;
   }
   resetKey = new Key(0, "CLEAR", FONT_SIZE, width/2 - width/6, vertOffset + 6*(KEY_HEIGHT)+KEY_VSPACING, 2*KEY_WIDTH + KEY_WIDTH/2, 2*KEY_HEIGHT/3);
@@ -277,8 +279,10 @@ public void drawKeyboards() {
 }
 
 private void setTextSize(float size) {
-  if (size <= 0)
-    return;
+  if (size <= 0) {
+    size = FONT_SIZE;
+    println("Text Size not initialized, set to "+ FONT_SIZE);
+  }
   textSize(size);
 }
 

@@ -188,7 +188,7 @@ String[] gameFileName = {
   // Test area
 /* 40 */ "photo.vip",
 /* 41 */ "S.572.21B_Studio_IV_Interpreter_final_1_of_1.rom", 
-/* 42 */
+/* 42 */ "space_explorer.st2", //
 //"AUD_2464_09_B41_ID02_02 Coin Bowling X2 10 Frames.wav.arc", 
 //"Coin Bowling.wav.raw.arc", 
 //"mines.wav.raw.arc",
@@ -246,6 +246,7 @@ String[] gameTitle = {
   "RCA Coin Arcade Swords", 
   "4096 Picture",
   "Studio IV Interpreter",
+  "Space Explorer",
 //  "Coin Bowling X2",
  // "FRED II Demo",
 };
@@ -302,6 +303,7 @@ String[] gameInfoFileName = {
   "AUD_2464_09_B41_ID01_02 Swords.wav.txt", 
   "photo.txt",
   "S.572.21B_Studio_IV_Interpreter_final_1_of_1.rom.txt",
+  "space_explorer.txt",
 //  "CoinBowlingX2.txt"
 //  "S.472.53A_FRED2_DEMO_1_of_2.fd2.txt",
 };
@@ -490,7 +492,7 @@ void systemReset() {
   // special conditions for testing - temporary solutions until Console.pde fully implemented
   if (gameFileName[gameSelected].startsWith("RCA_TEST_CARTRIDGE"))
     cartridgeMode = TEST;
-  else if (gameFileName[gameSelected].startsWith("photo.vip"))
+  else if (gameFileName[gameSelected].startsWith("photo.vip"))  // special case 4096 graphic
     cartridgeMode = VIP64x64;
   else
     cartridgeMode = NORMAL;
