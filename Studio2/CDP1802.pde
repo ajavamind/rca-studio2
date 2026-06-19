@@ -200,7 +200,7 @@ private final static void WRITE(int address, int data)
   } else if ((console == STUDIO3) && (address >= COLOR_MAP) && (address < (COLOR_MAP+COLOR_MAP_SIZE))) {
     studio2_memory[address] = data & 0xFF;
     //println("write color map memory "+ hex(address) + " value="+(data&0xFF));
-  } else if (console == VIP || console == CUSTOM || console == ARCADE || console == FRED2) {
+  } else if (console == VIP || console == CUSTOM || console == ARCADE || console == FRED2 || console == FRED3) {
     studio2_memory[address] = data & 0xFF;
   } else {
     if (DEBUG) println("Attempt at "+ hex(R[P]-1) + " to write ROM memory "+hex(address) + " "+ hex(data));
@@ -296,7 +296,7 @@ private final static int READEFLAG(int flag) {
   {
   case 1:  // EF1
     //println("EF1");
-    if (console == ARCADE || console == FRED2) {
+    if (console == ARCADE || console == FRED2 || console == FRED3) {
       // center A switch pressed
       retVal = isPressedA[5];
       //isPressedA[5] = 0;
@@ -314,14 +314,14 @@ private final static int READEFLAG(int flag) {
     }
     break;
   case 2: // EF2
-    if (console == ARCADE || console == FRED2) {
+    if (console == ARCADE || console == FRED2 || console == FRED3) {
       //println("EF2");
       //retVal = 1;
     }
     break;
   case 3: // EF3
     //println("EF3");
-    if (console == ARCADE || console == FRED2) {
+    if (console == ARCADE || console == FRED2 || console == FRED3) {
       // center B switch pressed
       retVal = isPressedB[5];
       //isPressedB[5] = 0;
@@ -334,7 +334,7 @@ private final static int READEFLAG(int flag) {
     break;
   case 4: // EF4
     //println("EF4");
-    if (console == ARCADE || console == FRED2) {
+    if (console == ARCADE || console == FRED2 || console == FRED3) {
       if (coin) {
         retVal = 1;
         //if (retVal == 1) println("Coin reset");
@@ -363,13 +363,13 @@ private final static void UPDATEIO(int portID, int data) {
     // OUT 1 turns the display off on a Studio 2, changed for Studio 3
     if (console == STUDIO2) { // || console == VIP)
       screenEnabled = false;
-    } else if (console == ARCADE || console == FRED2) {
+    } else if (console == ARCADE || console == FRED2 || console == FRED3) {
       // TV selected
       //println("TV selected "+ hex(data));
     }
     break;
   case 2:
-    if (console == ARCADE || console == FRED2) {
+    if (console == ARCADE || console == FRED2 || console == FRED3) {
       //println("start Arcade Display "+ hex(data));
       screenEnabled = true;
     } else {
@@ -379,7 +379,7 @@ private final static void UPDATEIO(int portID, int data) {
     break;
   case 3:
     //println("out 63 set tone "+hex(data));  // FRED 1.5 coin games
-    if (console == FRED2) {
+    if (console == FRED2 || console == FRED3) {
       if (data != 0) {
         toneState = 1;
       } else {
@@ -392,18 +392,18 @@ private final static void UPDATEIO(int portID, int data) {
     if (console == STUDIO4) {
       screenEnabled = true;
     }
-    else if (console != ARCADE && console != FRED2) {
+    else if (console != ARCADE && console != FRED2 && console != FRED3) {
       // Studio III programmable sound generator
       setFreq(data);
     }
     break;
   case 5:
-    if (console == ARCADE || console == FRED2) {
+    if (console == ARCADE || console == FRED2 || console == FRED3) {
       setFreq(data);
     }
     break;
   case 6:
-    if (console == ARCADE || console == FRED2) {
+    if (console == ARCADE || console == FRED2 || console == FRED3) {
       if (data != 0) {
         toneState = 1;
       } else {
@@ -422,19 +422,19 @@ private final static int INPUTIO(int portID) {
   switch (portID)
   {
   case 1:
-    if (console != ARCADE && console != FRED2) {
+    if (console != ARCADE && console != FRED2 || console != FRED3) {
       // IN 1 turns the display on.
       screenEnabled = true;
     }
     break;
   case 5:  // 4 Bit Parameter switch code
-    if (console == ARCADE || console == FRED2) {
+    if (console == ARCADE || console == FRED2 || console == FRED3) {
       retVal = COIN_ARCADE_PARAMETER_SWITCH;
       //println("Parameter switch read "+ retVal);
     }
     break;
   case 6: // Switches bit 0-7 
-    if (console == ARCADE || console == FRED2) {
+    if (console == ARCADE || console == FRED2 || console == FRED3) {
       retVal = 0;  
       coin = false;
       if (isPressedA[4] == 1) {
@@ -524,7 +524,7 @@ void CPU_Reset()
     println("VIP R[1]="+hexAddr(R[1]));
   } else if (console == ARCADE) {
     //
-  } else if (console == FRED2) {
+  } else if (console == FRED2 || console == FRED3) {
     //
   } else if (console == CUSTOM) {
     //

@@ -246,7 +246,7 @@ private void drawSetup() {
   if (console == STUDIO2 || console == STUDIO3 || console == STUDIO4) {
     aKeyboard = new Keyboard(10, "A", 3*KEY_HSPACING, vertOffset + KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING, FONT_SIZE);
     bKeyboard = new Keyboard(10, "B", width/2+KEY_HSPACING, vertOffset+ KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING, FONT_SIZE);
-  } else if (console == ARCADE || console == FRED2) {
+  } else if (console == ARCADE || console == FRED2 || console == FRED3) {
     aKeyboard = new Keyboard(5, "A", 3*KEY_HSPACING, vertOffset + KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING, FONT_SIZE);
     bKeyboard = new Keyboard(5, "B", width/2+KEY_HSPACING, vertOffset+ KEY_HEIGHT+3*KEY_VSPACING, KEY_WIDTH, KEY_HEIGHT, KEY_HSPACING, KEY_VSPACING, FONT_SIZE);
   } else if (console == CUSTOM) {
@@ -273,7 +273,7 @@ public void drawKeyboards() {
   resetKey.draw();
   cartridge.draw();
   infoKey.draw();
-  if (console == ARCADE || console == FRED2) {
+  if (console == ARCADE || console == FRED2 || console == FRED3) {
     coinKey.draw();
   }
 }
@@ -361,7 +361,7 @@ public void mousePressed() {
     displayUpdate = true;
     return;
   }
-  if (console == ARCADE || console == FRED2) {
+  if (console == ARCADE || console == FRED2 || console == FRED3) {
     if (coinKey.isPressed(mouseX, mouseY)) {
       coin = true;
       return;

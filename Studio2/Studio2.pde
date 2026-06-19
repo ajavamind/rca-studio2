@@ -61,13 +61,14 @@ private static int cpu = CDP1802;
 private final static int SYSTEM00 = 0;
 private final static int FRED1    = 1;
 private final static int FRED2    = 2;
-private final static int ARCADE   = 3;
-private final static int STUDIO2  = 4;  
-private final static int STUDIO3  = 5;  
-private final static int STUDIO4  = 6;  
-private final static int VIP      = 7;
-private final static int ELF      = 8;
-private final static int CUSTOM   = 9;
+private final static int FRED3    = 3;
+private final static int ARCADE   = 4;
+private final static int STUDIO2  = 5;  
+private final static int STUDIO3  = 6;  
+private final static int STUDIO4  = 7;  
+private final static int VIP      = 8;
+private final static int ELF      = 9;
+private final static int CUSTOM   = 10;
 private static int console = STUDIO2;
 
 // Cartridge Mode
@@ -142,14 +143,15 @@ String[] gameFileName = {
 /* 10 */ "RCA_TEST_CARTRIDGE_TESTER1.st2",
 
   ////////////////////////////////
-/* 11 */  "RCA_demo.st2", // Studio 3 demo cartridge holding entry
+/* 11 */  "RCA_demo.st2", // Studio 3 demo cartridge - holding this slot with Studio 2 demo
   // Studio 3 game cartridges implement with color graphics.
   // The Victory MPT-02, a clone of the RCA Studio III is a videogame console made by Soundic released around 1978. 
   // Unlike the Studio II the Victory came with 2 detachable controllers. 
   // The victory.rom expects PAL video with 192 visible lines
   // The victoryntsc.rom is a modification for NTSC video with 128 visible lines
   // Modified as follows: byte at address 0x40 changed from 0x2D to 0x33 in the interrupt routine
-/* 12 */  "victoryntsc.rom", // Victory is a Studio 3 internal resident game ROM
+/* 12 */  "victoryntsc.rom", // Studio 3 internal resident game ROM from Victory game console
+
   // Studio 3 game cartridges
 /* 13 */  "mathfun.st2", 
 /* 14 */  "biorhythm.st2", 
@@ -157,8 +159,9 @@ String[] gameFileName = {
 /* 16 */  "bingo.st2", 
 /* 17 */  "concentration-match.st2", 
 /* 18 */  "star-wars.st2", 
+
   ////////////////////////////////
-  // Other Studio2 Games 
+  // Other Studio2 Games
 /* 19 */  "computer.st2", 
 /* 20 */  "hockey.st2", 
 /* 21 */  "combat.st2", 
@@ -185,10 +188,21 @@ String[] gameFileName = {
 /* 38 */  "AUD_2464_09_B41_ID02_01 Coin Bowling.wav.arc",
 /* 39 */  "AUD_2464_09_B41_ID01_02 Swords.wav.arc", 
   ////////////////////////////////
-  // Test area
+  // Miscellaneous
 /* 40 */ "photo.vip",
 /* 41 */ "S.572.21B_Studio_IV_Interpreter_final_1_of_1.rom", 
 /* 42 */ "space_explorer.st2", //
+  ///////////////////////////////
+  // RCA FRED 3 Prototype Game Console 1975 pre-dates Studio 2)
+/* 43 */ "Bowling[FRED3].fd3", //
+/* 44 */ "Chase[FRED3].fd3",
+/* 45 */ "HomeDown[FRED3].fd3",
+/* 46 */ "MazeDraw[FRED3].fd3",
+/* 47 */ "Mines[FRED3].fd3",
+/* 48 */ "Pong[FRED3].fd3",
+/* 49 */ "SplitSecond[FRED3].fd3",
+
+
 //"AUD_2464_09_B41_ID02_02 Coin Bowling X2 10 Frames.wav.arc", 
 //"Coin Bowling.wav.raw.arc", 
 //"mines.wav.raw.arc",
@@ -249,6 +263,15 @@ String[] gameTitle = {
   "Space Explorer",
 //  "Coin Bowling X2",
  // "FRED II Demo",
+  ///////////////////////////////
+  // RCA FRED 3 Prototype Game Console 1975 pre-dates Studio 2)
+ "Bowling - FRED III",
+ "Chase - FRED III",
+ "Home Down - FRED III",
+ "Maze Draw - FRED III",
+ "Mines - FRED III",
+ "Pong - FRED III",
+ "Split Second - FRED III",
 };
 
 String[] gameInfoFileName = {
@@ -297,13 +320,24 @@ String[] gameInfoFileName = {
   "Color Kaleidoscope [Steve Houk, 1978].txt", 
   "swordfighter[Joe Weisbecker].txt", // swordfighter does not use CHIP8
   ////////////////////////////////
-  // RCA Video Arcade games (1974-1975 pre-dates Studio 2) 
+  // RCA Video Arcade games (1974-1975 pre-dates Studio 2
   "AUD_2464_09_B41_ID01_01 Tag-Bowling.wav.txt", 
   "AUD_2464_09_B41_ID02_01 Coin Bowling.wav.txt",
   "AUD_2464_09_B41_ID01_02 Swords.wav.txt", 
   "photo.txt",
   "S.572.21B_Studio_IV_Interpreter_final_1_of_1.rom.txt",
   "space_explorer.txt",
+  ///////////////////////////////
+  // RCA FRED 3 Prototype Game Console 1975 pre-dates Studio 2
+  "Bowling[FRED3].txt",
+  "Chase[FRED3].txt",
+  "HomeDown[FRED3].txt",
+  "MazeDraw[FRED3].txt",
+  "Mines[FRED3].txt",
+  "Pong[FRED3].txt",
+  "SplitSecond[FRED3].txt",
+  ///////////////////////////////
+  
 //  "CoinBowlingX2.txt"
 //  "S.472.53A_FRED2_DEMO_1_of_2.fd2.txt",
 };
@@ -384,7 +418,7 @@ void draw()
     displayInfo(width, 3*height/8, textInfo, textOffset);
   } else {
     while (true) {
-      if (console == ARCADE || console == FRED2) {
+      if (console == ARCADE || console == FRED2 || console == FRED3) {
         nextState = CPU1801_Execute();  // execute one 1801 CPU instruction until state changes
       } else {
         nextState = CPU_Execute();  // execute one 1802 CPU instruction until frame state changes
@@ -436,6 +470,8 @@ void systemReset() {
     console = ARCADE;
   } else if (gameFileName[gameSelected].toLowerCase().endsWith(".fd2")) {
     console = FRED2;
+  } else if (gameFileName[gameSelected].toLowerCase().endsWith(".fd3")) {
+    console = FRED3;
   } else if (gameFileName[gameSelected].toLowerCase().endsWith(".cus")) {
     console = CUSTOM;
   } else if (gameFileName[gameSelected].startsWith("S.572.21B_Studio_IV_Interpreter")) {
@@ -448,7 +484,7 @@ void systemReset() {
   }
   
   COLOR_MAP = INITIAL_COLOR_MAP;
-  if (console == STUDIO2 || console == ARCADE || console == FRED2)
+  if (console == STUDIO2 || console == ARCADE || console == FRED2 || console == FRED3)
     backgroundColor = 1;
   else
     backgroundColor = 0;
@@ -462,7 +498,7 @@ void systemReset() {
     if (interpreter == CHIP8X) {
       COLOR_MAP = 0xC000;
     }
-  } else if (console == ARCADE || console == FRED2) {
+  } else if (console == ARCADE || console == FRED2 || console == FRED3) {
     // Arcade and FRED Game development boards
     RAM = 0x0800;
     VIDEO_RAM = 0x0900;
